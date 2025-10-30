@@ -38,12 +38,21 @@ function ResultsTableImpl({ results, onSaveScenario }: ResultsTableProps) {
         </thead>
         <tbody className="divide-y divide-slate-100">
           {results.map((result, index) => {
-            const profitBgColor =
-              result.profitRate > 20
-                ? 'bg-gradient-to-r from-emerald-300 to-teal-300 shadow-md shadow-emerald-300/30'
-                : result.profitRate > 10
-                ? 'bg-gradient-to-r from-amber-300 to-orange-300 shadow-md shadow-amber-300/30'
-                : 'bg-gradient-to-r from-rose-300 to-red-300 shadow-md shadow-rose-300/30'
+            const nameLc = result.platform.toLowerCase()
+            const isCampaign = nameLc.includes('kampanya') || nameLc.includes('kampanyalı') || nameLc.includes('promosyon')
+            let profitBgColor = 'bg-gradient-to-r from-rose-400 to-red-500 shadow-md shadow-rose-300/30' // default: <10%
+            const pr = result.profitRate
+            if (isCampaign) {
+              profitBgColor = 'bg-gradient-to-r from-sky-400 to-indigo-400 shadow-md shadow-sky-300/30'
+            } else if (pr >= 20) {
+              profitBgColor = 'bg-gradient-to-r from-emerald-400 to-green-500 shadow-md shadow-emerald-300/30'
+            } else if (pr >= 15) {
+              profitBgColor = 'bg-gradient-to-r from-yellow-300 to-yellow-400 shadow-md shadow-yellow-200/40'
+            } else if (pr >= 10) {
+              profitBgColor = 'bg-gradient-to-r from-orange-400 to-amber-400 shadow-md shadow-amber-300/30'
+            } else {
+              profitBgColor = 'bg-gradient-to-r from-rose-400 to-red-500 shadow-md shadow-rose-300/30'
+            }
 
             const commissionDisplay = result.commissionAmount === 0 
               ? `${Math.round(result.commissionRate)}%`
