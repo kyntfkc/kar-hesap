@@ -340,7 +340,7 @@ function ProfitCalculator() {
     : null
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 px-3 sm:px-0">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 px-3 sm:px-0 pb-24">
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-6 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 ring-1 ring-slate-200/50">
         <InputForm
           productInfo={productInfo}
@@ -437,13 +437,13 @@ function ProfitCalculator() {
 
       {/* Saved calculations table */}
       {savedCalculations.length > 0 && (
-        <div className="mt-6 col-span-1 lg:col-span-2 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-6 ring-1 ring-slate-200/50">
+        <div className="mt-6 col-span-1 lg:col-span-2 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-5 sm:p-6 ring-1 ring-slate-200/50">
           <div className="mb-3">
             <h3 className="text-lg font-bold text-slate-900">Kayıtlı Sonuçlar</h3>
             <p className="text-xs text-slate-500">Ürün adıyla kaydettiğiniz karşılaştırmalar</p>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[520px] sm:min-w-[640px]">
+            <table className="w-full min-w-full">
               <thead>
                 <tr className="border-b-2 border-slate-200/80 bg-slate-50">
                   <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Ürün</th>
