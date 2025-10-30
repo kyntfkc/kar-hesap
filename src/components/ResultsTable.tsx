@@ -58,11 +58,7 @@ function ResultsTableImpl({ results, onSaveScenario }: ResultsTableProps) {
                 </td>
                 <td className="px-2 py-2 whitespace-nowrap">
                   <span className="text-sm font-semibold text-slate-900">
-                    {result.salePrice.toLocaleString('tr-TR', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    }).replace(',', '.')}{' '}
-                    <span className="text-slate-500 font-medium">TL</span>
+                    {formatNumber(result.salePrice)} <span className="text-slate-500 font-medium">TL</span>
                   </span>
                 </td>
                 <td className="px-2 py-2 whitespace-nowrap text-center">
@@ -77,7 +73,7 @@ function ResultsTableImpl({ results, onSaveScenario }: ResultsTableProps) {
                 </td>
                 <td className="px-2 py-2 whitespace-nowrap text-center">
                   <span className="text-base font-bold text-slate-900">
-                    {result.profitRate.toFixed(1).replace('.', ',')}%
+                    {Math.round(result.profitRate)}%
                   </span>
                 </td>
                 <td className="px-2 py-2 whitespace-nowrap text-center">

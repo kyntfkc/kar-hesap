@@ -381,7 +381,7 @@ function ProfitCalculator() {
                 <div className="p-4 bg-gradient-to-br from-sky-100 via-indigo-100 to-violet-100 rounded-xl border border-indigo-200/60 shadow-sm ring-1 ring-indigo-100/50">
                   <div className="text-xs text-indigo-700 font-semibold mb-1 uppercase tracking-wide">En İyi Senaryo</div>
                   <div className="text-lg font-bold text-indigo-900 mb-0.5">{bestScenario.platform}</div>
-                  <div className="text-xs text-indigo-700 font-medium">{bestScenario.profitRate.toFixed(1)}% kâr</div>
+                  <div className="text-xs text-indigo-700 font-medium">{Math.round(bestScenario.profitRate)}% kâr</div>
                 </div>
               </div>
             )}
