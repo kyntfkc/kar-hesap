@@ -1,6 +1,7 @@
-const DEFAULT_BASE = 'https://kar-hesap-production.up.railway.app';
-// Env varsa onu, yoksa production backend’i kullan
-const BASE = (import.meta?.env?.VITE_API_BASE_URL as string) || DEFAULT_BASE;
+// Vercel rewrite ile CORS'suz proxy: /api -> Railway
+const DEFAULT_BASE = '/api'
+// Env varsa onu, yoksa proxy'yi kullan
+const BASE = (import.meta?.env?.VITE_API_BASE_URL as string) || DEFAULT_BASE
 
 export const apiEnabled = true;
 

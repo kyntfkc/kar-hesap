@@ -3,7 +3,10 @@
   "outputDirectory": "dist",
   "installCommand": "npm ci",
   "framework": "vite",
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://kar-hesap-production.up.railway.app/:path*" }
+  ]
 }
 
 
