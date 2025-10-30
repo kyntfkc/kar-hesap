@@ -330,6 +330,13 @@ function ProfitCalculator() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 px-3 sm:px-0 pb-24">
+      {/* Gold card on mobile at very top */}
+      <div className="order-1 md:hidden">
+        <div className="card p-3 sm:p-4">
+          <GoldRateCard goldInfo={goldInfo} onGoldInfoChange={setGoldInfo} />
+        </div>
+      </div>
+
       <div className="order-2 md:order-1 card p-4 sm:p-6 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300">
         <InputForm
           productInfo={productInfo}
@@ -360,9 +367,9 @@ function ProfitCalculator() {
         </button>
       </div>
 
-      {/* Right column: compact gold card + results stacked (mobile: under input card) */}
+      {/* Right column: on desktop shows gold + results; on mobile only results (gold rendered above) */}
       <div className="order-3 md:order-2 space-y-3">
-        <div className="card p-3 sm:p-4">
+        <div className="card p-3 sm:p-4 hidden md:block">
           <GoldRateCard goldInfo={goldInfo} onGoldInfoChange={setGoldInfo} />
         </div>
 
@@ -520,17 +527,17 @@ function ProfitCalculator() {
               <option value="campaign">Kampanya (mavi)</option>
             </select>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-full border-separate border-spacing-0">
+          <div className="overflow-x-auto -mx-2 sm:mx-0">
+            <table className="w-full min-w-[720px] sm:min-w-full border-separate border-spacing-0 text-xs sm:text-sm">
               <thead>
                 <tr className="sticky top-0 z-10 border-b-2 border-slate-200/80 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/70">
-                  <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase w-6"> </th>
-                  <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Ürün</th>
-                  <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Tarih</th>
-                  <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Satış</th>
-                  <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Net</th>
-                  <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Kâr %</th>
-                  <th className="px-2 py-2 text-right text-xs font-bold text-slate-700 uppercase">Aksiyon</th>
+                  <th className="px-2 py-2 text-left text-[11px] sm:text-xs font-bold text-slate-700 uppercase w-6"> </th>
+                  <th className="px-2 py-2 text-left text-[11px] sm:text-xs font-bold text-slate-700 uppercase">Ürün</th>
+                  <th className="px-2 py-2 text-left text-[11px] sm:text-xs font-bold text-slate-700 uppercase">Tarih</th>
+                  <th className="px-2 py-2 text-left text-[11px] sm:text-xs font-bold text-slate-700 uppercase">Satış</th>
+                  <th className="px-2 py-2 text-left text-[11px] sm:text-xs font-bold text-slate-700 uppercase">Net</th>
+                  <th className="px-2 py-2 text-left text-[11px] sm:text-xs font-bold text-slate-700 uppercase">Kâr %</th>
+                  <th className="px-2 py-2 text-right text-[11px] sm:text-xs font-bold text-slate-700 uppercase">Aksiyon</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
