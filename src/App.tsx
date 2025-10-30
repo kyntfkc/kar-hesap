@@ -14,7 +14,7 @@ function App() {
               <path d="M20 7h-4V3"/>
             </svg>
           </div>
-          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-blue-700 to-indigo-800 tracking-tight">Kâr Hesap</h1>
+          <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-blue-700 to-indigo-800 tracking-tight">Fiyat Hesap</h1>
           </div>
           {/* alt açıklama kaldırıldı */}
         </div>
