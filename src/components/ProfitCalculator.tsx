@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult } from '../types'
+import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, SavedCalculation } from '../types'
 import { calculateAllPlatforms, calculateStandardSalePrice } from '../utils/calculations'
 import { apiEnabled, postCalculate } from '../utils/api'
 import { TrendingUp, Loader2, Copy, Check, Settings } from 'lucide-react'
@@ -106,6 +106,11 @@ function ProfitCalculator() {
   const [results, setResults] = useState<ProfitResult[]>([])
   const [isCalculating, setIsCalculating] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [saveName, setSaveName] = useState('')
+  const [savedCalculations, setSavedCalculations] = useState<SavedCalculation[]>(() => {
+    const saved = localStorage.getItem('savedCalculations')
+    return saved ? JSON.parse(saved) : []
+  })
 
   // Auto-save to localStorage
   useEffect(() => {
@@ -240,6 +245,26 @@ function ProfitCalculator() {
     }
   }
 
+  const handleSaveCurrentResults = () => {
+    if (!results.length || !saveName.trim()) return
+    const entry: SavedCalculation = {
+      id: `${Date.now()}`,
+      name: saveName.trim(),
+      createdAt: Date.now(),
+      results,
+    }
+    const updated = [entry, ...savedCalculations]
+    setSavedCalculations(updated)
+    localStorage.setItem('savedCalculations', JSON.stringify(updated))
+    setSaveName('')
+  }
+
+  const handleDeleteSaved = (id: string) => {
+    const updated = savedCalculations.filter(s => s.id !== id)
+    setSavedCalculations(updated)
+    localStorage.setItem('savedCalculations', JSON.stringify(updated))
+  }
+
   // En yüksek kâr oranına sahip senaryo "En İyi Senaryo"
   const bestScenario = results.length > 0 
     ? results.reduce((best, current) => current.profitRate > best.profitRate ? current : best)
@@ -285,28 +310,37 @@ function ProfitCalculator() {
           </div>
         ) : results.length > 0 ? (
           <div>
-            <div className="mb-5 flex items-center justify-between">
+            <div className="mb-5 flex items-center justify-between gap-3 flex-wrap">
               <div>
                 <h2 className="text-xl font-bold text-slate-900 mb-1">Hesaplama Sonuçları</h2>
                 <p className="text-xs text-slate-500 font-medium">{results.length} senaryo karşılaştırıldı</p>
               </div>
-              <button
-                onClick={copyResultsToClipboard}
-                className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50/80 rounded-xl transition-all duration-200 hover:scale-110"
-                title="Sonuçları kopyala"
-              >
-                {copied ? (
-                  <Check className="w-5 h-5 text-green-600" />
-                ) : (
-                  <Copy className="w-5 h-5" />
-                )}
-              </button>
+              <div className="flex items-center gap-2">
+                <input
+                  value={saveName}
+                  onChange={e=>setSaveName(e.target.value)}
+                  placeholder="Ürün adı"
+                  className="px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                />
+                <button
+                  onClick={handleSaveCurrentResults}
+                  disabled={!saveName.trim()}
+                  className="px-3 py-1.5 text-xs font-semibold text-white rounded-lg bg-blue-600 disabled:bg-blue-300"
+                >Kaydet</button>
+                <button
+                  onClick={copyResultsToClipboard}
+                  className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50/80 rounded-xl transition-all duration-200 hover:scale-110"
+                  title="Sonuçları kopyala"
+                >
+                  {copied ? (
+                    <Check className="w-5 h-5 text-green-600" />
+                  ) : (
+                    <Copy className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
             </div>
-            <div className="mb-4 flex justify-end">
-              <button onClick={()=>setShowSettings(true)} className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-50">
-                <Settings className="w-4 h-4" /> Ayarlar
-              </button>
-            </div>
+            
             
             {bestScenario && (
               <div className="mb-5">
@@ -333,6 +367,54 @@ function ProfitCalculator() {
         )}
       </div>
       <SettingsModal open={showSettings} initial={appSettings} onClose={()=>setShowSettings(false)} onSave={handleSaveSettings} />
+
+      {/* Floating Settings Button */}
+      <button
+        onClick={()=>setShowSettings(true)}
+        className="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-2xl shadow-indigo-500/30 bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 hover:from-indigo-700 hover:via-blue-700 hover:to-purple-700 ring-4 ring-indigo-500/10 hover:scale-105 transition-all"
+        title="Ayarlar"
+      >
+        <Settings className="w-4 h-4 text-white" /> Ayarlar
+      </button>
+
+      {/* Saved calculations table */}
+      {savedCalculations.length > 0 && (
+        <div className="mt-6 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-6 ring-1 ring-slate-200/50">
+          <div className="mb-3">
+            <h3 className="text-lg font-bold text-slate-900">Kayıtlı Sonuçlar</h3>
+            <p className="text-xs text-slate-500">Ürün adıyla kaydettiğiniz karşılaştırmalar</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px]">
+              <thead>
+                <tr className="border-b-2 border-slate-200/80 bg-slate-50">
+                  <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Ürün</th>
+                  <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Tarih</th>
+                  <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">En İyi Senaryo</th>
+                  <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Kâr %</th>
+                  <th className="px-2 py-2 text-right text-xs font-bold text-slate-700 uppercase">Aksiyon</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {savedCalculations.map(sc => {
+                  const best = sc.results.reduce((b, c)=> c.profitRate > b.profitRate ? c : b)
+                  return (
+                    <tr key={sc.id} className="hover:bg-blue-50/40">
+                      <td className="px-2 py-2 text-sm font-semibold text-slate-900">{sc.name}</td>
+                      <td className="px-2 py-2 text-sm text-slate-700">{new Date(sc.createdAt).toLocaleString('tr-TR')}</td>
+                      <td className="px-2 py-2 text-sm text-slate-900">{best.platform}</td>
+                      <td className="px-2 py-2 text-sm font-bold text-slate-900">{best.profitRate.toFixed(1)}%</td>
+                      <td className="px-2 py-2 text-right">
+                        <button onClick={()=>handleDeleteSaved(sc.id)} className="text-xs px-2 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50">Sil</button>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

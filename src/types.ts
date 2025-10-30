@@ -40,3 +40,10 @@ export interface ProfitResult {
   bankayaYatan: number
 }
 
+export interface SavedCalculation {
+  id: string
+  name: string
+  createdAt: number
+  results: ProfitResult[]
+}
+
