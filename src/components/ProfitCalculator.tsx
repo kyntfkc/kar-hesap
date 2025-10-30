@@ -283,6 +283,22 @@ function ProfitCalculator() {
     if (apiEnabled) deleteSavedCalculation(id).catch(() => {})
   }
 
+  const handleClearAllSaved = () => {
+    const count = savedCalculations.length
+    if (count === 0) return
+    if (!window.confirm(`${count} kaydı silmek istediğinize emin misiniz?`)) return
+    const ids = savedCalculations.map(s => s.id)
+    setSavedCalculations([])
+    localStorage.setItem('savedCalculations', JSON.stringify([]))
+    if (apiEnabled) {
+      // Arka planda tek tek sil; hata olsa da UI temiz kalsın
+      ids.forEach(id => {
+        try { deleteSavedCalculation(id).catch(()=>{}) } catch {}
+      })
+    }
+    setToast({ message: 'Tüm kayıtlar silindi', type: 'success' })
+  }
+
   const handleSaveSingleScenario = (result: ProfitResult) => {
     setSaveModalResult(result)
     setSaveModalName('')
@@ -472,13 +488,13 @@ function ProfitCalculator() {
       </button>
 
       {/* Saved calculations table */}
-      {savedCalculations.length > 0 && (
-        <div className="order-3 md:order-3 mt-6 col-span-1 md:col-span-2 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-5 ring-1 ring-slate-200/50 max-w-5xl mx-auto">
-          <div className="mb-3 flex items-center justify-between gap-3 flex-wrap">
-            <div>
-              <h3 className="text-lg font-bold text-slate-900">Kayıtlı Sonuçlar</h3>
-            </div>
-            <div className="flex items-center gap-2">
+      <div className="order-3 md:order-3 mt-6 col-span-1 md:col-span-2 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-5 ring-1 ring-slate-200/50 max-w-5xl mx-auto">
+        <div className="mb-3 flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-bold text-slate-900">Kayıtlı Sonuçlar</h3>
+            <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-700 border border-slate-200">{savedCalculations.length}</span>
+          </div>
+          <div className="flex items-center gap-2">
               <button
                 onClick={() => {
                   const data = JSON.stringify(savedCalculations, null, 2)
@@ -519,16 +535,19 @@ function ProfitCalculator() {
                   }}
                 />
               </label>
+              {savedCalculations.length > 0 && (
+                <button onClick={handleClearAllSaved} className="px-3 py-1.5 text-xs rounded-lg border border-red-300 text-red-700 hover:bg-red-50" title="Tüm kayıtları sil">Tümünü Sil</button>
+              )}
             </div>
-          </div>
-          <div className="mb-3 flex items-center gap-2 flex-wrap">
-            <input
+        </div>
+        <div className="mb-3 flex items-center gap-2 flex-wrap">
+          <input
               value={searchSaved}
               onChange={(e)=>setSearchSaved(e.target.value)}
               placeholder="Ürün adı ara..."
               className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg"
             />
-            <select
+          <select
               value={bandFilter}
               onChange={(e)=>setBandFilter(e.target.value as any)}
               className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white"
@@ -540,7 +559,10 @@ function ProfitCalculator() {
               <option value="gte20">20%+ (yeşil)</option>
               <option value="campaign">Kampanya (mavi)</option>
             </select>
-          </div>
+        </div>
+        {savedCalculations.length === 0 ? (
+          <div className="p-6 text-center text-slate-500 text-sm">Henüz kayıt yok. Sonuçlar tablosundan bir senaryoyu “Kaydet” ile ekleyebilirsin.</div>
+        ) : (
           <div className="overflow-x-auto -mx-2 sm:mx-0">
             <table className="w-full min-w-[720px] sm:min-w-full border-separate border-spacing-0 text-xs sm:text-sm">
               <thead>
@@ -627,8 +649,8 @@ function ProfitCalculator() {
               </tbody>
             </table>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Save scenario modal */}
       {saveModalOpen && (
