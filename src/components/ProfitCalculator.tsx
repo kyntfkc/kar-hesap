@@ -353,10 +353,6 @@ function ProfitCalculator() {
     setDragIndex(null)
   }
 
-  // En yüksek kâr oranına sahip senaryo "En İyi Senaryo"
-  const bestScenario = results.length > 0 
-    ? results.reduce((best, current) => current.profitRate > best.profitRate ? current : best)
-    : null
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 px-3 sm:px-0 pb-24">
@@ -418,44 +414,6 @@ function ProfitCalculator() {
               </div>
               {/* kopyalama ikonu kaldırıldı */}
             </div>
-            
-            
-            {bestScenario && (
-              <div className="mb-4">
-                <div className="relative overflow-hidden rounded-xl border border-indigo-200/70 ring-1 ring-indigo-100/60 shadow-md shadow-indigo-500/10">
-                  <div className="absolute inset-0 bg-gradient-to-r from-sky-100 via-indigo-100 to-purple-100" />
-                  <div className="relative p-3 sm:p-3">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <div className="text-[10px] sm:text-[11px] text-indigo-700 font-semibold uppercase tracking-wider">En İyi Senaryo</div>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-white/70 text-indigo-800 border border-indigo-200/70">
-                        <svg className="w-3 h-3 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M3 12l5 5L21 5"/></svg>
-                        En uygun kâr
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="text-base sm:text-lg font-extrabold text-indigo-900 truncate">{bestScenario.platform}</div>
-                        <div className="mt-1 inline-flex items-center gap-1.5 flex-wrap">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white/80 text-slate-800 border border-slate-200">
-                            Satış: {Math.round(bestScenario.salePrice).toLocaleString('tr-TR')} TL
-                          </span>
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white/80 text-slate-800 border border-slate-200">
-                            Net: {Math.round(bestScenario.netProfit).toLocaleString('tr-TR')} TL
-                          </span>
-                        </div>
-                      </div>
-                      <div className="shrink-0">
-                        <div className="px-2.5 py-1.5 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-md shadow-emerald-500/20 border border-emerald-400/40 text-right">
-                          <div className="text-[9px] uppercase tracking-wider opacity-90">Kâr %</div>
-                          <div className="text-xl sm:text-2xl font-extrabold leading-none">{Math.round(bestScenario.profitRate)}%</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
             
           <ResultsTable results={results} onSaveScenario={handleSaveSingleScenario} />
         </div>
