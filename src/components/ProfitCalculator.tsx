@@ -367,12 +367,13 @@ function ProfitCalculator() {
         </button>
       </div>
 
-      {/* Gold rate card above results */}
-      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-6 ring-1 ring-slate-200/50">
-        <GoldRateCard goldInfo={goldInfo} onGoldInfoChange={setGoldInfo} />
-      </div>
+      {/* Right column: compact gold card + results stacked */}
+      <div className="space-y-3">
+        <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-3 sm:p-4 ring-1 ring-slate-200/50">
+          <GoldRateCard goldInfo={goldInfo} onGoldInfoChange={setGoldInfo} />
+        </div>
 
-      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-6 overflow-y-auto overflow-x-hidden hover:shadow-2xl hover:shadow-indigo-300/10 transition-all duration-300 ring-1 ring-slate-200/50">
+        <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-6 overflow-y-auto overflow-x-hidden hover:shadow-2xl hover:shadow-indigo-300/10 transition-all duration-300 ring-1 ring-slate-200/50">
         {isCalculating ? (
           <div className="flex flex-col items-center justify-center h-full">
             <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
@@ -412,6 +413,7 @@ function ProfitCalculator() {
             <p className="text-xs text-slate-400 mt-1">Girdiğiniz bilgilere göre karşılaştırma yapılacak</p>
           </div>
         )}
+      </div>
       </div>
       <SettingsModal open={showSettings} initial={appSettings} onClose={()=>setShowSettings(false)} onSave={handleSaveSettings} />
 
