@@ -65,6 +65,23 @@ app.post('/sync', (req, res) => {
 // Proxy XAUUSD to bypass CORS in browser
 app.get('/xauusd', async (req, res) => {
   try {
+    // Primary: metalpriceapi.com
+    try {
+      const key = '2ade4ac5b99bea363bdb2bb795af36c0'
+      const url = `https://api.metalpriceapi.com/v1/latest?api_key=${key}&base=USD&currencies=XAU`
+      const mp = await fetch(url)
+      if (mp.ok) {
+        const jd = await mp.json()
+        const xauRate = jd?.rates?.XAU // units of XAU per USD
+        if (typeof xauRate === 'number' && xauRate > 0) {
+          const price = 1 / xauRate // USD per XAU (ounce)
+          return res.json({ price })
+        }
+      }
+    } catch (e) {
+      // fall through to other sources
+    }
+
     // Try Yahoo first
     const yahoo = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/XAUUSD=X?range=1d&interval=1d');
     if (yahoo.ok) {
