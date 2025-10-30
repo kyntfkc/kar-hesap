@@ -23,13 +23,13 @@ function ResultsTableImpl({ results, onSaveScenario }: ResultsTableProps) {
               Komisyon
             </th>
             <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
-              Net Kazanç
-            </th>
-            <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
               Kâr %
             </th>
             <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
               Bankaya Yatan
+            </th>
+            <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
+              Net Kazanç
             </th>
             {onSaveScenario && (
               <th className="px-2 py-2 text-right text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">Kaydet</th>
@@ -76,11 +76,6 @@ function ResultsTableImpl({ results, onSaveScenario }: ResultsTableProps) {
                   </span>
                 </td>
                 <td className="px-2 py-2 whitespace-nowrap text-center">
-                  <span className={`inline-block px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg ${profitBgColor} text-slate-800 font-bold text-xs sm:text-sm hover:scale-105 transition-transform`}>
-                    {formatNumber(result.netProfit)} TL
-                  </span>
-                </td>
-                <td className="px-2 py-2 whitespace-nowrap text-center">
                   <span className="text-sm sm:text-base font-bold text-slate-900">
                     {Math.round(result.profitRate)}%
                   </span>
@@ -88,6 +83,11 @@ function ResultsTableImpl({ results, onSaveScenario }: ResultsTableProps) {
                 <td className="px-2 py-2 whitespace-nowrap text-center">
                   <span className="text-xs sm:text-sm font-semibold text-blue-900">
                     {formatNumber(result.bankayaYatan)} TL
+                  </span>
+                </td>
+                <td className="px-2 py-2 whitespace-nowrap text-center">
+                  <span className={`inline-block px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg ${profitBgColor} text-slate-800 font-bold text-xs sm:text-sm hover:scale-105 transition-transform`}>
+                    {formatNumber(result.netProfit)} TL
                   </span>
                 </td>
                 {onSaveScenario && (
