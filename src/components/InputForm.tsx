@@ -176,44 +176,36 @@ function InputForm({
       <div className="grid grid-cols-1 gap-3">
         <div>
           <label className="block text-sm font-extrabold text-slate-900 mb-1.5 uppercase tracking-wider">Ürün Gram</label>
-          <div className="relative">
-            <input
-              type="text"
-              inputMode="decimal"
-              value={productGramInput !== '' ? productGramInput : (productInfo.productGram === 0 ? '' : productInfo.productGram.toString().replace('.', ','))}
-              onChange={(e) => {
-                const inputValue = e.target.value
-                // Türkçe format için virgülü noktaya çevir
-                const normalizedValue = inputValue.replace(',', '.')
-                
-                // Eğer boşsa veya geçerli bir sayı formatıysa (0.80, 0,80, 0.8, vb.)
-                if (normalizedValue === '' || /^(\d+)?([.,]\d*)?$/.test(normalizedValue)) {
-                  setProductGramInput(inputValue)
-                  // Manuel giriş yapılıyorsa uzunluk opsiyonu sıfırlansın
-                  if (lengthOption !== 'none') setLengthOption('none')
-                  
-                  if (normalizedValue === '' || normalizedValue === '.') {
-                    updateProductInfo('productGram', 0)
-                  } else {
-                    const numValue = parseFloat(normalizedValue)
-                    if (!isNaN(numValue)) {
-                      updateProductInfo('productGram', numValue)
-                    }
-                  }
-                }
-              }}
-              onBlur={() => {
-                // Focus kaybolduğunda input state'ini temizle, değer productInfo'dan gösterilecek
-                setProductGramInput('')
-              }}
-              className="w-full px-3 py-2.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white transition-all font-medium text-slate-900 hover:border-slate-400 shadow-sm"
-              placeholder="0,00"
-            />
-            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">Gr</span>
-          </div>
-          {/* Uzunluk seçenekleri + Ekstra Maliyet Farkı */}
-          <div className="mt-2 flex items-center justify-between gap-2 flex-wrap">
+          {/* Ürün gram + uzunluk butonları aynı satır */}
+          <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-2">
+              <div className="relative">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={productGramInput !== '' ? productGramInput : (productInfo.productGram === 0 ? '' : productInfo.productGram.toString().replace('.', ','))}
+                  onChange={(e) => {
+                    const inputValue = e.target.value
+                    const normalizedValue = inputValue.replace(',', '.')
+                    if (normalizedValue === '' || /^(\d+)?([.,]\d*)?$/.test(normalizedValue)) {
+                      setProductGramInput(inputValue)
+                      if (lengthOption !== 'none') setLengthOption('none')
+                      if (normalizedValue === '' || normalizedValue === '.') {
+                        updateProductInfo('productGram', 0)
+                      } else {
+                        const numValue = parseFloat(normalizedValue)
+                        if (!isNaN(numValue)) {
+                          updateProductInfo('productGram', numValue)
+                        }
+                      }
+                    }
+                  }}
+                  onBlur={() => setProductGramInput('')}
+                  className="w-24 px-3 py-2.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white transition-all font-medium text-slate-900 hover:border-slate-400 shadow-sm"
+                  placeholder="0,00"
+                />
+                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">Gr</span>
+              </div>
               <button
               type="button"
               onClick={() => {
@@ -248,7 +240,7 @@ function InputForm({
             </button>
             </div>
 
-            {/* Ekstra Maliyet Farkı (yan tarafa taşındı) */}
+            {/* Ekstra Maliyet Farkı */}
             <div className="flex items-center gap-2 bg-slate-50/80 px-2.5 py-1.5 rounded-lg border border-slate-200">
               <span className="text-xs font-medium text-slate-700">Ekstra Maliyet</span>
               <input
