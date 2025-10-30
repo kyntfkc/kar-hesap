@@ -5,6 +5,7 @@ import {
   calculateProductAmount, 
   calculatePurchasePrice 
 } from '../utils/calculations'
+import { calculateStandardSalePrice } from '../utils/calculations'
 import { Plus, X } from 'lucide-react'
 
 interface InputFormProps {
@@ -145,9 +146,16 @@ function InputForm({
   const addLinedProduct = () => {
     // Eğer zaten mevcutsa ekleme
     if (platforms.some(p => p.name === 'Astarlı Ürün')) return
+    const sale = calculateStandardSalePrice(
+      productInfo,
+      goldInfo,
+      expenses,
+      22,
+      30
+    )
     onPlatformsChange([
       ...platforms,
-      { name: 'Astarlı Ürün', commissionRate: 22, salePrice: 0, targetProfitRate: 30 },
+      { name: 'Astarlı Ürün', commissionRate: 22, salePrice: sale, targetProfitRate: 30 },
     ])
   }
 
