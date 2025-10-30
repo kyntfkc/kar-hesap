@@ -3,6 +3,7 @@ import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, SavedCalculati
 import { calculateAllPlatforms, calculateStandardSalePrice } from '../utils/calculations'
 import { apiEnabled, postCalculate, postSync, getSavedCalculations, postSavedCalculation, deleteSavedCalculation } from '../utils/api'
 import { TrendingUp, Loader2, Settings } from 'lucide-react'
+import { formatNumber } from '../utils/format'
 import Toast from './Toast'
 import InputForm from './InputForm'
 import ResultsTable from './ResultsTable'
@@ -374,6 +375,14 @@ function ProfitCalculator() {
           </div>
         ) : results.length > 0 ? (
           <div>
+            {/* Altın kuru bilgi kartı */}
+            <div className="mb-4 p-4 bg-gradient-to-br from-amber-50/60 via-yellow-50/50 to-white rounded-xl border border-amber-200/60 ring-1 ring-amber-100/60 shadow-sm flex items-center justify-between gap-3">
+              <div>
+                <div className="text-[11px] uppercase tracking-wide text-amber-700 font-semibold">Altın Kuru</div>
+                <div className="text-2xl font-extrabold text-amber-900 leading-tight">{formatNumber(goldInfo.goldPrice)} TL/gr</div>
+              </div>
+              <div className="text-xs text-slate-500">Sol panelden güncelleyebilirsiniz</div>
+            </div>
             <div className="mb-3 sm:mb-5 flex items-center justify-between gap-3 flex-wrap">
               <div>
                 <h2 className="text-xl font-bold text-slate-900 mb-1">Hesaplama Sonuçları</h2>
