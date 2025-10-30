@@ -10,7 +10,7 @@ interface ResultsTableProps {
 function ResultsTableImpl({ results, onSaveScenario }: ResultsTableProps) {
   return (
     <div>
-      <table className="w-full min-w-0">
+      <table className="w-full min-w-0 table-fixed">
         <thead>
           <tr className="border-b-2 border-slate-200/80 bg-gradient-to-r from-slate-50 via-blue-50/40 to-indigo-50/40">
             <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase tracking-wider">

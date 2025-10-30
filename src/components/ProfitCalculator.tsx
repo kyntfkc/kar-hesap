@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, SavedCalculation } from '../types'
 import { calculateAllPlatforms, calculateStandardSalePrice } from '../utils/calculations'
 import { apiEnabled, postCalculate, postSync, getSavedCalculations, postSavedCalculation, deleteSavedCalculation } from '../utils/api'
-import { TrendingUp, Loader2, Copy, Check, Settings } from 'lucide-react'
+import { TrendingUp, Loader2, Settings } from 'lucide-react'
 import Toast from './Toast'
 import InputForm from './InputForm'
 import ResultsTable from './ResultsTable'
@@ -106,7 +106,7 @@ function ProfitCalculator() {
   })
   const [results, setResults] = useState<ProfitResult[]>([])
   const [isCalculating, setIsCalculating] = useState(false)
-  const [copied, setCopied] = useState(false)
+  // clipboard state removed
   const [saveModalOpen, setSaveModalOpen] = useState(false)
   const [saveModalName, setSaveModalName] = useState('')
   const [saveModalResult, setSaveModalResult] = useState<ProfitResult | null>(null)
@@ -263,23 +263,7 @@ function ProfitCalculator() {
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [handleCalculate])
 
-  const copyResultsToClipboard = async () => {
-    if (results.length === 0) return
-    
-    const text = results.map(r => 
-      `${r.platform}\t${r.salePrice.toFixed(2)} TL\t${r.commissionRate.toFixed(2)}%\t${r.netProfit.toFixed(2)} TL\t${r.profitRate.toFixed(2)}%`
-    ).join('\n')
-    
-    const header = 'Senaryo\tSatış Tutarı\tKomisyon %\tNet Kazanç\tKâr %\n'
-    
-    try {
-      await navigator.clipboard.writeText(header + text)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error('Kopyalama hatası:', err)
-    }
-  }
+  // eski genel kopyalama kaldırıldı
 
   const handleDeleteSaved = (id: string) => {
     const updated = savedCalculations.filter(s => s.id !== id)
@@ -375,7 +359,7 @@ function ProfitCalculator() {
         </button>
       </div>
 
-      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-6 overflow-y-auto hover:shadow-2xl hover:shadow-indigo-300/10 transition-all duration-300 ring-1 ring-slate-200/50">
+      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-6 overflow-y-auto overflow-x-hidden hover:shadow-2xl hover:shadow-indigo-300/10 transition-all duration-300 ring-1 ring-slate-200/50">
         {isCalculating ? (
           <div className="flex flex-col items-center justify-center h-full">
             <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
@@ -388,19 +372,7 @@ function ProfitCalculator() {
                 <h2 className="text-xl font-bold text-slate-900 mb-1">Hesaplama Sonuçları</h2>
                 {/* karşılaştırma sayısı metni kaldırıldı */}
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={copyResultsToClipboard}
-                  className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50/80 rounded-xl transition-all duration-200 hover:scale-110"
-                  title="Sonuçları kopyala"
-                >
-                  {copied ? (
-                    <Check className="w-5 h-5 text-green-600" />
-                  ) : (
-                    <Copy className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
+              {/* kopyalama ikonu kaldırıldı */}
             </div>
             
             
