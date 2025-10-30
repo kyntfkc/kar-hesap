@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import { ProfitResult } from '../types'
+import { formatNumber } from '../utils/format'
 
 interface ResultsTableProps {
   results: ProfitResult[]
@@ -45,11 +46,8 @@ function ResultsTableImpl({ results, onSaveScenario }: ResultsTableProps) {
                 : 'bg-gradient-to-r from-rose-300 to-red-300 shadow-md shadow-rose-300/30'
 
             const commissionDisplay = result.commissionAmount === 0 
-              ? `${result.commissionRate.toFixed(0)}%`
-              : `${result.commissionAmount.toLocaleString('tr-TR', {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                })} TL`
+              ? `${Math.round(result.commissionRate)}%`
+              : `${formatNumber(result.commissionAmount)} TL`
 
             return (
               <tr key={index} className="hover:bg-blue-50/50 transition-all duration-200 border-b border-slate-100/80 group">
@@ -74,10 +72,7 @@ function ResultsTableImpl({ results, onSaveScenario }: ResultsTableProps) {
                 </td>
                 <td className="px-2 py-2 whitespace-nowrap text-center">
                   <span className={`inline-block px-4 py-2 rounded-lg ${profitBgColor} text-slate-800 font-bold text-sm hover:scale-105 transition-transform`}>
-                    {result.netProfit.toLocaleString('tr-TR', {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    })} TL
+                    {formatNumber(result.netProfit)} TL
                   </span>
                 </td>
                 <td className="px-2 py-2 whitespace-nowrap text-center">
@@ -87,10 +82,7 @@ function ResultsTableImpl({ results, onSaveScenario }: ResultsTableProps) {
                 </td>
                 <td className="px-2 py-2 whitespace-nowrap text-center">
                   <span className="text-sm font-semibold text-blue-900">
-                    {result.bankayaYatan.toLocaleString('tr-TR', {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    })} TL
+                    {formatNumber(result.bankayaYatan)} TL
                   </span>
                 </td>
                 {onSaveScenario && (

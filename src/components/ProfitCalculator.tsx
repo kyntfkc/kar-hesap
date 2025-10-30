@@ -3,6 +3,7 @@ import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, SavedCalculati
 import { calculateAllPlatforms, calculateStandardSalePrice } from '../utils/calculations'
 import { apiEnabled, postCalculate, postSync, getSavedCalculations, postSavedCalculation, deleteSavedCalculation } from '../utils/api'
 import { TrendingUp, Loader2, Copy, Check, Settings } from 'lucide-react'
+import Toast from './Toast'
 import InputForm from './InputForm'
 import ResultsTable from './ResultsTable'
 import SettingsModal, { AppSettings } from './SettingsModal'
@@ -115,6 +116,7 @@ function ProfitCalculator() {
   })
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [toast, setToast] = useState<{message: string; type?: 'success' | 'error' | 'info'} | null>(null)
 
   // Auto-save to localStorage
   useEffect(() => {
@@ -303,7 +305,8 @@ function ProfitCalculator() {
     const updated = [entry, ...savedCalculations]
     setSavedCalculations(updated)
     localStorage.setItem('savedCalculations', JSON.stringify(updated))
-    if (apiEnabled) postSavedCalculation(entry).catch(() => {})
+    if (apiEnabled) postSavedCalculation(entry).catch(() => setToast({ message: 'Kaydetme hatası', type: 'error' }))
+    setToast({ message: 'Kaydedildi', type: 'success' })
     setSaveModalOpen(false)
     setSaveModalResult(null)
     setSaveModalName('')
@@ -472,9 +475,10 @@ function ProfitCalculator() {
                       try {
                         const json = JSON.parse(String(reader.result))
                         if (Array.isArray(json)) {
-                          setSavedCalculations(json)
+                        setSavedCalculations(json)
                           localStorage.setItem('savedCalculations', JSON.stringify(json))
-                          if (apiEnabled) postSync({ savedCalculations: json }).catch(()=>{})
+                        if (apiEnabled) postSync({ savedCalculations: json }).catch(()=> setToast({ message: 'Sync hatası', type: 'error' }))
+                        setToast({ message: 'Yedek yüklendi', type: 'success' })
                         }
                       } catch {}
                     }
@@ -534,7 +538,7 @@ function ProfitCalculator() {
                         {confirmDeleteId === sc.id ? (
                           <div className="absolute right-2 top-1/2 -translate-y-1/2 bg-white border border-slate-300 rounded-md shadow-lg p-2 flex items-center gap-2 z-10">
                             <span className="text-xs text-slate-700">Silinsin mi?</span>
-                            <button onClick={() => { handleDeleteSaved(sc.id); setConfirmDeleteId(null); }} className="text-xs px-2 py-0.5 rounded-md bg-red-600 text-white">Evet</button>
+                            <button onClick={() => { handleDeleteSaved(sc.id); setConfirmDeleteId(null); setToast({ message: 'Kayıt silindi', type: 'success' }); }} className="text-xs px-2 py-0.5 rounded-md bg-red-600 text-white">Evet</button>
                             <button onClick={() => setConfirmDeleteId(null)} className="text-xs px-2 py-0.5 rounded-md border border-slate-300 text-slate-700">İptal</button>
                           </div>
                         ) : (
@@ -570,6 +574,7 @@ function ProfitCalculator() {
           </div>
         </div>
       )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={()=>setToast(null)} />}
     </div>
   )
 }
