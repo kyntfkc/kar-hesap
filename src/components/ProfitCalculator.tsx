@@ -117,6 +117,8 @@ function ProfitCalculator() {
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [toast, setToast] = useState<{message: string; type?: 'success' | 'error' | 'info'} | null>(null)
+  const [searchSaved, setSearchSaved] = useState('')
+  const [bandFilter, setBandFilter] = useState<'all' | 'lt10' | 'b10_15' | 'b15_20' | 'gte20' | 'campaign'>('all')
 
   // Auto-save to localStorage
   useEffect(() => {
@@ -413,8 +415,8 @@ function ProfitCalculator() {
 
       {/* Saved calculations table */}
       {savedCalculations.length > 0 && (
-        <div className="mt-6 col-span-1 lg:col-span-2 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-5 sm:p-6 ring-1 ring-slate-200/50">
-          <div className="mb-3 flex items-center justify-between gap-2 flex-wrap">
+        <div className="mt-6 col-span-1 lg:col-span-2 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-5 ring-1 ring-slate-200/50 max-w-5xl mx-auto">
+          <div className="mb-3 flex items-center justify-between gap-3 flex-wrap">
             <div>
               <h3 className="text-lg font-bold text-slate-900">Kayıtlı Sonuçlar</h3>
             </div>
@@ -461,6 +463,26 @@ function ProfitCalculator() {
               </label>
             </div>
           </div>
+          <div className="mb-3 flex items-center gap-2 flex-wrap">
+            <input
+              value={searchSaved}
+              onChange={(e)=>setSearchSaved(e.target.value)}
+              placeholder="Ürün adı ara..."
+              className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg"
+            />
+            <select
+              value={bandFilter}
+              onChange={(e)=>setBandFilter(e.target.value as any)}
+              className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white"
+            >
+              <option value="all">Tümü</option>
+              <option value="lt10">0-10% (kırmızı)</option>
+              <option value="b10_15">10-15% (turuncu)</option>
+              <option value="b15_20">15-20% (sarı)</option>
+              <option value="gte20">20%+ (yeşil)</option>
+              <option value="campaign">Kampanya (mavi)</option>
+            </select>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-full border-separate border-spacing-0">
               <thead>
@@ -468,7 +490,6 @@ function ProfitCalculator() {
                   <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase w-6"> </th>
                   <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Ürün</th>
                   <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Tarih</th>
-                  <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">En İyi Senaryo</th>
                   <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Satış</th>
                   <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Net</th>
                   <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Kâr %</th>
@@ -476,8 +497,30 @@ function ProfitCalculator() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {savedCalculations.map((sc, idx) => {
+                {savedCalculations
+                  .filter(sc => sc.name.toLowerCase().includes(searchSaved.toLowerCase()))
+                  .filter(sc => {
+                    const best = sc.results.reduce((b, c)=> c.profitRate > b.profitRate ? c : b)
+                    const nameLc = best.platform.toLowerCase()
+                    const isCampaign = nameLc.includes('kampanya') || nameLc.includes('kampanyalı') || nameLc.includes('promosyon')
+                    const pr = best.profitRate
+                    if (bandFilter === 'campaign') return isCampaign
+                    if (bandFilter === 'lt10') return pr < 10 && !isCampaign
+                    if (bandFilter === 'b10_15') return pr >= 10 && pr < 15 && !isCampaign
+                    if (bandFilter === 'b15_20') return pr >= 15 && pr < 20 && !isCampaign
+                    if (bandFilter === 'gte20') return pr >= 20 && !isCampaign
+                    return true
+                  })
+                  .map((sc, idx) => {
                   const best = sc.results.reduce((b, c)=> c.profitRate > b.profitRate ? c : b)
+                  const nameLc = best.platform.toLowerCase()
+                  const isCampaign = nameLc.includes('kampanya') || nameLc.includes('kampanyalı') || nameLc.includes('promosyon')
+                  let chipColor = 'bg-gradient-to-r from-rose-400 to-red-500 text-white'
+                  const pr = best.profitRate
+                  if (isCampaign) chipColor = 'bg-gradient-to-r from-sky-400 to-indigo-400 text-white'
+                  else if (pr >= 20) chipColor = 'bg-gradient-to-r from-emerald-400 to-green-500 text-white'
+                  else if (pr >= 15) chipColor = 'bg-gradient-to-r from-yellow-300 to-yellow-400 text-slate-900'
+                  else if (pr >= 10) chipColor = 'bg-gradient-to-r from-orange-400 to-amber-400 text-white'
                   return (
                     <tr
                       key={sc.id}
@@ -502,10 +545,13 @@ function ProfitCalculator() {
                         />
                       </td>
                       <td className="px-2 py-2 text-sm text-slate-700">{new Date(sc.createdAt).toLocaleDateString('tr-TR')}</td>
-                      <td className="px-2 py-2 text-sm text-slate-900"><span className="inline-flex px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-semibold">{best.platform}</span></td>
                       <td className="px-2 py-2 text-sm text-slate-900">{best.salePrice.toLocaleString('tr-TR', {maximumFractionDigits:0})} TL</td>
-                      <td className="px-2 py-2 text-sm text-slate-900">{best.netProfit.toLocaleString('tr-TR', {maximumFractionDigits:0})} TL</td>
-                      <td className="px-2 py-2 text-sm font-bold text-slate-900">{best.profitRate.toFixed(1)}%</td>
+                      <td className="px-2 py-2 text-sm">
+                        <span className={`inline-block px-3 py-1 rounded-lg text-xs font-bold ${chipColor}`}>
+                          {best.netProfit.toLocaleString('tr-TR', {maximumFractionDigits:0})} TL
+                        </span>
+                      </td>
+                      <td className="px-2 py-2 text-sm font-bold text-slate-900">{Math.round(best.profitRate)}%</td>
                       <td className="px-2 py-2 text-right relative">
                         {confirmDeleteId === sc.id ? (
                           <div className="absolute right-2 top-1/2 -translate-y-1/2 bg-white border border-slate-300 rounded-md shadow-lg p-2 flex items-center gap-2 z-10">
