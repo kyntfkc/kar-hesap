@@ -62,4 +62,16 @@ export async function getUsdTryRate(): Promise<number> {
   return rate
 }
 
+// Yahoo Finance XAUUSD=X – ana fiyatı çek
+export async function getXauUsd(): Promise<number> {
+  const url = 'https://query1.finance.yahoo.com/v8/finance/chart/XAUUSD=X?range=1d&interval=1d'
+  const res = await fetch(url)
+  if (!res.ok) throw new Error('Ons fiyatı alınamadı')
+  const data = await res.json().catch(() => null as any)
+  const r = data?.chart?.result?.[0]
+  const price = r?.meta?.regularMarketPrice || r?.meta?.previousClose || r?.indicators?.quote?.[0]?.close?.[0]
+  if (typeof price !== 'number') throw new Error('Ons fiyatı bulunamadı')
+  return price
+}
+
 

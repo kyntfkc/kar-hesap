@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getUsdTryRate } from '../utils/api'
+import { getUsdTryRate, getXauUsd } from '../utils/api'
 import { ProductInfo, GoldInfo, Expenses, Platform } from '../types'
 import { 
   calculatePureGoldGram, 
@@ -44,8 +44,9 @@ function InputForm({
   const [productGramInput, setProductGramInput] = useState<string>('')
   const [goldPriceInput, setGoldPriceInput] = useState<string>('')
   const [latestUsdTry, setLatestUsdTry] = useState<number | null>(null)
-  const [xauUsd, setXauUsd] = useState<string>('')
+  const [latestXauUsd, setLatestXauUsd] = useState<number | null>(null)
   const [loadingRate, setLoadingRate] = useState(false)
+  const [loadingXau, setLoadingXau] = useState(false)
   const [lengthOption, setLengthOption] = useState<'none' | '50' | '60'>('none')
 
   const pureGoldGram = calculatePureGoldGram(productInfo)
@@ -64,8 +65,9 @@ function InputForm({
     const fetchRate = async () => {
       try {
         setLoadingRate(true)
-        const rate = await getUsdTryRate()
-        setLatestUsdTry(rate)
+        const [usdtry, xau] = await Promise.allSettled([getUsdTryRate(), getXauUsd()])
+        if (usdtry.status === 'fulfilled') setLatestUsdTry(usdtry.value)
+        if (xau.status === 'fulfilled') setLatestXauUsd(xau.value)
       } catch {
         // ignore
       } finally {
@@ -78,21 +80,17 @@ function InputForm({
   const refreshRate = async () => {
     try {
       setLoadingRate(true)
-      const rate = await getUsdTryRate()
-      setLatestUsdTry(rate)
+      const [usdtry, xau] = await Promise.allSettled([getUsdTryRate(), getXauUsd()])
+      if (usdtry.status === 'fulfilled') setLatestUsdTry(usdtry.value)
+      if (xau.status === 'fulfilled') setLatestXauUsd(xau.value)
     } finally {
       setLoadingRate(false)
     }
   }
 
-  const applyRateToInput = () => {
-    // USDTRY kuru doğrudan gram altın değildir; sadece bilgi amaçlı gösteriyoruz
-  }
-
   const computeGoldFromUsd = () => {
-    const usd = parseFloat(xauUsd)
-    if (!latestUsdTry || !isFinite(usd) || usd <= 0) return
-    const tlPerGram = Math.round((usd / 31.1035) * latestUsdTry)
+    if (!latestUsdTry || !latestXauUsd) return
+    const tlPerGram = Math.round((latestXauUsd / 31.1035) * latestUsdTry)
     updateGoldInfo('goldPrice', tlPerGram)
     setGoldPriceInput('')
   }
@@ -309,22 +307,13 @@ function InputForm({
             <button onClick={refreshRate} className="px-2.5 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-60" disabled={loadingRate}>
               {loadingRate ? 'Güncelleniyor…' : 'Kuru Güncelle'}
             </button>
-            <button onClick={applyRateToInput} className="px-2.5 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-60" disabled={!latestUsdTry}>
-              Kuru Inputa Aktar
-            </button>
             {latestUsdTry && (
-              <span className="text-slate-500">Güncel: <b>{latestUsdTry.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} TL</b></span>
+              <span className="text-slate-500">USD/TRY: <b>{latestUsdTry.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</b></span>
             )}
-            <div className="flex items-center gap-1">
-              <input
-                type="number"
-                value={xauUsd}
-                onChange={e=>setXauUsd(e.target.value)}
-                placeholder="Ons (USD)"
-                className="w-28 px-2 py-1 rounded-md border border-slate-300"
-              />
-              <button onClick={computeGoldFromUsd} className="px-2 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50" disabled={!latestUsdTry || !xauUsd}>Gram Altın Hesapla</button>
-            </div>
+            {latestXauUsd && (
+              <span className="text-slate-500">XAU/USD: <b>{latestXauUsd.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</b></span>
+            )}
+            <button onClick={computeGoldFromUsd} className="px-2 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50" disabled={!latestUsdTry || !latestXauUsd}>Gramı Uygula</button>
           </div>
         </div>
       </div>
