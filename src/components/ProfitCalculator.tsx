@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, SavedCalculation } from '../types'
 import { calculateAllPlatforms, calculateStandardSalePrice } from '../utils/calculations'
-import { apiEnabled, postCalculate, postSync } from '../utils/api'
+import { apiEnabled, postCalculate, postSync, getSavedCalculations, postSavedCalculation, deleteSavedCalculation } from '../utils/api'
 import { TrendingUp, Loader2, Copy, Check, Settings } from 'lucide-react'
 import InputForm from './InputForm'
 import ResultsTable from './ResultsTable'
@@ -128,6 +128,19 @@ function ProfitCalculator() {
   useEffect(() => {
     localStorage.setItem('platforms', JSON.stringify(platforms))
   }, [platforms])
+
+  // Load persisted saved calculations from backend
+  useEffect(() => {
+    if (!apiEnabled) return
+    getSavedCalculations()
+      .then((resp: any) => {
+        if (resp && Array.isArray(resp.items)) {
+          setSavedCalculations(resp.items)
+          localStorage.setItem('savedCalculations', JSON.stringify(resp.items))
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   // Backend sync (debounced) with localStorage snapshot
   useEffect(() => {
@@ -275,13 +288,16 @@ function ProfitCalculator() {
     localStorage.setItem('savedCalculations', JSON.stringify(updated))
     setSaveName('')
     // fire-and-forget sync immediately after save
-    if (apiEnabled) postSync({ savedCalculations: updated }).catch(() => {})
+    if (apiEnabled) {
+      postSavedCalculation(entry).catch(() => {})
+    }
   }
 
   const handleDeleteSaved = (id: string) => {
     const updated = savedCalculations.filter(s => s.id !== id)
     setSavedCalculations(updated)
     localStorage.setItem('savedCalculations', JSON.stringify(updated))
+    if (apiEnabled) deleteSavedCalculation(id).catch(() => {})
   }
 
   // En yüksek kâr oranına sahip senaryo "En İyi Senaryo"

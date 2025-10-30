@@ -32,4 +32,26 @@ export async function postSync(payload: unknown) {
   return r.json();
 }
 
+export async function getSavedCalculations() {
+  const r = await fetch(`${BASE}/saved-calculations`);
+  if (!r.ok) throw new Error('API error');
+  return r.json();
+}
+
+export async function postSavedCalculation(payload: unknown) {
+  const r = await fetch(`${BASE}/saved-calculations`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!r.ok) throw new Error('API error');
+  return r.json();
+}
+
+export async function deleteSavedCalculation(id: string) {
+  const r = await fetch(`${BASE}/saved-calculations/${id}`, { method: 'DELETE' });
+  if (!r.ok) throw new Error('API error');
+  return r.json();
+}
+
 
