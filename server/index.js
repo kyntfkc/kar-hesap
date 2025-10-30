@@ -62,6 +62,22 @@ app.post('/sync', (req, res) => {
   }
 });
 
+// Proxy XAUUSD to bypass CORS in browser
+app.get('/xauusd', async (req, res) => {
+  try {
+    const r = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/XAUUSD=X?range=1d&interval=1d');
+    if (!r.ok) return res.status(502).json({ error: 'Upstream error' });
+    const data = await r.json();
+    const result = data?.chart?.result?.[0];
+    const price = result?.meta?.regularMarketPrice || result?.meta?.previousClose || result?.indicators?.quote?.[0]?.close?.[0];
+    if (typeof price !== 'number') return res.status(500).json({ error: 'Price not found' });
+    res.json({ price });
+  } catch (e) {
+    console.error('xauusd proxy error', e);
+    res.status(500).json({ error: 'Proxy error' });
+  }
+});
+
 // Saved calculations CRUD
 app.get('/saved-calculations', (req, res) => {
   db.all('SELECT id, name, createdAt, results FROM saved_calculations ORDER BY createdAt DESC', (err, rows) => {
