@@ -355,24 +355,24 @@ function InputForm({
       <div>
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wide">Senaryolar</h3>
-          <button
-            onClick={addPlatform}
-            className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all"
-            title="Yeni senaryo ekle"
-          >
-            <Plus className="w-3 h-3" />
-            Senaryo Ekle
-          </button>
-        </div>
-        <div className="flex items-center justify-end -mt-1 mb-2 gap-2">
-          <button
-            onClick={addLinedProduct}
-            className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-all"
-            title="Astarlı Ürün senaryosu ekle"
-          >
-            <Plus className="w-3 h-3" />
-            + Astarlı Ürün
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={addPlatform}
+              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all"
+              title="Yeni senaryo ekle"
+            >
+              <Plus className="w-3 h-3" />
+              Senaryo Ekle
+            </button>
+            <button
+              onClick={addLinedProduct}
+              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-all"
+              title="Astarlı Ürün senaryosu ekle"
+            >
+              <Plus className="w-3 h-3" />
+              Astarlı Ürün
+            </button>
+          </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {platforms.map((platform, index) => (
