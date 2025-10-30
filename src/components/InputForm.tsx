@@ -160,8 +160,14 @@ function InputForm({
   }
 
   const removePlatform = (index: number) => {
-    if (platforms.length > 1) {
-      onPlatformsChange(platforms.filter((_, i) => i !== index))
+    const next = platforms.filter((_, i) => i !== index)
+    if (next.length === 0) {
+      // En az bir senaryo olmalı: otomatik Standart ile yeniden başlat
+      onPlatformsChange([
+        { name: 'Standart', commissionRate: 22, salePrice: calculateDefaultSalePrice(goldInfo.productAmount), targetProfitRate: 15 },
+      ])
+    } else {
+      onPlatformsChange(next)
     }
   }
 
@@ -399,15 +405,13 @@ function InputForm({
                   className="w-full px-2 py-1.5 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white font-medium text-slate-900 text-center shadow-sm disabled:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-500"
                   placeholder="Senaryo adı"
                 />
-                {platforms.length > 1 && (
-                  <button
-                    onClick={() => removePlatform(index)}
-                    className="absolute top-1/2 right-1.5 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-red-500 rounded-full transition-all duration-200 shadow-sm hover:shadow-md group z-10"
-                    title="Senaryoyu sil"
-                  >
-                    <X className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" strokeWidth={3} />
-                  </button>
-                )}
+                <button
+                  onClick={() => removePlatform(index)}
+                  className="absolute top-1/2 right-1.5 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-red-500 rounded-full transition-all duration-200 shadow-sm hover:shadow-md group z-10"
+                  title="Senaryoyu sil"
+                >
+                  <X className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" strokeWidth={3} />
+                </button>
               </div>
               {platform.name === 'Standart' || platform.name === 'Astarlı Ürün' ? (
                 <div className="grid grid-cols-2 gap-2">

@@ -577,8 +577,7 @@ function ProfitCalculator() {
                   .filter(sc => sc.name.toLowerCase().includes(searchSaved.toLowerCase()))
                   .filter(sc => {
                     const best = sc.results.reduce((b, c)=> c.profitRate > b.profitRate ? c : b)
-                    const nameLc = best.platform.toLowerCase()
-                    const isCampaign = nameLc.includes('kampanya') || nameLc.includes('kampanyalı') || nameLc.includes('promosyon')
+                    const isCampaign = sc.name.toLowerCase().includes('kampanya') || sc.name.toLowerCase().includes('kampanyalı') || sc.name.toLowerCase().includes('promosyon')
                     const pr = best.profitRate
                     if (bandFilter === 'campaign') return isCampaign
                     if (bandFilter === 'lt10') return pr < 10 && !isCampaign
@@ -589,8 +588,7 @@ function ProfitCalculator() {
                   })
                   .map((sc, idx) => {
                   const best = sc.results.reduce((b, c)=> c.profitRate > b.profitRate ? c : b)
-                  const nameLc = best.platform.toLowerCase()
-                  const isCampaign = nameLc.includes('kampanya') || nameLc.includes('kampanyalı') || nameLc.includes('promosyon')
+                  const isCampaign = sc.name.toLowerCase().includes('kampanya') || sc.name.toLowerCase().includes('kampanyalı') || sc.name.toLowerCase().includes('promosyon')
                   let chipColor = 'bg-gradient-to-r from-rose-400 to-red-500 text-white'
                   const pr = best.profitRate
                   if (isCampaign) chipColor = 'bg-gradient-to-r from-sky-400 to-indigo-400 text-white'
