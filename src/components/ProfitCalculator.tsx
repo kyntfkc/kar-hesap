@@ -340,8 +340,8 @@ function ProfitCalculator() {
     : null
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-6 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 ring-1 ring-slate-200/50">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 px-3 sm:px-0">
+      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-6 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 ring-1 ring-slate-200/50">
         <InputForm
           productInfo={productInfo}
           goldInfo={goldInfo}
@@ -371,7 +371,7 @@ function ProfitCalculator() {
         </button>
       </div>
 
-      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-6 overflow-y-auto hover:shadow-2xl hover:shadow-indigo-300/10 transition-all duration-300 ring-1 ring-slate-200/50">
+      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-6 overflow-y-auto hover:shadow-2xl hover:shadow-indigo-300/10 transition-all duration-300 ring-1 ring-slate-200/50">
         {isCalculating ? (
           <div className="flex flex-col items-center justify-center h-full">
             <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
@@ -429,10 +429,10 @@ function ProfitCalculator() {
       {/* Floating Settings Button */}
       <button
         onClick={()=>setShowSettings(true)}
-        className="fixed bottom-6 right-6 z-40 inline-flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-2xl shadow-indigo-500/30 bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 hover:from-indigo-700 hover:via-blue-700 hover:to-purple-700 ring-4 ring-indigo-500/10 hover:scale-105 transition-all"
+        className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40 inline-flex items-center gap-2 px-3 sm:px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-2xl shadow-indigo-500/30 bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 hover:from-indigo-700 hover:via-blue-700 hover:to-purple-700 ring-4 ring-indigo-500/10 hover:scale-105 transition-all"
         title="Ayarlar"
       >
-        <Settings className="w-4 h-4 text-white" /> Ayarlar
+        <Settings className="w-4 h-4 text-white" /> <span className="hidden sm:inline">Ayarlar</span>
       </button>
 
       {/* Saved calculations table */}
