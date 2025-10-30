@@ -70,4 +70,9 @@ export async function getXauUsd(): Promise<number> {
   return data.price
 }
 
+export async function getRates(): Promise<{ usdtry: number; xauusd: number; ts: number; cached: boolean }> {
+  if (!apiEnabled) throw new Error('API disabled')
+  return request('/rates') as any
+}
+
 

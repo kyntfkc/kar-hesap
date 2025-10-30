@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { GoldInfo } from '../types'
-import { getUsdTryRate, getXauUsd } from '../utils/api'
+import { getRates } from '../utils/api'
 
 interface Props {
   goldInfo: GoldInfo
@@ -19,9 +19,9 @@ export default function GoldRateCard({ goldInfo, onGoldInfoChange }: Props) {
   const refresh = async () => {
     try {
       setLoading(true)
-      const [u, x] = await Promise.allSettled([getUsdTryRate(), getXauUsd()])
-      if (u.status === 'fulfilled') setUsdtry(u.value)
-      if (x.status === 'fulfilled') setXauusd(x.value)
+      const r = await getRates()
+      setUsdtry(r.usdtry)
+      setXauusd(r.xauusd)
     } finally {
       setLoading(false)
     }

@@ -150,6 +150,70 @@ app.delete('/saved-calculations/:id', (req, res) => {
   });
 });
 
+// Rates cache (in-memory, 15 minutes)
+let ratesCache = { ts: 0, usdtry: null, xauusd: null };
+const FIFTEEN_MIN = 15 * 60 * 1000;
+
+async function fetchUsdTry() {
+  const key = '955af145bf3c2926aa413512';
+  const url = `https://v6.exchangerate-api.com/v6/${key}/latest/USD`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('exchangerate-api');
+  const d = await r.json();
+  if (typeof d?.conversion_rates?.TRY !== 'number') throw new Error('usdtry missing');
+  return d.conversion_rates.TRY;
+}
+
+async function fetchXauUsdPrimary() {
+  const key = '2ade4ac5b99bea363bdb2bb795af36c0';
+  const url = `https://api.metalpriceapi.com/v1/latest?api_key=${key}&base=USD&currencies=XAU`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('metalpriceapi');
+  const d = await r.json();
+  const rate = d?.rates?.XAU; // XAU per USD
+  if (typeof rate !== 'number' || rate <= 0) throw new Error('metalpriceapi invalid');
+  return 1 / rate; // USD per XAU (ounce)
+}
+
+async function fetchXauUsdFallback() {
+  const yahoo = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/XAUUSD=X?range=1d&interval=1d');
+  if (yahoo.ok) {
+    const yd = await yahoo.json();
+    const yr = yd?.chart?.result?.[0];
+    const yp = yr?.meta?.regularMarketPrice || yr?.meta?.previousClose || yr?.indicators?.quote?.[0]?.close?.[0];
+    if (typeof yp === 'number') return yp;
+  }
+  const stooq = await fetch('https://stooq.com/q/l/?s=xauusd&i=d');
+  if (stooq.ok) {
+    const csv = await stooq.text();
+    const parts = csv.trim().split(',');
+    const close = parseFloat(parts[7] || parts[6]);
+    if (!isNaN(close)) return close;
+  }
+  throw new Error('xau not found');
+}
+
+app.get('/rates', async (req, res) => {
+  try {
+    const now = Date.now();
+    if (now - ratesCache.ts < FIFTEEN_MIN && ratesCache.usdtry && ratesCache.xauusd) {
+      return res.json({ cached: true, usdtry: ratesCache.usdtry, xauusd: ratesCache.xauusd, ts: ratesCache.ts });
+    }
+    const [usdtry, xauusd] = await Promise.all([
+      fetchUsdTry(),
+      fetchXauUsdPrimary().catch(() => fetchXauUsdFallback()),
+    ]);
+    ratesCache = { ts: now, usdtry, xauusd };
+    res.json({ cached: false, usdtry, xauusd, ts: now });
+  } catch (e) {
+    console.error('rates error', e);
+    if (ratesCache.usdtry && ratesCache.xauusd) {
+      return res.json({ cached: true, usdtry: ratesCache.usdtry, xauusd: ratesCache.xauusd, ts: ratesCache.ts });
+    }
+    res.status(502).json({ error: 'Rates unavailable' });
+  }
+});
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log('Server listening on', PORT);
