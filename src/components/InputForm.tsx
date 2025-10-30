@@ -254,17 +254,18 @@ function InputForm({
         
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="card overflow-hidden">
-          <button
-            onClick={() => toggleSection('labor')}
-            className="w-full h-10 px-3 flex items-center justify-between bg-white/90 hover:bg-white transition-all duration-200 group"
-          >
-            <span className="font-bold text-slate-900 text-sm">İşçilik</span>
-            <Plus className={`w-4 h-4 text-gray-700 transition-transform ${expandedSections.labor ? 'rotate-45' : ''}`} />
-          </button>
-          {expandedSections.labor && (
-            <div className="p-3 bg-white border-t border-slate-200/80">
+      <div className="card overflow-hidden bg-gradient-to-br from-slate-50/80 to-white">
+        <button
+          onClick={() => toggleSection('expenses')}
+          className="w-full h-10 px-3 flex items-center justify-between bg-white/90 hover:bg-white transition-all duration-200 group"
+        >
+          <span className="font-bold text-slate-900 text-sm">İşçilik ve Masraf Kalemleri</span>
+          <Plus className={`w-5 h-5 text-gray-700 transition-transform ${expandedSections.expenses ? 'rotate-45' : ''}`} />
+        </button>
+        {expandedSections.expenses && (
+          <div className="p-3 bg-white border-t border-slate-200/80">
+            {/* İşçilik Alanı */}
+            <div className="mb-3">
               <div className="grid grid-cols-4 gap-2">
                 <div className="col-span-2">
                   <label className="block text-xs text-gray-700 mb-1 font-medium">İşçilik (milyem)</label>
@@ -282,22 +283,7 @@ function InputForm({
                 </div>
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Ekstralar kartı kaldırıldı; alan yukarı taşındı */}
-      </div>
-
-      <div className="card overflow-hidden bg-gradient-to-br from-slate-50/80 to-white">
-        <button
-          onClick={() => toggleSection('expenses')}
-          className="w-full h-10 px-3 flex items-center justify-between bg-white/90 hover:bg-white transition-all duration-200 group"
-        >
-          <span className="font-bold text-slate-900 text-sm">Masraf Kalemleri</span>
-          <Plus className={`w-5 h-5 text-gray-700 transition-transform ${expandedSections.expenses ? 'rotate-45' : ''}`} />
-        </button>
-        {expandedSections.expenses && (
-          <div className="p-3 bg-white border-t border-slate-200/80">
             <div className="grid grid-cols-4 gap-2 items-end">
               <div>
                 <label className="block text-xs text-slate-600 mb-1 font-medium">Kargo</label>
