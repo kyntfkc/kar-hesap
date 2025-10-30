@@ -183,7 +183,7 @@ function InputForm({
                 <input
                   type="text"
                   inputMode="decimal"
-                  value={productGramInput !== '' ? productGramInput : (productInfo.productGram === 0 ? '' : productInfo.productGram.toFixed(3).replace('.', ','))}
+                  value={productGramInput !== '' ? productGramInput : (productInfo.productGram === 0 ? '' : productInfo.productGram.toFixed(10).replace('.', ','))}
                   onChange={(e) => {
                     const inputValue = e.target.value
                     const normalizedValue = inputValue.replace(',', '.')
