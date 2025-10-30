@@ -175,6 +175,20 @@ function ProfitCalculator() {
     setShowSettings(false)
   }
 
+  // İlk yüklemede kaydedilmiş ayarları otomatik uygula
+  const didApplySettingsOnMountRef = useRef(false)
+  useEffect(() => {
+    if (didApplySettingsOnMountRef.current) return
+    didApplySettingsOnMountRef.current = true
+    try {
+      const saved = localStorage.getItem('appSettings')
+      const s = saved ? { ...defaultAppSettings, ...JSON.parse(saved) } : appSettings
+      applySettingsToState(s)
+    } catch {
+      applySettingsToState(appSettings)
+    }
+  }, [])
+
   // Otomatik senaryoların (Standart ve Astarlı Ürün) satış fiyatını güncelle
   useEffect(() => {
     setPlatforms(prevPlatforms => {
