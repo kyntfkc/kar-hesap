@@ -1,4 +1,4 @@
-const nf = new Intl.NumberFormat('tr-TR')
+const nf = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 })
 const nf2 = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
 export function formatTL(value: number, fraction: 0 | 2 = 0): string {
