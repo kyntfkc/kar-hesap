@@ -65,13 +65,26 @@ app.post('/sync', (req, res) => {
 // Proxy XAUUSD to bypass CORS in browser
 app.get('/xauusd', async (req, res) => {
   try {
-    const r = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/XAUUSD=X?range=1d&interval=1d');
-    if (!r.ok) return res.status(502).json({ error: 'Upstream error' });
-    const data = await r.json();
-    const result = data?.chart?.result?.[0];
-    const price = result?.meta?.regularMarketPrice || result?.meta?.previousClose || result?.indicators?.quote?.[0]?.close?.[0];
-    if (typeof price !== 'number') return res.status(500).json({ error: 'Price not found' });
-    res.json({ price });
+    // Try Yahoo first
+    const yahoo = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/XAUUSD=X?range=1d&interval=1d');
+    if (yahoo.ok) {
+      const yd = await yahoo.json();
+      const yr = yd?.chart?.result?.[0];
+      const yp = yr?.meta?.regularMarketPrice || yr?.meta?.previousClose || yr?.indicators?.quote?.[0]?.close?.[0];
+      if (typeof yp === 'number') return res.json({ price: yp });
+    }
+
+    // Fallback: Stooq CSV (XAUUSD) -> last column
+    const stooq = await fetch('https://stooq.com/q/l/?s=xauusd&i=d');
+    if (stooq.ok) {
+      const csv = await stooq.text();
+      // format: symbol,date,time,open,high,low,close,volume
+      const parts = csv.trim().split(',');
+      const close = parseFloat(parts[7] || parts[6]);
+      if (!isNaN(close)) return res.json({ price: close });
+    }
+
+    return res.status(502).json({ error: 'Price not found' });
   } catch (e) {
     console.error('xauusd proxy error', e);
     res.status(500).json({ error: 'Proxy error' });
