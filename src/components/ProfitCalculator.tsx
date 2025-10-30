@@ -113,6 +113,7 @@ function ProfitCalculator() {
     const saved = localStorage.getItem('savedCalculations')
     return saved ? JSON.parse(saved) : []
   })
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
 
   // Auto-save to localStorage
   useEffect(() => {
@@ -307,6 +308,22 @@ function ProfitCalculator() {
     setSaveModalName('')
   }
 
+  // Drag & Drop for saved calculations
+  const onDragStartSaved = (index: number) => () => setDragIndex(index)
+  const onDragOverSaved = (e: React.DragEvent<HTMLTableRowElement>) => {
+    e.preventDefault()
+  }
+  const onDropSaved = (index: number) => () => {
+    if (dragIndex === null || dragIndex === index) return
+    const updated = [...savedCalculations]
+    const [moved] = updated.splice(dragIndex, 1)
+    updated.splice(index, 0, moved)
+    setSavedCalculations(updated)
+    localStorage.setItem('savedCalculations', JSON.stringify(updated))
+    if (apiEnabled) postSync({ savedCalculations: updated }).catch(() => {})
+    setDragIndex(null)
+  }
+
   // En yüksek kâr oranına sahip senaryo "En İyi Senaryo"
   const bestScenario = results.length > 0 
     ? results.reduce((best, current) => current.profitRate > best.profitRate ? current : best)
@@ -427,10 +444,17 @@ function ProfitCalculator() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {savedCalculations.map(sc => {
+                {savedCalculations.map((sc, idx) => {
                   const best = sc.results.reduce((b, c)=> c.profitRate > b.profitRate ? c : b)
                   return (
-                    <tr key={sc.id} className="hover:bg-blue-50/40">
+                    <tr
+                      key={sc.id}
+                      draggable
+                      onDragStart={onDragStartSaved(idx)}
+                      onDragOver={onDragOverSaved}
+                      onDrop={onDropSaved(idx)}
+                      className={`hover:bg-blue-50/40 ${dragIndex===idx ? 'bg-blue-50/70' : ''}`}
+                    >
                       <td className="px-2 py-2 text-sm font-semibold text-slate-900">{sc.name}</td>
                       <td className="px-2 py-2 text-sm text-slate-700">{new Date(sc.createdAt).toLocaleString('tr-TR')}</td>
                       <td className="px-2 py-2 text-sm text-slate-900">{best.platform}</td>
