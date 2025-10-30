@@ -106,7 +106,9 @@ function ProfitCalculator() {
   const [results, setResults] = useState<ProfitResult[]>([])
   const [isCalculating, setIsCalculating] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [saveName, setSaveName] = useState('')
+  const [saveModalOpen, setSaveModalOpen] = useState(false)
+  const [saveModalName, setSaveModalName] = useState('')
+  const [saveModalResult, setSaveModalResult] = useState<ProfitResult | null>(null)
   const [savedCalculations, setSavedCalculations] = useState<SavedCalculation[]>(() => {
     const saved = localStorage.getItem('savedCalculations')
     return saved ? JSON.parse(saved) : []
@@ -275,24 +277,6 @@ function ProfitCalculator() {
     }
   }
 
-  const handleSaveCurrentResults = () => {
-    if (!results.length || !saveName.trim()) return
-    const entry: SavedCalculation = {
-      id: `${Date.now()}`,
-      name: saveName.trim(),
-      createdAt: Date.now(),
-      results,
-    }
-    const updated = [entry, ...savedCalculations]
-    setSavedCalculations(updated)
-    localStorage.setItem('savedCalculations', JSON.stringify(updated))
-    setSaveName('')
-    // fire-and-forget sync immediately after save
-    if (apiEnabled) {
-      postSavedCalculation(entry).catch(() => {})
-    }
-  }
-
   const handleDeleteSaved = (id: string) => {
     const updated = savedCalculations.filter(s => s.id !== id)
     setSavedCalculations(updated)
@@ -301,18 +285,26 @@ function ProfitCalculator() {
   }
 
   const handleSaveSingleScenario = (result: ProfitResult) => {
-    const name = saveName.trim() || (typeof window !== 'undefined' ? window.prompt('Ürün adı') || '' : '')
-    if (!name) return
+    setSaveModalResult(result)
+    setSaveModalName('')
+    setSaveModalOpen(true)
+  }
+
+  const confirmSaveScenario = () => {
+    if (!saveModalOpen || !saveModalResult || !saveModalName.trim()) return
     const entry: SavedCalculation = {
       id: `${Date.now()}`,
-      name,
+      name: saveModalName.trim(),
       createdAt: Date.now(),
-      results: [result],
+      results: [saveModalResult],
     }
     const updated = [entry, ...savedCalculations]
     setSavedCalculations(updated)
     localStorage.setItem('savedCalculations', JSON.stringify(updated))
     if (apiEnabled) postSavedCalculation(entry).catch(() => {})
+    setSaveModalOpen(false)
+    setSaveModalResult(null)
+    setSaveModalName('')
   }
 
   // En yüksek kâr oranına sahip senaryo "En İyi Senaryo"
@@ -366,17 +358,6 @@ function ProfitCalculator() {
                 <p className="text-xs text-slate-500 font-medium">{results.length} senaryo karşılaştırıldı</p>
               </div>
               <div className="flex items-center gap-2">
-                <input
-                  value={saveName}
-                  onChange={e=>setSaveName(e.target.value)}
-                  placeholder="Ürün adı"
-                  className="px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-                />
-                <button
-                  onClick={handleSaveCurrentResults}
-                  disabled={!saveName.trim()}
-                  className="px-3 py-1.5 text-xs font-semibold text-white rounded-lg bg-blue-600 disabled:bg-blue-300"
-                >Kaydet</button>
                 <button
                   onClick={copyResultsToClipboard}
                   className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50/80 rounded-xl transition-all duration-200 hover:scale-110"
@@ -462,6 +443,27 @@ function ProfitCalculator() {
                 })}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Save scenario modal */}
+      {saveModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30" onClick={()=>setSaveModalOpen(false)} />
+          <div className="relative w-full max-w-sm bg-white rounded-xl shadow-2xl border border-slate-200 p-5">
+            <h3 className="text-lg font-bold text-slate-900 mb-3">Senaryoyu Kaydet</h3>
+            <label className="block text-xs text-slate-600 mb-1 font-medium">Ürün adı</label>
+            <input
+              value={saveModalName}
+              onChange={e=>setSaveModalName(e.target.value)}
+              placeholder="Örn. minik ikili"
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg mb-4"
+            />
+            <div className="flex items-center justify-end gap-2">
+              <button onClick={()=>setSaveModalOpen(false)} className="px-3 py-1.5 text-sm rounded-lg border border-slate-300">İptal</button>
+              <button onClick={confirmSaveScenario} disabled={!saveModalName.trim()} className="px-3 py-1.5 text-sm rounded-lg bg-blue-600 text-white disabled:bg-blue-300">Kaydet</button>
+            </div>
           </div>
         </div>
       )}
