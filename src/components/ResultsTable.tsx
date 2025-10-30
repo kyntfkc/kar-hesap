@@ -2,9 +2,10 @@ import { ProfitResult } from '../types'
 
 interface ResultsTableProps {
   results: ProfitResult[]
+  onSaveScenario?: (result: ProfitResult) => void
 }
 
-function ResultsTable({ results }: ResultsTableProps) {
+function ResultsTable({ results, onSaveScenario }: ResultsTableProps) {
   return (
     <div>
       <table className="w-full min-w-0">
@@ -28,6 +29,9 @@ function ResultsTable({ results }: ResultsTableProps) {
             <th className="px-2 py-2 text-center text-xs font-bold text-slate-700 uppercase tracking-wider">
               Bankaya Yatan
             </th>
+            {onSaveScenario && (
+              <th className="px-2 py-2 text-right text-xs font-bold text-slate-700 uppercase tracking-wider">Kaydet</th>
+            )}
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -88,6 +92,17 @@ function ResultsTable({ results }: ResultsTableProps) {
                     })} TL
                   </span>
                 </td>
+                {onSaveScenario && (
+                  <td className="px-2 py-2 whitespace-nowrap text-right">
+                    <button
+                      onClick={() => onSaveScenario(result)}
+                      className="text-xs px-2 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50"
+                      title="Bu senaryoyu kaydet"
+                    >
+                      Kaydet
+                    </button>
+                  </td>
+                )}
               </tr>
             )
           })}

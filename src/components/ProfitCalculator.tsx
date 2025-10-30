@@ -300,6 +300,21 @@ function ProfitCalculator() {
     if (apiEnabled) deleteSavedCalculation(id).catch(() => {})
   }
 
+  const handleSaveSingleScenario = (result: ProfitResult) => {
+    const name = saveName.trim() || (typeof window !== 'undefined' ? window.prompt('Ürün adı') || '' : '')
+    if (!name) return
+    const entry: SavedCalculation = {
+      id: `${Date.now()}`,
+      name,
+      createdAt: Date.now(),
+      results: [result],
+    }
+    const updated = [entry, ...savedCalculations]
+    setSavedCalculations(updated)
+    localStorage.setItem('savedCalculations', JSON.stringify(updated))
+    if (apiEnabled) postSavedCalculation(entry).catch(() => {})
+  }
+
   // En yüksek kâr oranına sahip senaryo "En İyi Senaryo"
   const bestScenario = results.length > 0 
     ? results.reduce((best, current) => current.profitRate > best.profitRate ? current : best)
@@ -387,7 +402,7 @@ function ProfitCalculator() {
               </div>
             )}
             
-          <ResultsTable results={results} />
+          <ResultsTable results={results} onSaveScenario={handleSaveSingleScenario} />
         </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-slate-400">
@@ -414,7 +429,7 @@ function ProfitCalculator() {
 
       {/* Saved calculations table */}
       {savedCalculations.length > 0 && (
-        <div className="mt-6 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-6 ring-1 ring-slate-200/50">
+        <div className="mt-6 col-span-1 lg:col-span-2 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-6 ring-1 ring-slate-200/50">
           <div className="mb-3">
             <h3 className="text-lg font-bold text-slate-900">Kayıtlı Sonuçlar</h3>
             <p className="text-xs text-slate-500">Ürün adıyla kaydettiğiniz karşılaştırmalar</p>
