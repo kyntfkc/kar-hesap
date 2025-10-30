@@ -5,7 +5,7 @@
   "framework": "vite",
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://kar-hesap-production.up.railway.app/:path*" }
+    { "source": "/api/:path*", "destination": "https://kar-hesap-backend-production.up.railway.app/:path*" }
   ]
 }
 
