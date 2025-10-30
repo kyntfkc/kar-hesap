@@ -443,6 +443,7 @@ function ProfitCalculator() {
             <div>
               <h3 className="text-lg font-bold text-slate-900">Kayıtlı Sonuçlar</h3>
               {/* açıklama kaldırıldı */}
+              <div className="mt-0.5 text-[11px] text-slate-500">Satır başındaki ≡ ikonundan sürükleyip sıralayabilirsiniz.</div>
             </div>
             <button
               onClick={() => {
@@ -486,9 +487,9 @@ function ProfitCalculator() {
             </label>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-full">
+            <table className="w-full min-w-full border-separate border-spacing-0">
               <thead>
-                <tr className="border-b-2 border-slate-200/80 bg-slate-50">
+                <tr className="sticky top-0 z-10 border-b-2 border-slate-200/80 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/70">
                   <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase w-6"> </th>
                   <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Ürün</th>
                   <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Tarih</th>
@@ -509,7 +510,7 @@ function ProfitCalculator() {
                       onDragStart={onDragStartSaved(idx)}
                       onDragOver={onDragOverSaved}
                       onDrop={onDropSaved(idx)}
-                      className={`hover:bg-blue-50/40 ${dragIndex===idx ? 'bg-blue-50/70' : ''}`}
+                      className={`odd:bg-slate-50/60 even:bg-white hover:bg-indigo-50/60 transition-colors ${dragIndex===idx ? 'ring-2 ring-indigo-300 bg-indigo-50' : ''}`}
                     >
                       <td className="px-2 py-2 text-slate-400 cursor-move select-none">≡</td>
                       <td className="px-2 py-2 text-sm font-semibold text-slate-900">
@@ -526,7 +527,7 @@ function ProfitCalculator() {
                         />
                       </td>
                       <td className="px-2 py-2 text-sm text-slate-700">{new Date(sc.createdAt).toLocaleDateString('tr-TR')}</td>
-                      <td className="px-2 py-2 text-sm text-slate-900">{best.platform}</td>
+                      <td className="px-2 py-2 text-sm text-slate-900"><span className="inline-flex px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-semibold">{best.platform}</span></td>
                       <td className="px-2 py-2 text-sm text-slate-900">{best.salePrice.toLocaleString('tr-TR', {maximumFractionDigits:0})} TL</td>
                       <td className="px-2 py-2 text-sm text-slate-900">{best.netProfit.toLocaleString('tr-TR', {maximumFractionDigits:0})} TL</td>
                       <td className="px-2 py-2 text-sm font-bold text-slate-900">{best.profitRate.toFixed(1)}%</td>
