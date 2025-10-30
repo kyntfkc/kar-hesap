@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { getUsdTryRate, getXauUsd } from '../utils/api'
 import { ProductInfo, GoldInfo, Expenses, Platform } from '../types'
 import { 
   calculatePureGoldGram, 
@@ -43,11 +42,6 @@ function InputForm({
   
   const [productGramInput, setProductGramInput] = useState<string>('')
   const [goldPriceInput, setGoldPriceInput] = useState<string>('')
-  const [latestUsdTry, setLatestUsdTry] = useState<number | null>(null)
-  const [latestXauUsd, setLatestXauUsd] = useState<number | null>(null)
-  const [manualXauUsd, setManualXauUsd] = useState<string>('')
-  const [loadingRate, setLoadingRate] = useState(false)
-  const [loadingXau, setLoadingXau] = useState(false)
   const [lengthOption, setLengthOption] = useState<'none' | '50' | '60'>('none')
 
   const pureGoldGram = calculatePureGoldGram(productInfo)
@@ -61,42 +55,7 @@ function InputForm({
     goldInfo.goldPrice
   )
 
-  useEffect(() => {
-    // Uygulama açıldığında kuru çek
-    const fetchRate = async () => {
-      try {
-        setLoadingRate(true)
-        const [usdtry, xau] = await Promise.allSettled([getUsdTryRate(), getXauUsd()])
-        if (usdtry.status === 'fulfilled') setLatestUsdTry(usdtry.value)
-        if (xau.status === 'fulfilled') setLatestXauUsd(xau.value)
-      } catch {
-        // ignore
-      } finally {
-        setLoadingRate(false)
-      }
-    }
-    fetchRate()
-  }, [])
-
-  const refreshRate = async () => {
-    try {
-      setLoadingRate(true)
-      const [usdtry, xau] = await Promise.allSettled([getUsdTryRate(), getXauUsd()])
-      if (usdtry.status === 'fulfilled') setLatestUsdTry(usdtry.value)
-      if (xau.status === 'fulfilled') setLatestXauUsd(xau.value)
-    } finally {
-      setLoadingRate(false)
-    }
-  }
-
-  const computeGoldFromUsd = () => {
-    if (!latestUsdTry) return
-    const xau = latestXauUsd ?? parseFloat(manualXauUsd)
-    if (!xau || !isFinite(xau) || xau <= 0) return
-    const tlPerGram = Math.round((xau / 31.1035) * latestUsdTry)
-    updateGoldInfo('goldPrice', tlPerGram)
-    setGoldPriceInput('')
-  }
+  // Altın kuru işlemleri ayrı kartta
   
   useEffect(() => {
     const updatedProductInfo = {
@@ -195,7 +154,7 @@ function InputForm({
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3">
         <div>
           <label className="block text-sm font-extrabold text-slate-900 mb-1.5 uppercase tracking-wider">Ürün Gram</label>
           <div className="relative">
@@ -270,57 +229,7 @@ function InputForm({
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-extrabold text-slate-900 mb-1 uppercase tracking-wider">Altın Kuru</label>
-          <div className="relative">
-            <input
-              type="text"
-              inputMode="numeric"
-              value={goldPriceInput !== '' ? goldPriceInput : goldInfo.goldPrice.toLocaleString('tr-TR', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-              onChange={(e) => {
-                const inputValue = e.target.value
-                // Nokta ve virgülleri temizle (sadece rakamlar)
-                const cleanedValue = inputValue.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
-                
-                // Sadece geçerli sayı formatını kabul et
-                if (inputValue === '' || /^(\d+)([.,]\d{0,2})?$/.test(inputValue.replace(/\./g, ''))) {
-                  setGoldPriceInput(inputValue)
-                  
-                  const numValue = parseFloat(cleanedValue)
-                  if (!isNaN(numValue) && numValue >= 0) {
-                    updateGoldInfo('goldPrice', numValue)
-                  } else if (inputValue === '') {
-                    updateGoldInfo('goldPrice', 0)
-                  }
-                }
-              }}
-              onBlur={() => {
-                // Focus kaybolduğunda input state'ini temizle, değer goldInfo'dan formatlı gösterilecek
-                setGoldPriceInput('')
-              }}
-              className="w-full px-2.5 py-2 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white transition-all font-medium text-slate-900 hover:border-slate-400 shadow-sm"
-              placeholder="0,00"
-            />
-            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">TL</span>
-          </div>
-          <div className="mt-2 flex items-center gap-2 text-xs flex-wrap">
-            <button onClick={refreshRate} className="px-2.5 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-60" disabled={loadingRate}>
-              {loadingRate ? 'Güncelleniyor…' : 'Kuru Güncelle'}
-            </button>
-            {latestUsdTry && (
-              <span className="text-slate-500">USD/TRY: <b>{latestUsdTry.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</b></span>
-            )}
-            {latestXauUsd ? (
-              <span className="text-slate-500">XAU/USD: <b>{latestXauUsd.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</b></span>
-            ) : (
-              <input type="number" value={manualXauUsd} onChange={e=>setManualXauUsd(e.target.value)} placeholder="Ons (USD)" className="w-28 px-2 py-1 rounded-md border border-slate-300" />
-            )}
-            <button onClick={computeGoldFromUsd} className="px-2 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50" disabled={!latestUsdTry || (!latestXauUsd && manualXauUsd.trim()==='')}>Gramı Uygula</button>
-          </div>
-        </div>
+        
       </div>
 
       <div className="grid grid-cols-2 gap-3">
