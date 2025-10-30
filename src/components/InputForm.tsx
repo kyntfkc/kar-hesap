@@ -183,7 +183,7 @@ function InputForm({
                 <input
                   type="text"
                   inputMode="decimal"
-                  value={productGramInput !== '' ? productGramInput : (productInfo.productGram === 0 ? '' : productInfo.productGram.toString().replace('.', ','))}
+                  value={productGramInput !== '' ? productGramInput : (productInfo.productGram === 0 ? '' : productInfo.productGram.toFixed(3).replace('.', ','))}
                   onChange={(e) => {
                     const inputValue = e.target.value
                     const normalizedValue = inputValue.replace(',', '.')
@@ -201,7 +201,7 @@ function InputForm({
                     }
                   }}
                   onBlur={() => setProductGramInput('')}
-                  className="w-24 px-3 py-2.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white transition-all font-medium text-slate-900 hover:border-slate-400 shadow-sm"
+                  className="w-32 px-3 py-2.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white transition-all font-medium text-slate-900 hover:border-slate-400 shadow-sm"
                   placeholder="0,00"
                 />
                 <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">Gr</span>
