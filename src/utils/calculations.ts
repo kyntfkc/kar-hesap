@@ -17,10 +17,7 @@ export function calculateProductAmount(pureGoldGram: number, goldPrice: number):
 // Alış Fiyatı hesaplama: Ürün Tutarı (işçilik maliyeti ayrı bir gider olarak sayılmıyor, Has Gram'da dahil)
 // Görseldeki mantığa göre: Alış Fiyatı = Ürün Tutarı (işçilik dahil Has Gram üzerinden hesaplanıyor)
 export function calculatePurchasePrice(
-  productAmount: number,
-  productGram: number,
-  laborMillem: number,
-  goldPrice: number
+  productAmount: number
 ): number {
   // Görseldeki mantığa göre: Ürün Tutarı zaten Has Gram × Altın Kuru olarak hesaplanıyor
   // Has Gram'da işçilik milyemi dahil, dolayısıyla işçilik maliyeti eklenmiyor
@@ -43,12 +40,7 @@ export function calculateProfit(
   const totalLaborMillem = productInfo.laborMillem + (productInfo.laserCuttingEnabled ? productInfo.laserCuttingMillem : 0)
   
   // Alış Fiyatı hesapla
-  const purchasePrice = calculatePurchasePrice(
-    productAmount,
-    productInfo.productGram,
-    totalLaborMillem,
-    goldInfo.goldPrice
-  )
+  const purchasePrice = calculatePurchasePrice(productAmount)
   
   // Komisyon Tutarı: Satış Tutarı × Komisyon Oranı / 100
   const commissionAmount = (platform.salePrice * platform.commissionRate) / 100
@@ -142,12 +134,7 @@ export function calculateStandardSalePrice(
   const totalLaborMillem = productInfo.laborMillem + (productInfo.laserCuttingEnabled ? productInfo.laserCuttingMillem : 0)
   
   // Alış Fiyatı hesapla
-  const purchasePrice = calculatePurchasePrice(
-    productAmount,
-    productInfo.productGram,
-    totalLaborMillem,
-    goldInfo.goldPrice
-  )
+  const purchasePrice = calculatePurchasePrice(productAmount)
   
   // Sabit masraflar (stopaj hariç)
   const fixedExpenses = 

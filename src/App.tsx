@@ -1,4 +1,4 @@
-import { useState } from 'react'
+ 
 import ProfitCalculator from './components/ProfitCalculator'
 
 function App() {
