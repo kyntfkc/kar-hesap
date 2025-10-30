@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { getUsdTryRate } from '../utils/api'
 import { ProductInfo, GoldInfo, Expenses, Platform } from '../types'
 import { 
   calculatePureGoldGram, 
@@ -42,6 +43,8 @@ function InputForm({
   
   const [productGramInput, setProductGramInput] = useState<string>('')
   const [goldPriceInput, setGoldPriceInput] = useState<string>('')
+  const [latestUsdTry, setLatestUsdTry] = useState<number | null>(null)
+  const [loadingRate, setLoadingRate] = useState(false)
   const [lengthOption, setLengthOption] = useState<'none' | '50' | '60'>('none')
 
   const pureGoldGram = calculatePureGoldGram(productInfo)
@@ -56,6 +59,37 @@ function InputForm({
   )
 
   useEffect(() => {
+    // Uygulama açıldığında kuru çek
+    const fetchRate = async () => {
+      try {
+        setLoadingRate(true)
+        const rate = await getUsdTryRate()
+        setLatestUsdTry(rate)
+      } catch {
+        // ignore
+      } finally {
+        setLoadingRate(false)
+      }
+    }
+    fetchRate()
+  }, [])
+
+  const refreshRate = async () => {
+    try {
+      setLoadingRate(true)
+      const rate = await getUsdTryRate()
+      setLatestUsdTry(rate)
+    } finally {
+      setLoadingRate(false)
+    }
+  }
+
+  const applyRateToInput = () => {
+    if (latestUsdTry && latestUsdTry > 0) {
+      updateGoldInfo('goldPrice', latestUsdTry)
+      setGoldPriceInput('')
+    }
+  }
     const updatedProductInfo = {
       ...productInfo,
       pureGoldGram: pureGoldGram
@@ -262,6 +296,17 @@ function InputForm({
               placeholder="0,00"
             />
             <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">TL</span>
+          </div>
+          <div className="mt-2 flex items-center gap-2 text-xs">
+            <button onClick={refreshRate} className="px-2.5 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-60" disabled={loadingRate}>
+              {loadingRate ? 'Güncelleniyor…' : 'Kuru Güncelle'}
+            </button>
+            <button onClick={applyRateToInput} className="px-2.5 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-60" disabled={!latestUsdTry}>
+              Kuru Inputa Aktar
+            </button>
+            {latestUsdTry && (
+              <span className="text-slate-500">Güncel: <b>{latestUsdTry.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} TL</b></span>
+            )}
           </div>
         </div>
       </div>

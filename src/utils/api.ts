@@ -50,4 +50,16 @@ export function deleteSavedCalculation(id: string) {
   return request(`/saved-calculations/${id}`, { method: 'DELETE' });
 }
 
+// ExchangeRate API – USD->TRY kuru
+export async function getUsdTryRate(): Promise<number> {
+  const KEY = '955af145bf3c2926aa413512'
+  const url = `https://v6.exchangerate-api.com/v6/${KEY}/latest/USD`
+  const res = await fetch(url)
+  if (!res.ok) throw new Error('Kur alınamadı')
+  const data = await res.json().catch(() => null as any)
+  const rate = data?.conversion_rates?.TRY
+  if (typeof rate !== 'number') throw new Error('TRY kuru bulunamadı')
+  return rate
+}
+
 
