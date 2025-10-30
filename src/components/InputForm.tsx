@@ -45,6 +45,7 @@ function InputForm({
   const [goldPriceInput, setGoldPriceInput] = useState<string>('')
   const [latestUsdTry, setLatestUsdTry] = useState<number | null>(null)
   const [latestXauUsd, setLatestXauUsd] = useState<number | null>(null)
+  const [manualXauUsd, setManualXauUsd] = useState<string>('')
   const [loadingRate, setLoadingRate] = useState(false)
   const [loadingXau, setLoadingXau] = useState(false)
   const [lengthOption, setLengthOption] = useState<'none' | '50' | '60'>('none')
@@ -89,8 +90,10 @@ function InputForm({
   }
 
   const computeGoldFromUsd = () => {
-    if (!latestUsdTry || !latestXauUsd) return
-    const tlPerGram = Math.round((latestXauUsd / 31.1035) * latestUsdTry)
+    if (!latestUsdTry) return
+    const xau = latestXauUsd ?? parseFloat(manualXauUsd)
+    if (!xau || !isFinite(xau) || xau <= 0) return
+    const tlPerGram = Math.round((xau / 31.1035) * latestUsdTry)
     updateGoldInfo('goldPrice', tlPerGram)
     setGoldPriceInput('')
   }
@@ -310,10 +313,12 @@ function InputForm({
             {latestUsdTry && (
               <span className="text-slate-500">USD/TRY: <b>{latestUsdTry.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</b></span>
             )}
-            {latestXauUsd && (
+            {latestXauUsd ? (
               <span className="text-slate-500">XAU/USD: <b>{latestXauUsd.toLocaleString('tr-TR', { maximumFractionDigits: 0 })}</b></span>
+            ) : (
+              <input type="number" value={manualXauUsd} onChange={e=>setManualXauUsd(e.target.value)} placeholder="Ons (USD)" className="w-28 px-2 py-1 rounded-md border border-slate-300" />
             )}
-            <button onClick={computeGoldFromUsd} className="px-2 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50" disabled={!latestUsdTry || !latestXauUsd}>Gramı Uygula</button>
+            <button onClick={computeGoldFromUsd} className="px-2 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50" disabled={!latestUsdTry || (!latestXauUsd && manualXauUsd.trim()==='')}>Gramı Uygula</button>
           </div>
         </div>
       </div>
