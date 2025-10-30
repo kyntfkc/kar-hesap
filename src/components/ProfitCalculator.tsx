@@ -340,7 +340,7 @@ function ProfitCalculator() {
     : null
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 h-[calc(100vh-180px)]">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
       <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-6 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 ring-1 ring-slate-200/50">
         <InputForm
           productInfo={productInfo}
