@@ -44,6 +44,7 @@ function InputForm({
   const [productGramInput, setProductGramInput] = useState<string>('')
   const [goldPriceInput, setGoldPriceInput] = useState<string>('')
   const [latestUsdTry, setLatestUsdTry] = useState<number | null>(null)
+  const [xauUsd, setXauUsd] = useState<string>('')
   const [loadingRate, setLoadingRate] = useState(false)
   const [lengthOption, setLengthOption] = useState<'none' | '50' | '60'>('none')
 
@@ -85,11 +86,18 @@ function InputForm({
   }
 
   const applyRateToInput = () => {
-    if (latestUsdTry && latestUsdTry > 0) {
-      updateGoldInfo('goldPrice', latestUsdTry)
-      setGoldPriceInput('')
-    }
+    // USDTRY kuru doğrudan gram altın değildir; sadece bilgi amaçlı gösteriyoruz
   }
+
+  const computeGoldFromUsd = () => {
+    const usd = parseFloat(xauUsd)
+    if (!latestUsdTry || !isFinite(usd) || usd <= 0) return
+    const tlPerGram = Math.round((usd / 31.1035) * latestUsdTry)
+    updateGoldInfo('goldPrice', tlPerGram)
+    setGoldPriceInput('')
+  }
+  
+  useEffect(() => {
     const updatedProductInfo = {
       ...productInfo,
       pureGoldGram: pureGoldGram
@@ -297,7 +305,7 @@ function InputForm({
             />
             <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">TL</span>
           </div>
-          <div className="mt-2 flex items-center gap-2 text-xs">
+          <div className="mt-2 flex items-center gap-2 text-xs flex-wrap">
             <button onClick={refreshRate} className="px-2.5 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-60" disabled={loadingRate}>
               {loadingRate ? 'Güncelleniyor…' : 'Kuru Güncelle'}
             </button>
@@ -307,6 +315,16 @@ function InputForm({
             {latestUsdTry && (
               <span className="text-slate-500">Güncel: <b>{latestUsdTry.toLocaleString('tr-TR', { maximumFractionDigits: 0 })} TL</b></span>
             )}
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                value={xauUsd}
+                onChange={e=>setXauUsd(e.target.value)}
+                placeholder="Ons (USD)"
+                className="w-28 px-2 py-1 rounded-md border border-slate-300"
+              />
+              <button onClick={computeGoldFromUsd} className="px-2 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50" disabled={!latestUsdTry || !xauUsd}>Gram Altın Hesapla</button>
+            </div>
           </div>
         </div>
       </div>
