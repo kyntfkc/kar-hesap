@@ -137,9 +137,12 @@ function InputForm({
       ? Math.max(...scenarioNumbers) + 1 
       : platforms.some(p => p.name === 'Standart') ? 1 : 1
     
+    // Standart senaryonun mevcut satış fiyatını kopyala; yoksa default kullan
+    const std = platforms.find(p => p.name === 'Standart')
+    const initialSale = std?.salePrice ?? calculateDefaultSalePrice(goldInfo.productAmount)
     onPlatformsChange([
       ...platforms,
-      { name: `Senaryo ${nextNumber}`, commissionRate: 22, salePrice: calculateDefaultSalePrice(goldInfo.productAmount) },
+      { name: `Senaryo ${nextNumber}`, commissionRate: 22, salePrice: Math.round(initialSale) },
     ])
   }
 
