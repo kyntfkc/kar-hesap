@@ -142,6 +142,15 @@ function InputForm({
     ])
   }
 
+  const addLinedProduct = () => {
+    // Eğer zaten mevcutsa ekleme
+    if (platforms.some(p => p.name === 'Astarlı Ürün')) return
+    onPlatformsChange([
+      ...platforms,
+      { name: 'Astarlı Ürün', commissionRate: 22, salePrice: 0, targetProfitRate: 30 },
+    ])
+  }
+
   const removePlatform = (index: number) => {
     if (platforms.length > 1) {
       onPlatformsChange(platforms.filter((_, i) => i !== index))
@@ -353,6 +362,16 @@ function InputForm({
           >
             <Plus className="w-3 h-3" />
             Senaryo Ekle
+          </button>
+        </div>
+        <div className="flex items-center justify-end -mt-1 mb-2 gap-2">
+          <button
+            onClick={addLinedProduct}
+            className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-all"
+            title="Astarlı Ürün senaryosu ekle"
+          >
+            <Plus className="w-3 h-3" />
+            + Astarlı Ürün
           </button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">

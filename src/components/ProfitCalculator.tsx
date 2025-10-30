@@ -35,7 +35,6 @@ const defaultExpenses: Expenses = {
 
 const getDefaultPlatforms = (productGram: number = 0.40, goldPrice: number = 5900): Platform[] => [
   { name: 'Standart', commissionRate: 22, salePrice: productGram * goldPrice * 1.2, targetProfitRate: 15 },
-  { name: 'Astarlı Ürün', commissionRate: 22, salePrice: productGram * goldPrice * 1.2, targetProfitRate: 30 },
 ]
 
 function ProfitCalculator() {
@@ -82,24 +81,13 @@ function ProfitCalculator() {
     const saved = localStorage.getItem('platforms')
     if (saved) {
       const parsed = JSON.parse(saved)
-      // Eğer hiç platform yoksa veya Standart yoksa varsayılan oluştur
+      // Eğer hiç platform yoksa veya Standart yoksa, sadece Standart ile başla
       if (parsed.length === 0 || !parsed.some((p: Platform) => p.name === 'Standart')) {
         const savedProductInfo = localStorage.getItem('productInfo')
         const savedGoldInfo = localStorage.getItem('goldInfo')
         const productGram = savedProductInfo ? JSON.parse(savedProductInfo).productGram : defaultProductInfo.productGram
         const goldPrice = savedGoldInfo ? JSON.parse(savedGoldInfo).goldPrice : defaultGoldInfo.goldPrice
         return getDefaultPlatforms(productGram, goldPrice)
-      }
-      // Astarlı Ürün yoksa ekle
-      if (!parsed.some((p: Platform) => p.name === 'Astarlı Ürün')) {
-        const savedProductInfo = localStorage.getItem('productInfo')
-        const savedGoldInfo = localStorage.getItem('goldInfo')
-        const productGram = savedProductInfo ? JSON.parse(savedProductInfo).productGram : defaultProductInfo.productGram
-        const goldPrice = savedGoldInfo ? JSON.parse(savedGoldInfo).goldPrice : defaultGoldInfo.goldPrice
-        return [
-          ...parsed,
-          { name: 'Astarlı Ürün', commissionRate: 22, salePrice: productGram * goldPrice * 1.2, targetProfitRate: 30 },
-        ]
       }
       return parsed
     }
