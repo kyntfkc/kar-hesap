@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, SavedCalculation } from '../types'
 import { calculateAllPlatforms, calculateStandardSalePrice } from '../utils/calculations'
 import { apiEnabled, postCalculate, postSync, getSavedCalculations, postSavedCalculation, deleteSavedCalculation } from '../utils/api'
@@ -205,8 +205,13 @@ function ProfitCalculator() {
     })
   }, [productInfo, goldInfo, expenses])
 
-  // Auto-calculate with debounce
+  // Auto-calculate with debounce (skip first render -> results empty on initial load)
+  const didInitRef = useRef(false)
   useEffect(() => {
+    if (!didInitRef.current) {
+      didInitRef.current = true
+      return
+    }
     setIsCalculating(true)
     const timer = setTimeout(() => {
       const calculatedResults = calculateAllPlatforms(
@@ -355,8 +360,8 @@ function ProfitCalculator() {
         </button>
       </div>
 
-      {/* Right column: compact gold card + results stacked */}
-      <div className="order-1 md:order-2 space-y-3">
+      {/* Right column: compact gold card + results stacked (mobile: under input card) */}
+      <div className="order-3 md:order-2 space-y-3">
         <div className="card p-3 sm:p-4">
           <GoldRateCard goldInfo={goldInfo} onGoldInfoChange={setGoldInfo} />
         </div>
