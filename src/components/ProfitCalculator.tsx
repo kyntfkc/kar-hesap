@@ -110,6 +110,7 @@ function ProfitCalculator() {
   const [saveModalOpen, setSaveModalOpen] = useState(false)
   const [saveModalName, setSaveModalName] = useState('')
   const [saveModalResult, setSaveModalResult] = useState<ProfitResult | null>(null)
+  const [saveModalCampaign, setSaveModalCampaign] = useState(false)
   const [savedCalculations, setSavedCalculations] = useState<SavedCalculation[]>(() => {
     const saved = localStorage.getItem('savedCalculations')
     return saved ? JSON.parse(saved) : []
@@ -282,9 +283,12 @@ function ProfitCalculator() {
 
   const confirmSaveScenario = () => {
     if (!saveModalOpen || !saveModalResult || !saveModalName.trim()) return
+    const finalName = saveModalCampaign && !saveModalName.toLowerCase().includes('kampanya')
+      ? `${saveModalName} (Kampanya)`
+      : saveModalName
     const entry: SavedCalculation = {
       id: `${Date.now()}`,
-      name: saveModalName.trim(),
+      name: finalName.trim(),
       createdAt: Date.now(),
       results: [saveModalResult],
     }
@@ -296,6 +300,7 @@ function ProfitCalculator() {
     setSaveModalOpen(false)
     setSaveModalResult(null)
     setSaveModalName('')
+    setSaveModalCampaign(false)
   }
 
   // Escape ile modal kapatma
@@ -585,6 +590,10 @@ function ProfitCalculator() {
               placeholder="Örn. minik ikili"
               className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg mb-4"
             />
+            <label className="flex items-center gap-2 mb-4 text-sm text-slate-700">
+              <input type="checkbox" checked={saveModalCampaign} onChange={e=>setSaveModalCampaign(e.target.checked)} />
+              Kampanyalı ürün olarak işaretle
+            </label>
             <div className="flex items-center justify-end gap-2">
               <button onClick={()=>setSaveModalOpen(false)} className="px-3 py-1.5 text-sm rounded-lg border border-slate-300">İptal</button>
               <button onClick={confirmSaveScenario} disabled={!saveModalName.trim()} className="px-3 py-1.5 text-sm rounded-lg bg-blue-600 text-white disabled:bg-blue-300">Kaydet</button>
