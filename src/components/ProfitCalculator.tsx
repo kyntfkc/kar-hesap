@@ -337,7 +337,7 @@ function ProfitCalculator() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 px-3 sm:px-0 pb-24">
-      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-6 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 ring-1 ring-slate-200/50">
+      <div className="order-2 md:order-1 card p-4 sm:p-6 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300">
         <InputForm
           productInfo={productInfo}
           goldInfo={goldInfo}
@@ -351,7 +351,7 @@ function ProfitCalculator() {
         <button
           onClick={handleCalculate}
           disabled={isCalculating}
-          className="w-full mt-6 bg-gradient-to-r from-sky-300 via-indigo-300 to-violet-300 hover:from-sky-400 hover:via-indigo-400 hover:to-violet-400 text-slate-800 font-bold py-3.5 px-5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm shadow-lg shadow-indigo-300/40 hover:shadow-xl hover:shadow-indigo-400/50 hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="w-full mt-6 btn-primary !h-11 text-white !text-sm"
         >
           {isCalculating ? (
             <>
@@ -368,12 +368,12 @@ function ProfitCalculator() {
       </div>
 
       {/* Right column: compact gold card + results stacked */}
-      <div className="space-y-3">
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-3 sm:p-4 ring-1 ring-slate-200/50">
+      <div className="order-1 md:order-2 space-y-3">
+        <div className="card p-3 sm:p-4">
           <GoldRateCard goldInfo={goldInfo} onGoldInfoChange={setGoldInfo} />
         </div>
 
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-6 overflow-y-auto overflow-x-hidden hover:shadow-2xl hover:shadow-indigo-300/10 transition-all duration-300 ring-1 ring-slate-200/50">
+        <div className="card p-4 sm:p-6 overflow-y-auto overflow-x-hidden hover:shadow-2xl hover:shadow-indigo-300/10 transition-all duration-300">
         {isCalculating ? (
           <div className="flex flex-col items-center justify-center h-full">
             <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
@@ -428,7 +428,7 @@ function ProfitCalculator() {
 
       {/* Saved calculations table */}
       {savedCalculations.length > 0 && (
-        <div className="mt-6 col-span-1 lg:col-span-2 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-5 ring-1 ring-slate-200/50 max-w-5xl mx-auto">
+        <div className="order-3 md:order-3 mt-6 col-span-1 md:col-span-2 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-5 ring-1 ring-slate-200/50 max-w-5xl mx-auto">
           <div className="mb-3 flex items-center justify-between gap-3 flex-wrap">
             <div>
               <h3 className="text-lg font-bold text-slate-900">Kayıtlı Sonuçlar</h3>

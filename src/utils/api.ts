@@ -1,9 +1,11 @@
-const BASE = import.meta.env.VITE_API_BASE_URL;
+const DEFAULT_BASE = 'https://kar-hesap-production.up.railway.app';
+// Env varsa onu, yoksa production backend’i kullan
+const BASE = (import.meta?.env?.VITE_API_BASE_URL as string) || DEFAULT_BASE;
 
-export const apiEnabled = typeof BASE === 'string' && BASE.length > 0;
+export const apiEnabled = true;
 
 async function request(path: string, options: RequestInit = {}, timeoutMs = 8000, retries = 1) {
-  if (!apiEnabled) throw new Error('API disabled');
+  // BASE her zaman tanımlı; yine de koruma
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), timeoutMs);
   try {

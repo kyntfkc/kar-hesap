@@ -24,20 +24,46 @@ interface SettingsModalProps {
 export default function SettingsModal({ open, initial, onClose, onSave }: SettingsModalProps) {
   const [form, setForm] = useState<AppSettings>(initial)
   const [applyNow, setApplyNow] = useState(true)
+  const [draft, setDraft] = useState<Record<keyof AppSettings, string>>({
+    defaultProductGram: String(initial.defaultProductGram),
+    defaultGoldPrice: String(initial.defaultGoldPrice),
+    defaultShipping: String(initial.defaultShipping),
+    defaultPackaging: String(initial.defaultPackaging),
+    defaultServiceFee: String(initial.defaultServiceFee),
+    defaultETaxRate: String(initial.defaultETaxRate),
+    defaultCommission: String(initial.defaultCommission),
+    defaultStandardProfit: String(initial.defaultStandardProfit),
+    defaultLinedProfit: String(initial.defaultLinedProfit),
+    defaultLaborMillem: String(initial.defaultLaborMillem),
+    defaultExtraCost: String(initial.defaultExtraCost),
+  })
 
   useEffect(() => {
     setForm(initial)
+    setDraft({
+      defaultProductGram: String(initial.defaultProductGram),
+      defaultGoldPrice: String(initial.defaultGoldPrice),
+      defaultShipping: String(initial.defaultShipping),
+      defaultPackaging: String(initial.defaultPackaging),
+      defaultServiceFee: String(initial.defaultServiceFee),
+      defaultETaxRate: String(initial.defaultETaxRate),
+      defaultCommission: String(initial.defaultCommission),
+      defaultStandardProfit: String(initial.defaultStandardProfit),
+      defaultLinedProfit: String(initial.defaultLinedProfit),
+      defaultLaborMillem: String(initial.defaultLaborMillem),
+      defaultExtraCost: String(initial.defaultExtraCost),
+    })
   }, [initial])
 
   if (!open) return null
 
-  const update = (key: keyof AppSettings, value: number) => {
-    setForm(prev => ({ ...prev, [key]: value }))
+  const setDraftValue = (key: keyof AppSettings, v: string) => {
+    setDraft(prev => ({ ...prev, [key]: v }))
   }
-
-  const numberOr = (v: string, fallback: number) => {
-    const n = parseFloat(v)
-    return isNaN(n) ? fallback : n
+  const commitNumber = (key: keyof AppSettings) => {
+    const raw = draft[key]
+    const n = parseFloat(raw)
+    setForm(prev => ({ ...prev, [key]: isNaN(n) ? 0 : n }))
   }
 
   return (
@@ -49,70 +75,70 @@ export default function SettingsModal({ open, initial, onClose, onSave }: Settin
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs text-slate-600 mb-1 font-medium">İşçilik (milyem)</label>
-            <input type="number" step="0.001" value={form.defaultLaborMillem}
-              onChange={e=>update('defaultLaborMillem', numberOr(e.target.value, form.defaultLaborMillem))}
+            <input type="text" inputMode="decimal" value={draft.defaultLaborMillem}
+              onChange={e=>setDraftValue('defaultLaborMillem', e.target.value)} onBlur={()=>commitNumber('defaultLaborMillem')}
               className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
           </div>
           <div>
             <label className="block text-xs text-slate-600 mb-1 font-medium">Varsayılan Ürün Gram</label>
-            <input type="number" step="0.01" value={form.defaultProductGram}
-              onChange={e=>update('defaultProductGram', numberOr(e.target.value, form.defaultProductGram))}
+            <input type="text" inputMode="decimal" value={draft.defaultProductGram}
+              onChange={e=>setDraftValue('defaultProductGram', e.target.value)} onBlur={()=>commitNumber('defaultProductGram')}
               className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
           </div>
           <div>
             <label className="block text-xs text-slate-600 mb-1 font-medium">Varsayılan Altın Kuru</label>
-            <input type="number" step="0.01" value={form.defaultGoldPrice}
-              onChange={e=>update('defaultGoldPrice', numberOr(e.target.value, form.defaultGoldPrice))}
+            <input type="text" inputMode="numeric" value={draft.defaultGoldPrice}
+              onChange={e=>setDraftValue('defaultGoldPrice', e.target.value)} onBlur={()=>commitNumber('defaultGoldPrice')}
               className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
           </div>
 
           <div>
             <label className="block text-xs text-slate-600 mb-1 font-medium">Kargo</label>
-            <input type="number" step="1" value={form.defaultShipping}
-              onChange={e=>update('defaultShipping', numberOr(e.target.value, form.defaultShipping))}
+            <input type="text" inputMode="numeric" value={draft.defaultShipping}
+              onChange={e=>setDraftValue('defaultShipping', e.target.value)} onBlur={()=>commitNumber('defaultShipping')}
               className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
           </div>
           <div>
             <label className="block text-xs text-slate-600 mb-1 font-medium">Ambalaj</label>
-            <input type="number" step="1" value={form.defaultPackaging}
-              onChange={e=>update('defaultPackaging', numberOr(e.target.value, form.defaultPackaging))}
+            <input type="text" inputMode="numeric" value={draft.defaultPackaging}
+              onChange={e=>setDraftValue('defaultPackaging', e.target.value)} onBlur={()=>commitNumber('defaultPackaging')}
               className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
           </div>
           <div>
             <label className="block text-xs text-slate-600 mb-1 font-medium">Ekstra Maliyet Farkı (varsayılan)</label>
-            <input type="number" step="1" value={form.defaultExtraCost}
-              onChange={e=>update('defaultExtraCost', numberOr(e.target.value, form.defaultExtraCost))}
+            <input type="text" inputMode="numeric" value={draft.defaultExtraCost}
+              onChange={e=>setDraftValue('defaultExtraCost', e.target.value)} onBlur={()=>commitNumber('defaultExtraCost')}
               className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
           </div>
           <div>
             <label className="block text-xs text-slate-600 mb-1 font-medium">Hizmet Bedeli</label>
-            <input type="number" step="1" value={form.defaultServiceFee}
-              onChange={e=>update('defaultServiceFee', numberOr(e.target.value, form.defaultServiceFee))}
+            <input type="text" inputMode="numeric" value={draft.defaultServiceFee}
+              onChange={e=>setDraftValue('defaultServiceFee', e.target.value)} onBlur={()=>commitNumber('defaultServiceFee')}
               className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
           </div>
           <div>
             <label className="block text-xs text-slate-600 mb-1 font-medium">E-ticaret Stopajı (%)</label>
-            <input type="number" step="0.01" value={form.defaultETaxRate}
-              onChange={e=>update('defaultETaxRate', numberOr(e.target.value, form.defaultETaxRate))}
+            <input type="text" inputMode="decimal" value={draft.defaultETaxRate}
+              onChange={e=>setDraftValue('defaultETaxRate', e.target.value)} onBlur={()=>commitNumber('defaultETaxRate')}
               className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
           </div>
 
           <div>
             <label className="block text-xs text-slate-600 mb-1 font-medium">Komisyon (%)</label>
-            <input type="number" step="0.1" value={form.defaultCommission}
-              onChange={e=>update('defaultCommission', numberOr(e.target.value, form.defaultCommission))}
+            <input type="text" inputMode="decimal" value={draft.defaultCommission}
+              onChange={e=>setDraftValue('defaultCommission', e.target.value)} onBlur={()=>commitNumber('defaultCommission')}
               className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
           </div>
           <div>
             <label className="block text-xs text-slate-600 mb-1 font-medium">Standart Kâr Oranı (%)</label>
-            <input type="number" step="0.1" value={form.defaultStandardProfit}
-              onChange={e=>update('defaultStandardProfit', numberOr(e.target.value, form.defaultStandardProfit))}
+            <input type="text" inputMode="decimal" value={draft.defaultStandardProfit}
+              onChange={e=>setDraftValue('defaultStandardProfit', e.target.value)} onBlur={()=>commitNumber('defaultStandardProfit')}
               className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
           </div>
           <div>
             <label className="block text-xs text-slate-600 mb-1 font-medium">Astarlı Ürün Kâr Oranı (%)</label>
-            <input type="number" step="0.1" value={form.defaultLinedProfit}
-              onChange={e=>update('defaultLinedProfit', numberOr(e.target.value, form.defaultLinedProfit))}
+            <input type="text" inputMode="decimal" value={draft.defaultLinedProfit}
+              onChange={e=>setDraftValue('defaultLinedProfit', e.target.value)} onBlur={()=>commitNumber('defaultLinedProfit')}
               className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
           </div>
         </div>

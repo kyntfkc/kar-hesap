@@ -143,10 +143,6 @@ function InputForm({
   }
 
   const removePlatform = (index: number) => {
-    // Standart senaryosu silinemez
-    if (platforms[index].name === 'Standart') {
-      return
-    }
     if (platforms.length > 1) {
       onPlatformsChange(platforms.filter((_, i) => i !== index))
     }
@@ -192,9 +188,10 @@ function InputForm({
             />
             <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">Gr</span>
           </div>
-          {/* Uzunluk seçenekleri */}
-          <div className="mt-2 flex items-center gap-2">
-            <button
+          {/* Uzunluk seçenekleri + Ekstra Maliyet Farkı */}
+          <div className="mt-2 flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              <button
               type="button"
               onClick={() => {
                 const currentExtra = lengthOption === '50' ? 0.10 : lengthOption === '60' ? 0.30 : 0
@@ -226,6 +223,31 @@ function InputForm({
             >
               60 cm Zincir
             </button>
+            </div>
+
+            {/* Ekstra Maliyet Farkı (yan tarafa taşındı) */}
+            <div className="flex items-center gap-2 bg-slate-50/80 px-2.5 py-1.5 rounded-lg border border-slate-200">
+              <span className="text-xs font-medium text-slate-700">Ekstra Maliyet</span>
+              <input
+                type="number"
+                step="0.01"
+                value={expenses.specialPackaging}
+                onChange={(e) => updateExpenses('specialPackaging', parseFloat(e.target.value) || 0)}
+                disabled={expenses.specialPackaging === 0}
+                className={`w-20 px-2 py-1 text-xs border border-slate-300/70 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed ${expenses.specialPackaging === 0 ? 'pointer-events-none opacity-60' : ''}`}
+                placeholder="150"
+              />
+              <span className="text-[11px] text-gray-500">TL</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={expenses.specialPackaging > 0}
+                  onChange={handleSpecialPackagingToggle}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
           </div>
         </div>
 
@@ -233,27 +255,29 @@ function InputForm({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="border border-slate-300/70 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-200 ring-1 ring-slate-200/30">
+        <div className="card overflow-hidden">
           <button
             onClick={() => toggleSection('labor')}
-            className="w-full px-3 py-2.5 flex items-center justify-between bg-gradient-to-r from-slate-50/50 to-white hover:from-slate-100/50 hover:to-white transition-all duration-200 group"
+            className="w-full h-10 px-3 flex items-center justify-between bg-white/90 hover:bg-white transition-all duration-200 group"
           >
             <span className="font-bold text-slate-900 text-sm">İşçilik</span>
             <Plus className={`w-4 h-4 text-gray-700 transition-transform ${expandedSections.labor ? 'rotate-45' : ''}`} />
           </button>
           {expandedSections.labor && (
-            <div className="p-3 bg-white border-t border-slate-200/80 space-y-2.5">
-          <div>
-                <label className="block text-xs text-gray-700 mb-1 font-medium">İşçilik (milyem)</label>
-                <input
-                  type="number"
-                  step="0.001"
-                  value={productInfo.laborMillem}
-                  onChange={(e) => updateProductInfo('laborMillem', parseFloat(e.target.value) || 0)}
-                  className="w-full px-2.5 py-2 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
-                  placeholder="0.050"
-                />
-                <div className="mt-1 text-xs text-gray-500 font-light">
+            <div className="p-3 bg-white border-t border-slate-200/80">
+              <div className="grid grid-cols-4 gap-2">
+                <div className="col-span-2">
+                  <label className="block text-xs text-gray-700 mb-1 font-medium">İşçilik (milyem)</label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={productInfo.laborMillem}
+                    onChange={(e) => updateProductInfo('laborMillem', parseFloat(e.target.value) || 0)}
+                    className="w-full px-2.5 py-2 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
+                    placeholder="0.050"
+                  />
+                </div>
+                <div className="col-span-2 flex items-end text-[11px] text-slate-500">
                   Gram başına işçilik oranı
                 </div>
               </div>
@@ -261,58 +285,20 @@ function InputForm({
           )}
         </div>
 
-        <div className="border border-slate-300/70 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-200 ring-1 ring-slate-200/30">
-          <button
-            onClick={() => toggleSection('extras')}
-            className="w-full px-3 py-2.5 flex items-center justify-between bg-white/90 hover:bg-white transition-all duration-200 group"
-          >
-            <span className="font-bold text-slate-900 text-sm">Ekstralar</span>
-            <Plus className={`w-4 h-4 text-gray-700 transition-transform ${expandedSections.extras ? 'rotate-45' : ''}`} />
-          </button>
-          {expandedSections.extras && (
-            <div className="p-3 space-y-2 bg-white border-t border-slate-200/80">
-              <div className="flex items-center justify-between p-2.5 bg-slate-50/80 rounded-lg border border-slate-200/60 shadow-sm">
-                <div className="flex-1">
-                  <div className="text-xs font-medium text-gray-900 mb-0.5">Ekstra Maliyet Farkı</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={expenses.specialPackaging}
-                    onChange={(e) => updateExpenses('specialPackaging', parseFloat(e.target.value) || 0)}
-                    disabled={expenses.specialPackaging === 0}
-                    className="w-20 px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
-                    placeholder="150"
-                  />
-                  <span className="text-xs text-gray-500">TL</span>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={expenses.specialPackaging > 0}
-                      onChange={handleSpecialPackagingToggle}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                  </label>
-          </div>
-          </div>
-          </div>
-          )}
-        </div>
+        {/* Ekstralar kartı kaldırıldı; alan yukarı taşındı */}
       </div>
 
-      <div className="border border-slate-300/60 rounded-xl overflow-hidden bg-gradient-to-br from-slate-50/80 to-white backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
+      <div className="card overflow-hidden bg-gradient-to-br from-slate-50/80 to-white">
         <button
           onClick={() => toggleSection('expenses')}
-          className="w-full px-3 py-2.5 flex items-center justify-between bg-white/90 hover:bg-white transition-all duration-200 group"
+          className="w-full h-10 px-3 flex items-center justify-between bg-white/90 hover:bg-white transition-all duration-200 group"
         >
           <span className="font-bold text-slate-900 text-sm">Masraf Kalemleri</span>
           <Plus className={`w-5 h-5 text-gray-700 transition-transform ${expandedSections.expenses ? 'rotate-45' : ''}`} />
         </button>
         {expandedSections.expenses && (
           <div className="p-3 bg-white border-t border-slate-200/80">
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-2 items-end">
               <div>
                 <label className="block text-xs text-slate-600 mb-1 font-medium">Kargo</label>
                 <div className="relative">
@@ -321,7 +307,7 @@ function InputForm({
                   step="0.01"
                   value={expenses.shipping}
                   onChange={(e) => updateExpenses('shipping', parseFloat(e.target.value) || 0)}
-                    className="w-full px-2 py-2 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center shadow-sm"
+                    className="h-9 w-full px-2 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center shadow-sm"
                 />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-medium">TL</span>
                 </div>
@@ -334,7 +320,7 @@ function InputForm({
                   step="0.01"
                   value={expenses.packaging}
                   onChange={(e) => updateExpenses('packaging', parseFloat(e.target.value) || 0)}
-                    className="w-full px-2 py-2 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center shadow-sm"
+                    className="h-9 w-full px-2 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center shadow-sm"
                 />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-medium">TL</span>
                 </div>
@@ -347,7 +333,7 @@ function InputForm({
                   step="0.01"
                   value={expenses.serviceFee}
                   onChange={(e) => updateExpenses('serviceFee', parseFloat(e.target.value) || 0)}
-                    className="w-full px-2 py-2 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center shadow-sm"
+                    className="h-9 w-full px-2 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center shadow-sm"
                 />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-medium">TL</span>
               </div>
@@ -362,7 +348,7 @@ function InputForm({
                     const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
                     updateExpenses('eCommerceTaxRate', value)
                   }}
-                  className="w-full px-2 py-2 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center shadow-sm"
+                  className="h-9 w-full px-2 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center shadow-sm"
                   placeholder="1.00"
                 />
               </div>
@@ -400,7 +386,7 @@ function InputForm({
                   className="w-full px-2 py-1.5 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white font-medium text-slate-900 text-center shadow-sm disabled:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-500"
                   placeholder="Senaryo adı"
                 />
-                {platforms.length > 1 && platform.name !== 'Standart' && (
+                {platforms.length > 1 && (
                   <button
                     onClick={() => removePlatform(index)}
                     className="absolute top-1/2 right-1.5 -translate-y-1/2 w-5 h-5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-red-500 rounded-full transition-all duration-200 shadow-sm hover:shadow-md group z-10"

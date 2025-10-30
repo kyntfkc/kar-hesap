@@ -94,7 +94,7 @@ function ResultsTableImpl({ results, onSaveScenario }: ResultsTableProps) {
                   <td className="px-2 py-2 whitespace-nowrap text-right">
                     <button
                       onClick={() => onSaveScenario(result)}
-                      className="text-xs px-2 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50"
+                      className="btn-outline h-8"
                       title="Bu senaryoyu kaydet"
                     >
                       Kaydet
