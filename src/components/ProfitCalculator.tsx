@@ -114,6 +114,7 @@ function ProfitCalculator() {
     return saved ? JSON.parse(saved) : []
   })
   const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   // Auto-save to localStorage
   useEffect(() => {
@@ -441,7 +442,7 @@ function ProfitCalculator() {
           <div className="mb-3 flex items-center justify-between gap-2 flex-wrap">
             <div>
               <h3 className="text-lg font-bold text-slate-900">Kayıtlı Sonuçlar</h3>
-              <p className="text-xs text-slate-500">Ürün adıyla kaydettiğiniz karşılaştırmalar</p>
+              {/* açıklama kaldırıldı */}
             </div>
             <button
               onClick={() => {
@@ -457,6 +458,32 @@ function ProfitCalculator() {
               className="px-3 py-1.5 text-xs rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
               title="Yedeği indir (JSON)"
             >Yedek İndir</button>
+            <label className="px-3 py-1.5 text-xs rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer" title="Yedek yükle (JSON)">
+              Yedek Yükle
+              <input
+                type="file"
+                accept="application/json"
+                className="hidden"
+                onChange={(e)=>{
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  const reader = new FileReader()
+                  reader.onload = () => {
+                    try {
+                      const json = JSON.parse(String(reader.result))
+                      if (Array.isArray(json)) {
+                        setSavedCalculations(json)
+                        localStorage.setItem('savedCalculations', JSON.stringify(json))
+                        if (apiEnabled) postSync({ savedCalculations: json }).catch(()=>{})
+                      }
+                    } catch {}
+                  }
+                  reader.readAsText(file)
+                  // reset input value to allow re-uploading same file
+                  ;(e.target as HTMLInputElement).value = ''
+                }}
+              />
+            </label>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-full">
@@ -503,8 +530,16 @@ function ProfitCalculator() {
                       <td className="px-2 py-2 text-sm text-slate-900">{best.salePrice.toLocaleString('tr-TR', {maximumFractionDigits:0})} TL</td>
                       <td className="px-2 py-2 text-sm text-slate-900">{best.netProfit.toLocaleString('tr-TR', {maximumFractionDigits:0})} TL</td>
                       <td className="px-2 py-2 text-sm font-bold text-slate-900">{best.profitRate.toFixed(1)}%</td>
-                      <td className="px-2 py-2 text-right">
-                        <button onClick={()=>{ if(confirm('Bu kaydı silmek istediğinize emin misiniz?')) handleDeleteSaved(sc.id) }} className="text-xs px-2 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50">Sil</button>
+                      <td className="px-2 py-2 text-right relative">
+                        {confirmDeleteId === sc.id ? (
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 bg-white border border-slate-300 rounded-md shadow-lg p-2 flex items-center gap-2 z-10">
+                            <span className="text-xs text-slate-700">Silinsin mi?</span>
+                            <button onClick={() => { handleDeleteSaved(sc.id); setConfirmDeleteId(null); }} className="text-xs px-2 py-0.5 rounded-md bg-red-600 text-white">Evet</button>
+                            <button onClick={() => setConfirmDeleteId(null)} className="text-xs px-2 py-0.5 rounded-md border border-slate-300 text-slate-700">İptal</button>
+                          </div>
+                        ) : (
+                          <button onClick={()=> setConfirmDeleteId(sc.id)} className="text-xs px-2 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50">Sil</button>
+                        )}
                       </td>
                     </tr>
                   )
