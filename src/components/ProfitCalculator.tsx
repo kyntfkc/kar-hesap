@@ -308,6 +308,16 @@ function ProfitCalculator() {
     setSaveModalName('')
   }
 
+  // Escape ile modal kapatma
+  useEffect(() => {
+    if (!saveModalOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSaveModalOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [saveModalOpen])
+
   // Drag & Drop for saved calculations
   const onDragStartSaved = (index: number) => () => setDragIndex(index)
   const onDragOverSaved = (e: React.DragEvent<HTMLTableRowElement>) => {
@@ -345,7 +355,7 @@ function ProfitCalculator() {
         <button
           onClick={handleCalculate}
           disabled={isCalculating}
-          className="w-full mt-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 disabled:from-blue-400 disabled:via-indigo-400 disabled:to-purple-400 text-white font-bold py-3.5 px-5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm shadow-lg shadow-blue-500/40 hover:shadow-xl hover:shadow-blue-500/50 hover:scale-[1.02] disabled:cursor-not-allowed disabled:hover:scale-100"
+          className="w-full mt-6 bg-gradient-to-r from-sky-300 via-indigo-300 to-violet-300 hover:from-sky-400 hover:via-indigo-400 hover:to-violet-400 text-slate-800 font-bold py-3.5 px-5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm shadow-lg shadow-indigo-300/40 hover:shadow-xl hover:shadow-indigo-400/50 hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
           {isCalculating ? (
             <>
@@ -361,7 +371,7 @@ function ProfitCalculator() {
         </button>
       </div>
 
-      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-6 overflow-y-auto hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 ring-1 ring-slate-200/50">
+      <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-6 overflow-y-auto hover:shadow-2xl hover:shadow-indigo-300/10 transition-all duration-300 ring-1 ring-slate-200/50">
         {isCalculating ? (
           <div className="flex flex-col items-center justify-center h-full">
             <Loader2 className="w-12 h-12 text-blue-500 animate-spin mb-4" />
@@ -392,10 +402,10 @@ function ProfitCalculator() {
             
             {bestScenario && (
               <div className="mb-5">
-                <div className="p-4 bg-gradient-to-br from-blue-50 via-indigo-50/50 to-purple-50/30 rounded-xl border border-blue-200/60 shadow-sm ring-1 ring-blue-100/50">
-                  <div className="text-xs text-blue-700 font-semibold mb-1 uppercase tracking-wide">En İyi Senaryo</div>
-                  <div className="text-lg font-bold text-blue-900 mb-0.5">{bestScenario.platform}</div>
-                  <div className="text-xs text-blue-600 font-medium">{bestScenario.profitRate.toFixed(1)}% kâr</div>
+                <div className="p-4 bg-gradient-to-br from-sky-100 via-indigo-100 to-violet-100 rounded-xl border border-indigo-200/60 shadow-sm ring-1 ring-indigo-100/50">
+                  <div className="text-xs text-indigo-700 font-semibold mb-1 uppercase tracking-wide">En İyi Senaryo</div>
+                  <div className="text-lg font-bold text-indigo-900 mb-0.5">{bestScenario.platform}</div>
+                  <div className="text-xs text-indigo-700 font-medium">{bestScenario.profitRate.toFixed(1)}% kâr</div>
                 </div>
               </div>
             )}
@@ -427,13 +437,13 @@ function ProfitCalculator() {
 
       {/* Saved calculations table */}
       {savedCalculations.length > 0 && (
-        <div className="mt-6 col-span-1 lg:col-span-2 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-6 ring-1 ring-slate-200/50">
+        <div className="mt-6 col-span-1 lg:col-span-2 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-6 ring-1 ring-slate-200/50">
           <div className="mb-3">
             <h3 className="text-lg font-bold text-slate-900">Kayıtlı Sonuçlar</h3>
             <p className="text-xs text-slate-500">Ürün adıyla kaydettiğiniz karşılaştırmalar</p>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px]">
+            <table className="w-full min-w-[520px] sm:min-w-[640px]">
               <thead>
                 <tr className="border-b-2 border-slate-200/80 bg-slate-50">
                   <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Ürün</th>

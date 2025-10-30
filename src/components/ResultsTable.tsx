@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { ProfitResult } from '../types'
 
 interface ResultsTableProps {
@@ -5,7 +6,7 @@ interface ResultsTableProps {
   onSaveScenario?: (result: ProfitResult) => void
 }
 
-function ResultsTable({ results, onSaveScenario }: ResultsTableProps) {
+function ResultsTableImpl({ results, onSaveScenario }: ResultsTableProps) {
   return (
     <div>
       <table className="w-full min-w-0">
@@ -38,10 +39,10 @@ function ResultsTable({ results, onSaveScenario }: ResultsTableProps) {
           {results.map((result, index) => {
             const profitBgColor =
               result.profitRate > 20
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/30'
+                ? 'bg-gradient-to-r from-emerald-300 to-teal-300 shadow-md shadow-emerald-300/30'
                 : result.profitRate > 10
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-lg shadow-amber-500/30'
-                : 'bg-gradient-to-r from-amber-600 to-red-500 shadow-lg shadow-amber-600/30'
+                ? 'bg-gradient-to-r from-amber-300 to-orange-300 shadow-md shadow-amber-300/30'
+                : 'bg-gradient-to-r from-rose-300 to-red-300 shadow-md shadow-rose-300/30'
 
             const commissionDisplay = result.commissionAmount === 0 
               ? `${result.commissionRate.toFixed(0)}%`
@@ -72,7 +73,7 @@ function ResultsTable({ results, onSaveScenario }: ResultsTableProps) {
                   </span>
                 </td>
                 <td className="px-2 py-2 whitespace-nowrap text-center">
-                  <span className={`inline-block px-4 py-2 rounded-lg ${profitBgColor} text-white font-bold text-sm shadow-md shadow-black/10 hover:scale-105 transition-transform`}>
+                  <span className={`inline-block px-4 py-2 rounded-lg ${profitBgColor} text-slate-800 font-bold text-sm hover:scale-105 transition-transform`}>
                     {result.netProfit.toLocaleString('tr-TR', {
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
@@ -111,5 +112,5 @@ function ResultsTable({ results, onSaveScenario }: ResultsTableProps) {
     </div>
   )
 }
-
+const ResultsTable = memo(ResultsTableImpl)
 export default ResultsTable

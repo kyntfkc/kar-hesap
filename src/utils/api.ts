@@ -2,56 +2,52 @@ const BASE = import.meta.env.VITE_API_BASE_URL;
 
 export const apiEnabled = typeof BASE === 'string' && BASE.length > 0;
 
-export async function postCalculate(payload: unknown) {
-  const r = await fetch(`${BASE}/calculate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  if (!r.ok) throw new Error('API error');
-  return r.json();
+async function request(path: string, options: RequestInit = {}, timeoutMs = 8000, retries = 1) {
+  if (!apiEnabled) throw new Error('API disabled');
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const r = await fetch(`${BASE}${path}`, {
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      signal: controller.signal,
+      ...options,
+    });
+    if (!r.ok) {
+      const text = await r.text().catch(() => '');
+      throw new Error(text || `HTTP ${r.status}`);
+    }
+    const ct = r.headers.get('content-type') || '';
+    return ct.includes('application/json') ? r.json() : r.text();
+  } catch (e) {
+    if (retries > 0) return request(path, options, timeoutMs, retries - 1);
+    throw e;
+  } finally {
+    clearTimeout(t);
+  }
 }
 
-export async function postStandardSalePrice(payload: unknown) {
-  const r = await fetch(`${BASE}/standard-sale-price`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  if (!r.ok) throw new Error('API error');
-  return r.json();
+export function postCalculate(payload: unknown) {
+  return request('/calculate', { method: 'POST', body: JSON.stringify(payload) });
 }
 
-export async function postSync(payload: unknown) {
-  const r = await fetch(`${BASE}/sync`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  if (!r.ok) throw new Error('API error');
-  return r.json();
+export function postStandardSalePrice(payload: unknown) {
+  return request('/standard-sale-price', { method: 'POST', body: JSON.stringify(payload) });
 }
 
-export async function getSavedCalculations() {
-  const r = await fetch(`${BASE}/saved-calculations`);
-  if (!r.ok) throw new Error('API error');
-  return r.json();
+export function postSync(payload: unknown) {
+  return request('/sync', { method: 'POST', body: JSON.stringify(payload) });
 }
 
-export async function postSavedCalculation(payload: unknown) {
-  const r = await fetch(`${BASE}/saved-calculations`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  if (!r.ok) throw new Error('API error');
-  return r.json();
+export function getSavedCalculations() {
+  return request('/saved-calculations');
 }
 
-export async function deleteSavedCalculation(id: string) {
-  const r = await fetch(`${BASE}/saved-calculations/${id}`, { method: 'DELETE' });
-  if (!r.ok) throw new Error('API error');
-  return r.json();
+export function postSavedCalculation(payload: unknown) {
+  return request('/saved-calculations', { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export function deleteSavedCalculation(id: string) {
+  return request(`/saved-calculations/${id}`, { method: 'DELETE' });
 }
 
 
