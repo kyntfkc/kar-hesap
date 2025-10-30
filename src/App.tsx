@@ -14,9 +14,7 @@ function App() {
           <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-blue-700 to-indigo-800 mb-1.5 tracking-tight">
             Kârlılık Hesaplayıcı
           </h1>
-          <p className="text-sm text-slate-500 font-medium">
-            Platform komisyon ve fiyat karşılaştırması
-          </p>
+          {/* alt açıklama kaldırıldı */}
         </div>
         <ProfitCalculator />
       </div>

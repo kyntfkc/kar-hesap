@@ -380,10 +380,10 @@ function ProfitCalculator() {
           </div>
         ) : results.length > 0 ? (
           <div>
-            <div className="mb-5 flex items-center justify-between gap-3 flex-wrap">
+            <div className="mb-3 sm:mb-5 flex items-center justify-between gap-3 flex-wrap">
               <div>
                 <h2 className="text-xl font-bold text-slate-900 mb-1">Hesaplama Sonuçları</h2>
-                <p className="text-xs text-slate-500 font-medium">{results.length} senaryo karşılaştırıldı</p>
+                {/* karşılaştırma sayısı metni kaldırıldı */}
               </div>
               <div className="flex items-center gap-2">
                 <button
