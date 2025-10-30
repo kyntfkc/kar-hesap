@@ -438,17 +438,36 @@ function ProfitCalculator() {
       {/* Saved calculations table */}
       {savedCalculations.length > 0 && (
         <div className="mt-6 col-span-1 lg:col-span-2 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-5 sm:p-6 ring-1 ring-slate-200/50">
-          <div className="mb-3">
-            <h3 className="text-lg font-bold text-slate-900">Kayıtlı Sonuçlar</h3>
-            <p className="text-xs text-slate-500">Ürün adıyla kaydettiğiniz karşılaştırmalar</p>
+          <div className="mb-3 flex items-center justify-between gap-2 flex-wrap">
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">Kayıtlı Sonuçlar</h3>
+              <p className="text-xs text-slate-500">Ürün adıyla kaydettiğiniz karşılaştırmalar</p>
+            </div>
+            <button
+              onClick={() => {
+                const data = JSON.stringify(savedCalculations, null, 2)
+                const blob = new Blob([data], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `kayitli-sonuclar-${new Date().toISOString().slice(0,10)}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+              }}
+              className="px-3 py-1.5 text-xs rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
+              title="Yedeği indir (JSON)"
+            >Yedek İndir</button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-full">
               <thead>
                 <tr className="border-b-2 border-slate-200/80 bg-slate-50">
+                  <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase w-6"> </th>
                   <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Ürün</th>
                   <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Tarih</th>
                   <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">En İyi Senaryo</th>
+                  <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Satış</th>
+                  <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Net</th>
                   <th className="px-2 py-2 text-left text-xs font-bold text-slate-700 uppercase">Kâr %</th>
                   <th className="px-2 py-2 text-right text-xs font-bold text-slate-700 uppercase">Aksiyon</th>
                 </tr>
@@ -465,12 +484,27 @@ function ProfitCalculator() {
                       onDrop={onDropSaved(idx)}
                       className={`hover:bg-blue-50/40 ${dragIndex===idx ? 'bg-blue-50/70' : ''}`}
                     >
-                      <td className="px-2 py-2 text-sm font-semibold text-slate-900">{sc.name}</td>
-                      <td className="px-2 py-2 text-sm text-slate-700">{new Date(sc.createdAt).toLocaleString('tr-TR')}</td>
+                      <td className="px-2 py-2 text-slate-400 cursor-move select-none">≡</td>
+                      <td className="px-2 py-2 text-sm font-semibold text-slate-900">
+                        <input
+                          className="w-full bg-transparent border-b border-transparent focus:border-slate-300 focus:outline-none"
+                          value={sc.name}
+                          onChange={(e)=>{
+                            const updated = [...savedCalculations]
+                            updated[idx] = { ...sc, name: e.target.value }
+                            setSavedCalculations(updated)
+                            localStorage.setItem('savedCalculations', JSON.stringify(updated))
+                            if (apiEnabled) postSync({ savedCalculations: updated }).catch(()=>{})
+                          }}
+                        />
+                      </td>
+                      <td className="px-2 py-2 text-sm text-slate-700">{new Date(sc.createdAt).toLocaleDateString('tr-TR')}</td>
                       <td className="px-2 py-2 text-sm text-slate-900">{best.platform}</td>
+                      <td className="px-2 py-2 text-sm text-slate-900">{best.salePrice.toLocaleString('tr-TR', {maximumFractionDigits:0})} TL</td>
+                      <td className="px-2 py-2 text-sm text-slate-900">{best.netProfit.toLocaleString('tr-TR', {maximumFractionDigits:0})} TL</td>
                       <td className="px-2 py-2 text-sm font-bold text-slate-900">{best.profitRate.toFixed(1)}%</td>
                       <td className="px-2 py-2 text-right">
-                        <button onClick={()=>handleDeleteSaved(sc.id)} className="text-xs px-2 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50">Sil</button>
+                        <button onClick={()=>{ if(confirm('Bu kaydı silmek istediğinize emin misiniz?')) handleDeleteSaved(sc.id) }} className="text-xs px-2 py-1 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50">Sil</button>
                       </td>
                     </tr>
                   )
