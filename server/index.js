@@ -38,6 +38,19 @@ app.post('/standard-sale-price', (req, res) => {
   }
 });
 
+// Receive client state snapshot (no persistence here; just acknowledge)
+app.post('/sync', (req, res) => {
+  try {
+    const snapshot = req.body || {};
+    console.log('[SYNC] snapshot received at', new Date().toISOString());
+    // Optionally validate shape here
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log('Server listening on', PORT);

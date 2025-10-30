@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, SavedCalculation } from '../types'
 import { calculateAllPlatforms, calculateStandardSalePrice } from '../utils/calculations'
-import { apiEnabled, postCalculate } from '../utils/api'
+import { apiEnabled, postCalculate, postSync } from '../utils/api'
 import { TrendingUp, Loader2, Copy, Check, Settings } from 'lucide-react'
 import InputForm from './InputForm'
 import ResultsTable from './ResultsTable'
@@ -128,6 +128,23 @@ function ProfitCalculator() {
   useEffect(() => {
     localStorage.setItem('platforms', JSON.stringify(platforms))
   }, [platforms])
+
+  // Backend sync (debounced) with localStorage snapshot
+  useEffect(() => {
+    if (!apiEnabled) return
+    const timer = setTimeout(() => {
+      const snapshot = {
+        appSettings,
+        productInfo,
+        goldInfo,
+        expenses,
+        platforms,
+        savedCalculations,
+      }
+      postSync(snapshot).catch(() => {})
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [appSettings, productInfo, goldInfo, expenses, platforms, savedCalculations])
 
   const applySettingsToState = (s: AppSettings) => {
     setProductInfo(prev => ({ ...prev, productGram: s.defaultProductGram, laborMillem: s.defaultLaborMillem }))
@@ -257,6 +274,8 @@ function ProfitCalculator() {
     setSavedCalculations(updated)
     localStorage.setItem('savedCalculations', JSON.stringify(updated))
     setSaveName('')
+    // fire-and-forget sync immediately after save
+    if (apiEnabled) postSync({ savedCalculations: updated }).catch(() => {})
   }
 
   const handleDeleteSaved = (id: string) => {

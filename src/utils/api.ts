@@ -22,4 +22,14 @@ export async function postStandardSalePrice(payload: unknown) {
   return r.json();
 }
 
+export async function postSync(payload: unknown) {
+  const r = await fetch(`${BASE}/sync`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!r.ok) throw new Error('API error');
+  return r.json();
+}
+
 
