@@ -151,8 +151,8 @@ function InputForm({
   }
 
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
+    <div className="space-y-2.5">
+      <div className="grid grid-cols-2 gap-2.5">
         <div>
           <label className="block text-sm font-extrabold text-slate-900 mb-1.5 uppercase tracking-wider">Ürün Gram</label>
           <div className="relative">
@@ -185,13 +185,13 @@ function InputForm({
                 // Focus kaybolduğunda input state'ini temizle, değer productInfo'dan gösterilecek
                 setProductGramInput('')
               }}
-              className="w-full px-3 py-2.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white transition-all font-medium text-slate-900 hover:border-slate-400 shadow-sm"
+              className="w-full px-2.5 py-2 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white transition-all font-medium text-slate-900 hover:border-slate-400 shadow-sm"
               placeholder="0,00"
             />
             <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">Gr</span>
           </div>
           {/* Uzunluk seçenekleri */}
-          <div className="mt-2 flex items-center gap-2">
+          <div className="mt-1.5 flex items-center gap-2">
             <button
               type="button"
               onClick={() => {
@@ -266,17 +266,17 @@ function InputForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2.5">
         <div className="border border-slate-300/70 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-200 ring-1 ring-slate-200/30">
           <button
             onClick={() => toggleSection('labor')}
-            className="w-full px-3 py-2.5 flex items-center justify-between bg-gradient-to-r from-slate-50/50 to-white hover:from-slate-100/50 hover:to-white transition-all duration-200 group"
+            className="w-full px-2.5 py-2 flex items-center justify-between bg-gradient-to-r from-slate-50/50 to-white hover:from-slate-100/50 hover:to-white transition-all duration-200 group"
           >
             <span className="font-bold text-slate-900 text-sm">İşçilik</span>
             <Plus className={`w-4 h-4 text-gray-700 transition-transform ${expandedSections.labor ? 'rotate-45' : ''}`} />
           </button>
           {expandedSections.labor && (
-            <div className="p-3 bg-white border-t border-slate-200/80 space-y-2.5">
+            <div className="p-2.5 bg-white border-t border-slate-200/80 space-y-2">
           <div>
                 <label className="block text-xs text-gray-700 mb-1 font-medium">İşçilik (milyem)</label>
                 <input
@@ -284,7 +284,7 @@ function InputForm({
                   step="0.001"
                   value={productInfo.laborMillem}
                   onChange={(e) => updateProductInfo('laborMillem', parseFloat(e.target.value) || 0)}
-                  className="w-full px-2.5 py-2 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
+                  className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
                   placeholder="0.050"
                 />
                 <div className="mt-1 text-xs text-gray-500 font-light">
@@ -298,14 +298,14 @@ function InputForm({
         <div className="border border-slate-300/70 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-200 ring-1 ring-slate-200/30">
           <button
             onClick={() => toggleSection('extras')}
-            className="w-full px-3 py-2.5 flex items-center justify-between bg-white/90 hover:bg-white transition-all duration-200 group"
+            className="w-full px-2.5 py-2 flex items-center justify-between bg-white/90 hover:bg-white transition-all duration-200 group"
           >
             <span className="font-bold text-slate-900 text-sm">Ekstralar</span>
             <Plus className={`w-4 h-4 text-gray-700 transition-transform ${expandedSections.extras ? 'rotate-45' : ''}`} />
           </button>
           {expandedSections.extras && (
-            <div className="p-3 space-y-2 bg-white border-t border-slate-200/80">
-              <div className="flex items-center justify-between p-2.5 bg-slate-50/80 rounded-lg border border-slate-200/60 shadow-sm">
+            <div className="p-2.5 space-y-2 bg-white border-t border-slate-200/80">
+              <div className="flex items-center justify-between p-2 bg-slate-50/80 rounded-lg border border-slate-200/60 shadow-sm">
                 <div className="flex-1">
                   <div className="text-xs font-medium text-gray-900 mb-0.5">Ekstra Maliyet Farkı</div>
                 </div>
@@ -316,7 +316,7 @@ function InputForm({
                     value={expenses.specialPackaging}
                     onChange={(e) => updateExpenses('specialPackaging', parseFloat(e.target.value) || 0)}
                     disabled={expenses.specialPackaging === 0}
-                    className="w-20 px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+                    className="w-20 px-2 py-1 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                     placeholder="150"
                   />
                   <span className="text-xs text-gray-500">TL</span>
@@ -339,13 +339,13 @@ function InputForm({
       <div className="border border-slate-300/60 rounded-xl overflow-hidden bg-gradient-to-br from-slate-50/80 to-white backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
         <button
           onClick={() => toggleSection('expenses')}
-          className="w-full px-3 py-2.5 flex items-center justify-between bg-white/90 hover:bg-white transition-all duration-200 group"
+          className="w-full px-2.5 py-2 flex items-center justify-between bg-white/90 hover:bg-white transition-all duration-200 group"
         >
           <span className="font-bold text-slate-900 text-sm">Masraf Kalemleri</span>
           <Plus className={`w-5 h-5 text-gray-700 transition-transform ${expandedSections.expenses ? 'rotate-45' : ''}`} />
         </button>
         {expandedSections.expenses && (
-          <div className="p-3 bg-white border-t border-slate-200/80">
+          <div className="p-2.5 bg-white border-t border-slate-200/80">
             <div className="grid grid-cols-4 gap-2">
               <div>
                 <label className="block text-xs text-slate-600 mb-1 font-medium">Kargo</label>
