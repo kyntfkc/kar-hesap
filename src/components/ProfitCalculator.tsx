@@ -442,49 +442,48 @@ function ProfitCalculator() {
           <div className="mb-3 flex items-center justify-between gap-2 flex-wrap">
             <div>
               <h3 className="text-lg font-bold text-slate-900">Kayıtlı Sonuçlar</h3>
-              {/* açıklama kaldırıldı */}
-              <div className="mt-0.5 text-[11px] text-slate-500">Satır başındaki ≡ ikonundan sürükleyip sıralayabilirsiniz.</div>
             </div>
-            <button
-              onClick={() => {
-                const data = JSON.stringify(savedCalculations, null, 2)
-                const blob = new Blob([data], { type: 'application/json' })
-                const url = URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = `kayitli-sonuclar-${new Date().toISOString().slice(0,10)}.json`
-                a.click()
-                URL.revokeObjectURL(url)
-              }}
-              className="px-3 py-1.5 text-xs rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
-              title="Yedeği indir (JSON)"
-            >Yedek İndir</button>
-            <label className="px-3 py-1.5 text-xs rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer" title="Yedek yükle (JSON)">
-              Yedek Yükle
-              <input
-                type="file"
-                accept="application/json"
-                className="hidden"
-                onChange={(e)=>{
-                  const file = e.target.files?.[0]
-                  if (!file) return
-                  const reader = new FileReader()
-                  reader.onload = () => {
-                    try {
-                      const json = JSON.parse(String(reader.result))
-                      if (Array.isArray(json)) {
-                        setSavedCalculations(json)
-                        localStorage.setItem('savedCalculations', JSON.stringify(json))
-                        if (apiEnabled) postSync({ savedCalculations: json }).catch(()=>{})
-                      }
-                    } catch {}
-                  }
-                  reader.readAsText(file)
-                  // reset input value to allow re-uploading same file
-                  ;(e.target as HTMLInputElement).value = ''
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  const data = JSON.stringify(savedCalculations, null, 2)
+                  const blob = new Blob([data], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `kayitli-sonuclar-${new Date().toISOString().slice(0,10)}.json`
+                  a.click()
+                  URL.revokeObjectURL(url)
                 }}
-              />
-            </label>
+                className="px-3 py-1.5 text-xs rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
+                title="Yedeği indir (JSON)"
+              >Yedek İndir</button>
+              <label className="px-3 py-1.5 text-xs rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer" title="Yedek yükle (JSON)">
+                Yedek Yükle
+                <input
+                  type="file"
+                  accept="application/json"
+                  className="hidden"
+                  onChange={(e)=>{
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    const reader = new FileReader()
+                    reader.onload = () => {
+                      try {
+                        const json = JSON.parse(String(reader.result))
+                        if (Array.isArray(json)) {
+                          setSavedCalculations(json)
+                          localStorage.setItem('savedCalculations', JSON.stringify(json))
+                          if (apiEnabled) postSync({ savedCalculations: json }).catch(()=>{})
+                        }
+                      } catch {}
+                    }
+                    reader.readAsText(file)
+                    ;(e.target as HTMLInputElement).value = ''
+                  }}
+                />
+              </label>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-full border-separate border-spacing-0">
