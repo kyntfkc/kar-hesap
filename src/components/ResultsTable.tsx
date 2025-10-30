@@ -5,9 +5,11 @@ import { formatNumber } from '../utils/format'
 interface ResultsTableProps {
   results: ProfitResult[]
   onSaveScenario?: (result: ProfitResult) => void
+  showCommission?: boolean
+  showBank?: boolean
 }
 
-function ResultsTableImpl({ results, onSaveScenario }: ResultsTableProps) {
+function ResultsTableImpl({ results, onSaveScenario, showCommission = false, showBank = false }: ResultsTableProps) {
   return (
     <div className="overflow-x-auto -mx-2 sm:mx-0">
       <table className="w-full min-w-[720px] sm:min-w-0 table-fixed">
@@ -19,15 +21,19 @@ function ResultsTableImpl({ results, onSaveScenario }: ResultsTableProps) {
             <th className="px-2 py-2 text-left text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
               Satış Tutarı
             </th>
-            <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
-              Komisyon
-            </th>
+            {showCommission && (
+              <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Komisyon
+              </th>
+            )}
             <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
               Kâr %
             </th>
-            <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
-              Bankaya Yatan
-            </th>
+            {showBank && (
+              <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Bankaya Yatan
+              </th>
+            )}
             <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
               Net Kazanç
             </th>
@@ -70,21 +76,25 @@ function ResultsTableImpl({ results, onSaveScenario }: ResultsTableProps) {
                     {formatNumber(result.salePrice)} <span className="text-slate-500 font-medium">TL</span>
                   </span>
                 </td>
-                <td className="px-2 py-2 whitespace-nowrap text-center">
-                  <span className="text-xs sm:text-sm font-medium text-slate-700">
-                    {commissionDisplay}
-                  </span>
-                </td>
+                {showCommission && (
+                  <td className="px-2 py-2 whitespace-nowrap text-center">
+                    <span className="text-xs sm:text-sm font-medium text-slate-700">
+                      {commissionDisplay}
+                    </span>
+                  </td>
+                )}
                 <td className="px-2 py-2 whitespace-nowrap text-center">
                   <span className="text-sm sm:text-base font-bold text-slate-900">
                     {Math.round(result.profitRate)}%
                   </span>
                 </td>
-                <td className="px-2 py-2 whitespace-nowrap text-center">
-                  <span className="text-xs sm:text-sm font-semibold text-blue-900">
-                    {formatNumber(result.bankayaYatan)} TL
-                  </span>
-                </td>
+                {showBank && (
+                  <td className="px-2 py-2 whitespace-nowrap text-center">
+                    <span className="text-xs sm:text-sm font-semibold text-blue-900">
+                      {formatNumber(result.bankayaYatan)} TL
+                    </span>
+                  </td>
+                )}
                 <td className="px-2 py-2 whitespace-nowrap text-center">
                   <span className={`inline-block px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg ${profitBgColor} text-slate-800 font-bold text-xs sm:text-sm hover:scale-105 transition-transform`}>
                     {formatNumber(result.netProfit)} TL

@@ -107,6 +107,7 @@ function ProfitCalculator() {
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [toast, setToast] = useState<{message: string; type?: 'success' | 'error' | 'info'} | null>(null)
+  const [showExtraCols, setShowExtraCols] = useState(false)
   const [searchSaved, setSearchSaved] = useState('')
   const [bandFilter, setBandFilter] = useState<'all' | 'lt10' | 'b10_15' | 'b15_20' | 'gte20' | 'campaign'>('all')
 
@@ -412,10 +413,16 @@ function ProfitCalculator() {
                 <h2 className="text-xl font-bold text-slate-900 mb-1">Hesaplama Sonuçları</h2>
                 {/* karşılaştırma sayısı metni kaldırıldı */}
               </div>
-              {/* kopyalama ikonu kaldırıldı */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowExtraCols(v=>!v)}
+                  className="px-3 py-1.5 text-xs rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50"
+                  title="Komisyon ve Bankaya Yatan sütunlarını göster/gizle"
+                >{showExtraCols ? 'Detayı Gizle' : 'Detayı Göster'}</button>
+              </div>
             </div>
             
-          <ResultsTable results={results} onSaveScenario={handleSaveSingleScenario} />
+          <ResultsTable results={results} onSaveScenario={handleSaveSingleScenario} showCommission={showExtraCols} showBank={showExtraCols} />
         </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-slate-400">
