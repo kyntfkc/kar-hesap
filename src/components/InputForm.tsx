@@ -457,19 +457,21 @@ function InputForm({
                     <span className="ml-1 text-xs text-gray-500 font-normal">(Otomatik)</span>
                   )}
                 </label>
-                  <input
-                    type="number"
-                  step="1"
-                    value={platform.salePrice}
-                  onChange={(e) => {
-                    // Sabit kartların satış fiyatı manuel değiştirilemez (otomatik hesaplanır)
-                    if (platform.name === 'Standart' || platform.name === 'Astarlı Ürün') return
-                    updatePlatform(index, 'salePrice', parseInt(e.target.value) || 0)
-                  }}
-                  disabled={platform.name === 'Standart' || platform.name === 'Astarlı Ürün'}
-                  className="w-full px-2 py-1.5 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center font-semibold disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500"
-                  placeholder="0"
-                  />
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="1"
+                      value={platform.salePrice}
+                      onChange={(e) => {
+                        if (platform.name === 'Standart' || platform.name === 'Astarlı Ürün') return
+                        updatePlatform(index, 'salePrice', parseInt(e.target.value) || 0)
+                      }}
+                      disabled={platform.name === 'Standart' || platform.name === 'Astarlı Ürün'}
+                      className="w-full pr-8 px-2 py-1.5 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center font-semibold disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500"
+                      placeholder="0"
+                    />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-medium">TL</span>
+                  </div>
                 </div>
               </div>
             </div>
