@@ -95,6 +95,7 @@ function ProfitCalculator() {
   })
   const [results, setResults] = useState<ProfitResult[]>([])
   const [isCalculating, setIsCalculating] = useState(false)
+  const [hasCalculated, setHasCalculated] = useState(false)
   // clipboard state removed
   const [saveModalOpen, setSaveModalOpen] = useState(false)
   const [saveModalName, setSaveModalName] = useState('')
@@ -110,6 +111,11 @@ function ProfitCalculator() {
   const [showExtraCols, setShowExtraCols] = useState(false)
   const [searchSaved, setSearchSaved] = useState('')
   const [bandFilter, setBandFilter] = useState<'all' | 'lt10' | 'b10_15' | 'b15_20' | 'gte20' | 'campaign'>('all')
+  const [sortBy, setSortBy] = useState<'date-desc' | 'date-asc' | 'profit-desc' | 'profit-asc' | 'sale-desc' | 'sale-asc' | 'net-desc' | 'net-asc'>('date-desc')
+  const [minProfit, setMinProfit] = useState<string>('')
+  const [maxProfit, setMaxProfit] = useState<string>('')
+  const [minSale, setMinSale] = useState<string>('')
+  const [maxSale, setMaxSale] = useState<string>('')
 
   // Auto-save to localStorage
   useEffect(() => {
@@ -220,13 +226,9 @@ function ProfitCalculator() {
     })
   }, [productInfo, goldInfo, expenses])
 
-  // Auto-calculate with debounce (skip first render -> results empty on initial load)
-  const didInitRef = useRef(false)
+  // Auto-calculate only after first manual calculation
   useEffect(() => {
-    if (!didInitRef.current) {
-      didInitRef.current = true
-      return
-    }
+    if (!hasCalculated) return
     setIsCalculating(true)
     const timer = setTimeout(() => {
       const calculatedResults = calculateAllPlatforms(
@@ -240,7 +242,7 @@ function ProfitCalculator() {
     }, 300)
 
     return () => clearTimeout(timer)
-  }, [productInfo, goldInfo, expenses, platforms])
+  }, [hasCalculated, productInfo, goldInfo, expenses, platforms])
 
   const handleCalculate = useCallback(() => {
     setIsCalculating(true)
@@ -253,12 +255,13 @@ function ProfitCalculator() {
           const calculatedResults = calculateAllPlatforms(productInfo, goldInfo, expenses, platforms)
           setResults(calculatedResults)
         })
-        .finally(() => setIsCalculating(false))
+        .finally(() => { setIsCalculating(false); setHasCalculated(true) })
     } else {
       setTimeout(() => {
         const calculatedResults = calculateAllPlatforms(productInfo, goldInfo, expenses, platforms)
         setResults(calculatedResults)
         setIsCalculating(false)
+        setHasCalculated(true)
       }, 100)
     }
   }, [productInfo, goldInfo, expenses, platforms])
@@ -496,19 +499,17 @@ function ProfitCalculator() {
                   }}
                 />
               </label>
-              {savedCalculations.length > 0 && (
-                <button onClick={handleClearAllSaved} className="px-3 py-1.5 text-xs rounded-lg border border-red-300 text-red-700 hover:bg-red-50" title="Tüm kayıtları sil">Tümünü Sil</button>
-              )}
             </div>
         </div>
-        <div className="mb-3 flex items-center gap-2 flex-wrap">
-          <input
+        <div className="mb-3 space-y-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <input
               value={searchSaved}
               onChange={(e)=>setSearchSaved(e.target.value)}
               placeholder="Ürün adı ara..."
-              className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg"
+              className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg flex-1 min-w-[150px]"
             />
-          <select
+            <select
               value={bandFilter}
               onChange={(e)=>setBandFilter(e.target.value as any)}
               className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white"
@@ -520,6 +521,77 @@ function ProfitCalculator() {
               <option value="gte20">20%+ (yeşil)</option>
               <option value="campaign">Kampanya (mavi)</option>
             </select>
+            <select
+              value={sortBy}
+              onChange={(e)=>setSortBy(e.target.value as any)}
+              className="px-3 py-1.5 text-sm border border-slate-300 rounded-lg bg-white"
+            >
+              <option value="date-desc">Tarih (Yeni → Eski)</option>
+              <option value="date-asc">Tarih (Eski → Yeni)</option>
+              <option value="profit-desc">Kâr % (Yüksek → Düşük)</option>
+              <option value="profit-asc">Kâr % (Düşük → Yüksek)</option>
+              <option value="sale-desc">Satış Fiyatı (Yüksek → Düşük)</option>
+              <option value="sale-asc">Satış Fiyatı (Düşük → Yüksek)</option>
+              <option value="net-desc">Net Kazanç (Yüksek → Düşük)</option>
+              <option value="net-asc">Net Kazanç (Düşük → Yüksek)</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap bg-slate-50 p-2 rounded-lg border border-slate-200">
+            <span className="text-xs font-medium text-slate-700">Gelişmiş Filtre:</span>
+            <div className="flex items-center gap-1">
+              <label className="text-xs text-slate-600">Kâr % Min:</label>
+              <input
+                type="number"
+                value={minProfit}
+                onChange={(e)=>setMinProfit(e.target.value)}
+                placeholder="Min"
+                className="w-20 px-2 py-1 text-xs border border-slate-300 rounded-md"
+              />
+            </div>
+            <div className="flex items-center gap-1">
+              <label className="text-xs text-slate-600">Kâr % Max:</label>
+              <input
+                type="number"
+                value={maxProfit}
+                onChange={(e)=>setMaxProfit(e.target.value)}
+                placeholder="Max"
+                className="w-20 px-2 py-1 text-xs border border-slate-300 rounded-md"
+              />
+            </div>
+            <div className="flex items-center gap-1">
+              <label className="text-xs text-slate-600">Satış Min:</label>
+              <input
+                type="number"
+                value={minSale}
+                onChange={(e)=>setMinSale(e.target.value)}
+                placeholder="Min"
+                className="w-24 px-2 py-1 text-xs border border-slate-300 rounded-md"
+              />
+            </div>
+            <div className="flex items-center gap-1">
+              <label className="text-xs text-slate-600">Satış Max:</label>
+              <input
+                type="number"
+                value={maxSale}
+                onChange={(e)=>setMaxSale(e.target.value)}
+                placeholder="Max"
+                className="w-24 px-2 py-1 text-xs border border-slate-300 rounded-md"
+              />
+            </div>
+            {(minProfit || maxProfit || minSale || maxSale) && (
+              <button
+                onClick={() => {
+                  setMinProfit('')
+                  setMaxProfit('')
+                  setMinSale('')
+                  setMaxSale('')
+                }}
+                className="px-2 py-1 text-xs rounded-md border border-slate-300 text-slate-700 hover:bg-slate-100"
+              >
+                Filtreleri Temizle
+              </button>
+            )}
+          </div>
         </div>
         {savedCalculations.length === 0 ? (
           <div className="p-6 text-center text-slate-500 text-sm">Henüz kayıt yok. Sonuçlar tablosundan bir senaryoyu “Kaydet” ile ekleyebilirsin.</div>
@@ -550,6 +622,30 @@ function ProfitCalculator() {
                     if (bandFilter === 'b15_20') return pr >= 15 && pr < 20 && !isCampaign
                     if (bandFilter === 'gte20') return pr >= 20 && !isCampaign
                     return true
+                  })
+                  .filter(sc => {
+                    const best = sc.results.reduce((b, c)=> c.profitRate > b.profitRate ? c : b)
+                    const pr = best.profitRate
+                    const sale = best.salePrice
+                    if (minProfit && pr < parseFloat(minProfit)) return false
+                    if (maxProfit && pr > parseFloat(maxProfit)) return false
+                    if (minSale && sale < parseFloat(minSale)) return false
+                    if (maxSale && sale > parseFloat(maxSale)) return false
+                    return true
+                  })
+                  .sort((a, b) => {
+                    const bestA = a.results.reduce((b, c)=> c.profitRate > b.profitRate ? c : b)
+                    const bestB = b.results.reduce((b, c)=> c.profitRate > b.profitRate ? c : b)
+                    
+                    if (sortBy === 'date-desc') return b.createdAt - a.createdAt
+                    if (sortBy === 'date-asc') return a.createdAt - b.createdAt
+                    if (sortBy === 'profit-desc') return bestB.profitRate - bestA.profitRate
+                    if (sortBy === 'profit-asc') return bestA.profitRate - bestB.profitRate
+                    if (sortBy === 'sale-desc') return bestB.salePrice - bestA.salePrice
+                    if (sortBy === 'sale-asc') return bestA.salePrice - bestB.salePrice
+                    if (sortBy === 'net-desc') return bestB.netProfit - bestA.netProfit
+                    if (sortBy === 'net-asc') return bestA.netProfit - bestB.netProfit
+                    return 0
                   })
                   .map((sc, idx) => {
                   const best = sc.results.reduce((b, c)=> c.profitRate > b.profitRate ? c : b)
