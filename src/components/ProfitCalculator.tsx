@@ -249,7 +249,20 @@ function ProfitCalculator() {
     if (apiEnabled) {
       postCalculate({ productInfo, goldInfo, expenses, platforms })
         .then((resp: any) => {
-          setResults(resp.results || [])
+          // API sonuçlarında optimum skor eksikse local hesaplama yap
+          const apiResults = resp.results || []
+          const localResults = calculateAllPlatforms(productInfo, goldInfo, expenses, platforms)
+          
+          // API sonuçlarını optimum skorlarla birleştir (platform adına göre eşleştir)
+          const mergedResults = apiResults.map((apiResult: ProfitResult) => {
+            const localResult = localResults.find(lr => lr.platform === apiResult.platform)
+            return {
+              ...apiResult,
+              optimumScore: localResult?.optimumScore ?? apiResult.optimumScore
+            }
+          })
+          
+          setResults(mergedResults.length > 0 ? mergedResults : localResults)
         })
         .catch(() => {
           const calculatedResults = calculateAllPlatforms(productInfo, goldInfo, expenses, platforms)

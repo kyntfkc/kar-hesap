@@ -49,18 +49,22 @@ function ResultsTableImpl({ results, onSaveScenario, showCommission = false, sho
           {results.map((result, index) => {
             const nameLc = result.platform.toLowerCase()
             const isCampaign = nameLc.includes('kampanya') || nameLc.includes('kampanyalı') || nameLc.includes('promosyon')
-            let profitBgColor = 'bg-gradient-to-r from-rose-400 to-red-500 shadow-md shadow-rose-300/30' // default: <10%
-            const pr = result.profitRate
+            const optimumScore = result.optimumScore ?? 0
+            
+            // Optimum skor aralıklarına göre net kazanç rengi
+            let profitBgColor = 'bg-gradient-to-r from-rose-400 to-red-500 shadow-md shadow-rose-300/30' // 0-60: Zayıf
             if (isCampaign) {
-              profitBgColor = 'bg-gradient-to-r from-sky-400 to-indigo-400 shadow-md shadow-sky-300/30'
-            } else if (pr >= 20) {
-              profitBgColor = 'bg-gradient-to-r from-emerald-400 to-green-500 shadow-md shadow-emerald-300/30'
-            } else if (pr >= 15) {
-              profitBgColor = 'bg-gradient-to-r from-yellow-300 to-yellow-400 shadow-md shadow-yellow-200/40'
-            } else if (pr >= 10) {
-              profitBgColor = 'bg-gradient-to-r from-orange-400 to-amber-400 shadow-md shadow-amber-300/30'
+              profitBgColor = 'bg-gradient-to-r from-sky-400 to-indigo-400 shadow-md shadow-sky-300/30' // Kampanya
+            } else if (optimumScore >= 120) {
+              profitBgColor = 'bg-gradient-to-r from-purple-400 to-purple-600 shadow-md shadow-purple-300/30' // 120+: Aşırı
+            } else if (optimumScore >= 100) {
+              profitBgColor = 'bg-gradient-to-r from-emerald-400 to-green-500 shadow-md shadow-emerald-300/30' // 100-120: Mükemmel
+            } else if (optimumScore >= 80) {
+              profitBgColor = 'bg-gradient-to-r from-blue-400 to-blue-600 shadow-md shadow-blue-300/30' // 80-100: İyi
+            } else if (optimumScore >= 60) {
+              profitBgColor = 'bg-gradient-to-r from-yellow-300 to-yellow-400 shadow-md shadow-yellow-200/40' // 60-80: Orta
             } else {
-              profitBgColor = 'bg-gradient-to-r from-rose-400 to-red-500 shadow-md shadow-rose-300/30'
+              profitBgColor = 'bg-gradient-to-r from-rose-400 to-red-500 shadow-md shadow-rose-300/30' // 0-60: Zayıf
             }
 
             const commissionDisplay = result.commissionAmount === 0 
