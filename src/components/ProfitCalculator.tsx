@@ -663,12 +663,23 @@ function ProfitCalculator() {
                   .map((sc, idx) => {
                   const best = sc.results.reduce((b, c)=> c.profitRate > b.profitRate ? c : b)
                   const isCampaign = sc.name.toLowerCase().includes('kampanya') || sc.name.toLowerCase().includes('kampanyalı') || sc.name.toLowerCase().includes('promosyon')
-                  let chipColor = 'bg-gradient-to-r from-rose-400 to-red-500 text-white'
-                  const pr = best.profitRate
-                  if (isCampaign) chipColor = 'bg-gradient-to-r from-sky-400 to-indigo-400 text-white'
-                  else if (pr >= 20) chipColor = 'bg-gradient-to-r from-emerald-400 to-green-500 text-white'
-                  else if (pr >= 15) chipColor = 'bg-gradient-to-r from-yellow-300 to-yellow-400 text-slate-900'
-                  else if (pr >= 10) chipColor = 'bg-gradient-to-r from-orange-400 to-amber-400 text-white'
+                  const optimumScore = best.optimumScore ?? 0
+                  
+                  // Optimum skor aralıklarına göre net kazanç rengi
+                  let chipColor = 'bg-gradient-to-r from-rose-400 to-red-500 text-white' // 0-60: Zayıf
+                  if (isCampaign) {
+                    chipColor = 'bg-gradient-to-r from-slate-400 to-slate-600 text-white' // Kampanya: Gri
+                  } else if (optimumScore >= 120) {
+                    chipColor = 'bg-gradient-to-r from-purple-400 to-purple-600 text-white' // 120+: Aşırı
+                  } else if (optimumScore >= 100) {
+                    chipColor = 'bg-gradient-to-r from-emerald-400 to-green-500 text-white' // 100-120: Mükemmel
+                  } else if (optimumScore >= 80) {
+                    chipColor = 'bg-gradient-to-r from-blue-400 to-blue-600 text-white' // 80-100: İyi
+                  } else if (optimumScore >= 60) {
+                    chipColor = 'bg-gradient-to-r from-yellow-300 to-yellow-400 text-slate-900' // 60-80: Orta
+                  } else {
+                    chipColor = 'bg-gradient-to-r from-rose-400 to-red-500 text-white' // 0-60: Zayıf
+                  }
                   return (
                     <tr
                       key={sc.id}

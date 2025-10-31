@@ -54,7 +54,7 @@ function ResultsTableImpl({ results, onSaveScenario, showCommission = false, sho
             // Optimum skor aralıklarına göre net kazanç rengi
             let profitBgColor = 'bg-gradient-to-r from-rose-400 to-red-500 shadow-md shadow-rose-300/30' // 0-60: Zayıf
             if (isCampaign) {
-              profitBgColor = 'bg-gradient-to-r from-sky-400 to-indigo-400 shadow-md shadow-sky-300/30' // Kampanya
+              profitBgColor = 'bg-gradient-to-r from-slate-400 to-slate-600 shadow-md shadow-slate-300/30' // Kampanya: Gri
             } else if (optimumScore >= 120) {
               profitBgColor = 'bg-gradient-to-r from-purple-400 to-purple-600 shadow-md shadow-purple-300/30' // 120+: Aşırı
             } else if (optimumScore >= 100) {
@@ -99,7 +99,7 @@ function ResultsTableImpl({ results, onSaveScenario, showCommission = false, sho
                   {result.optimumScore !== undefined ? (
                     <div className="flex flex-col items-center gap-0.5">
                       <span className={`text-sm sm:text-base font-bold ${
-                        isCampaign ? 'text-sky-600' :
+                        isCampaign ? 'text-slate-600' :
                         result.optimumScore >= 120 ? 'text-purple-600' :
                         result.optimumScore >= 100 ? 'text-emerald-600' :
                         result.optimumScore >= 80 ? 'text-blue-600' :
