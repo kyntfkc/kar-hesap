@@ -29,6 +29,9 @@ function ResultsTableImpl({ results, onSaveScenario, showCommission = false, sho
             <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
               Kâr %
             </th>
+            <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
+              Optimum Skor
+            </th>
             {showBank && (
               <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
                 Bankaya Yatan
@@ -87,6 +90,32 @@ function ResultsTableImpl({ results, onSaveScenario, showCommission = false, sho
                   <span className="text-sm sm:text-base font-bold text-slate-900">
                     {Math.round(result.profitRate)}%
                   </span>
+                </td>
+                <td className="px-2 py-2 whitespace-nowrap text-center">
+                  {result.optimumScore !== undefined ? (
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className={`text-sm sm:text-base font-bold ${
+                        isCampaign ? 'text-sky-600' :
+                        result.optimumScore >= 120 ? 'text-purple-600' :
+                        result.optimumScore >= 100 ? 'text-emerald-600' :
+                        result.optimumScore >= 80 ? 'text-blue-600' :
+                        result.optimumScore >= 60 ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
+                        {Math.round(result.optimumScore)}
+                      </span>
+                      <span className="text-[10px] text-slate-500 font-medium">
+                        {isCampaign ? 'Değişken' :
+                         result.optimumScore >= 120 ? 'Aşırı' :
+                         result.optimumScore >= 100 ? 'Mükemmel' :
+                         result.optimumScore >= 80 ? 'İyi' :
+                         result.optimumScore >= 60 ? 'Orta' :
+                         'Zayıf'}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-slate-400">-</span>
+                  )}
                 </td>
                 {showBank && (
                   <td className="px-2 py-2 whitespace-nowrap text-center">

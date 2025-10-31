@@ -38,6 +38,7 @@ export interface ProfitResult {
   netProfit: number
   profitRate: number
   bankayaYatan: number
+  optimumScore?: number
 }
 
 export interface SavedCalculation {

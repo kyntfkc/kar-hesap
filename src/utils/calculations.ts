@@ -70,6 +70,18 @@ export function calculateProfit(
   // Bankaya yatan: Satış Tutarı - (Komisyon + Kargo + Stopaj)
   const bankayaYatan = platform.salePrice - (commissionAmount + expenses.shipping + eCommerceTaxAmount)
 
+  // Optimum Skor Hesaplama: (Kâr % / 15) × Satış Fiyatı Katsayısı × 100
+  // Satış Fiyatı Katsayısı = Mevcut Satış Fiyatı / Standart Satış Fiyatı (%15 kâr ile)
+  const standardSalePrice = calculateStandardSalePrice(
+    productInfo,
+    goldInfo,
+    expenses,
+    platform.commissionRate,
+    15 // %15 kâr referans olarak
+  )
+  const salePriceCoefficient = standardSalePrice > 0 ? platform.salePrice / standardSalePrice : 1
+  const optimumScore = (profitRate / 15) * salePriceCoefficient * 100
+
   return {
     platform: platform.name,
     commissionRate: platform.commissionRate,
@@ -78,7 +90,8 @@ export function calculateProfit(
     totalExpenses,
     netProfit,
     profitRate,
-    bankayaYatan
+    bankayaYatan,
+    optimumScore
   }
 }
 
