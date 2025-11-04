@@ -49,12 +49,7 @@ function InputForm({
   
   const productAmount = calculateProductAmount(pureGoldGram, goldInfo.goldPrice)
   
-  const purchasePrice = calculatePurchasePrice(
-    productAmount,
-    productInfo.productGram,
-    productInfo.laborMillem,
-    goldInfo.goldPrice
-  )
+  const purchasePrice = calculatePurchasePrice(productAmount)
 
   // Altın kuru işlemleri ayrı kartta
   
@@ -63,7 +58,9 @@ function InputForm({
       ...productInfo,
       pureGoldGram: pureGoldGram
     }
-    if (Math.abs(updatedProductInfo.pureGoldGram - productInfo.pureGoldGram) > 0.0001) {
+    // Hassasiyet için epsilon değeri kullan (0.00001)
+    const epsilon = 0.00001
+    if (Math.abs(updatedProductInfo.pureGoldGram - productInfo.pureGoldGram) > epsilon) {
       onProductInfoChange(updatedProductInfo)
     }
   }, [productInfo.productGram, productInfo.laborMillem, productInfo.laserCuttingEnabled, productInfo.laserCuttingMillem, productInfo.pureGoldGram, pureGoldGram])
@@ -74,9 +71,11 @@ function InputForm({
       productAmount: productAmount,
       purchasePrice: purchasePrice
     }
+    // Hassasiyet için epsilon değeri kullan (0.01 TL için yeterli)
+    const epsilon = 0.01
     if (
-      Math.abs(updatedGoldInfo.productAmount - goldInfo.productAmount) > 0.01 ||
-      Math.abs(updatedGoldInfo.purchasePrice - goldInfo.purchasePrice) > 0.01
+      Math.abs(updatedGoldInfo.productAmount - goldInfo.productAmount) > epsilon ||
+      Math.abs(updatedGoldInfo.purchasePrice - goldInfo.purchasePrice) > epsilon
     ) {
       onGoldInfoChange(updatedGoldInfo)
     }
@@ -198,13 +197,15 @@ function InputForm({
                       } else {
                         const numValue = parseFloat(normalizedValue)
                         if (!isNaN(numValue)) {
-                          updateProductInfo('productGram', numValue)
+                          // Tutarlı yuvarlama: 3 ondalık basamağa yuvarla
+                          const roundedValue = Math.round(numValue * 1000) / 1000
+                          updateProductInfo('productGram', roundedValue)
                         }
                       }
                     }
                   }}
                   onBlur={() => setProductGramInput('')}
-                  className="w-32 px-3 py-2.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white transition-all font-medium text-slate-900 hover:border-slate-400 shadow-sm"
+                  className="w-32 px-3 py-2.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 bg-white transition-all font-medium text-slate-900 hover:border-slate-400 shadow-sm"
                   placeholder="0,00"
                 />
                 <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">Gr</span>
@@ -216,12 +217,13 @@ function InputForm({
                 const nextOption = lengthOption === '50' ? 'none' : '50'
                 const desiredExtra = nextOption === '50' ? 0.10 : 0
                 const base = productInfo.productGram - currentExtra
-                const nextValue = parseFloat((base + desiredExtra).toFixed(3))
+                // Tutarlı yuvarlama için Math.round kullan
+                const nextValue = Math.round((base + desiredExtra) * 1000) / 1000
                 updateProductInfo('productGram', nextValue)
                 setProductGramInput('')
                 setLengthOption(nextOption)
               }}
-              className={`px-2.5 py-1.5 text-xs rounded-lg border transition-colors ${lengthOption === '50' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'}`}
+              className={`px-2.5 py-1.5 text-xs rounded-lg border transition-colors ${lengthOption === '50' ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'}`}
             >
               50 cm Zincir
             </button>
@@ -232,12 +234,13 @@ function InputForm({
                 const nextOption = lengthOption === '60' ? 'none' : '60'
                 const desiredExtra = nextOption === '60' ? 0.30 : 0
                 const base = productInfo.productGram - currentExtra
-                const nextValue = parseFloat((base + desiredExtra).toFixed(3))
+                // Tutarlı yuvarlama için Math.round kullan
+                const nextValue = Math.round((base + desiredExtra) * 1000) / 1000
                 updateProductInfo('productGram', nextValue)
                 setProductGramInput('')
                 setLengthOption(nextOption)
               }}
-              className={`px-2.5 py-1.5 text-xs rounded-lg border transition-colors ${lengthOption === '60' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'}`}
+              className={`px-2.5 py-1.5 text-xs rounded-lg border transition-colors ${lengthOption === '60' ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'}`}
             >
               60 cm Zincir
             </button>
@@ -252,7 +255,7 @@ function InputForm({
                 value={expenses.specialPackaging}
                 onChange={(e) => updateExpenses('specialPackaging', parseFloat(e.target.value) || 0)}
                 disabled={expenses.specialPackaging === 0}
-                className={`w-20 px-2 py-1 text-xs border border-slate-300/70 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed ${expenses.specialPackaging === 0 ? 'pointer-events-none opacity-60' : ''}`}
+                className={`w-20 px-2 py-1 text-xs border border-slate-300/70 rounded-md focus:ring-1 focus:ring-amber-500 focus:border-amber-500 bg-white shadow-sm disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed ${expenses.specialPackaging === 0 ? 'pointer-events-none opacity-60' : ''}`}
                 placeholder="150"
               />
               <span className="text-[11px] text-gray-500">TL</span>
@@ -263,7 +266,7 @@ function InputForm({
                   onChange={handleSpecialPackagingToggle}
                   className="sr-only peer"
                 />
-                <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
               </label>
             </div>
           </div>
@@ -292,7 +295,7 @@ function InputForm({
                     step="0.001"
                     value={productInfo.laborMillem}
                     onChange={(e) => updateProductInfo('laborMillem', parseFloat(e.target.value) || 0)}
-                    className="w-full px-2.5 py-2 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
+                    className="w-full px-2.5 py-2 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white shadow-sm"
                     placeholder="0.050"
                   />
                 </div>
@@ -311,7 +314,7 @@ function InputForm({
                   step="0.01"
                   value={expenses.shipping}
                   onChange={(e) => updateExpenses('shipping', parseFloat(e.target.value) || 0)}
-                    className="h-9 w-full px-2 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center shadow-sm"
+                    className="h-9 w-full px-2 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-center shadow-sm"
                 />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-medium">TL</span>
                 </div>
@@ -324,7 +327,7 @@ function InputForm({
                   step="0.01"
                   value={expenses.packaging}
                   onChange={(e) => updateExpenses('packaging', parseFloat(e.target.value) || 0)}
-                    className="h-9 w-full px-2 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center shadow-sm"
+                    className="h-9 w-full px-2 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-center shadow-sm"
                 />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-medium">TL</span>
                 </div>
@@ -337,7 +340,7 @@ function InputForm({
                   step="0.01"
                   value={expenses.serviceFee}
                   onChange={(e) => updateExpenses('serviceFee', parseFloat(e.target.value) || 0)}
-                    className="h-9 w-full px-2 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center shadow-sm"
+                    className="h-9 w-full px-2 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-center shadow-sm"
                 />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-medium">TL</span>
               </div>
@@ -352,7 +355,7 @@ function InputForm({
                     const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
                     updateExpenses('eCommerceTaxRate', value)
                   }}
-                  className="h-9 w-full px-2 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center shadow-sm"
+                  className="h-9 w-full px-2 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-center shadow-sm"
                   placeholder="1.00"
                 />
               </div>
@@ -367,7 +370,7 @@ function InputForm({
           <div className="flex items-center gap-2">
             <button
               onClick={addPlatform}
-              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all"
+              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-all"
               title="Yeni senaryo ekle"
             >
               <Plus className="w-3 h-3" />
@@ -375,7 +378,7 @@ function InputForm({
             </button>
             <button
               onClick={addLinedProduct}
-              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-all"
+              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50 rounded-lg transition-all"
               title="Astarlı Ürün senaryosu ekle"
             >
               <Plus className="w-3 h-3" />
@@ -397,7 +400,7 @@ function InputForm({
                     updatePlatform(index, 'name', e.target.value)
                   }}
                   disabled={platform.name === 'Standart' || platform.name === 'Astarlı Ürün'}
-                  className="w-full px-2 py-1.5 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white font-medium text-slate-900 text-center shadow-sm disabled:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-500"
+                  className="w-full px-2 py-1.5 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white font-medium text-slate-900 text-center shadow-sm disabled:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-500"
                   placeholder="Senaryo adı"
                 />
                 <button
@@ -419,7 +422,7 @@ function InputForm({
                       onChange={(e) =>
                         updatePlatform(index, 'commissionRate', parseFloat(e.target.value) || 0)
                       }
-                      className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center font-semibold shadow-sm"
+                      className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-center font-semibold shadow-sm"
                       placeholder="0"
                     />
                   </div>
@@ -433,7 +436,7 @@ function InputForm({
                         const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
                         updatePlatform(index, 'targetProfitRate', value)
                       }}
-                      className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center font-semibold shadow-sm"
+                      className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-center font-semibold shadow-sm"
                       placeholder={platform.name === 'Astarlı Ürün' ? '30' : '15'}
                     />
                   </div>
@@ -470,7 +473,7 @@ function InputForm({
                         updatePlatform(index, 'salePrice', parseInt(e.target.value) || 0)
                       }}
                       disabled={platform.name === 'Standart' || platform.name === 'Astarlı Ürün'}
-                      className="w-full pr-8 px-2 py-1.5 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center font-semibold disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500"
+                      className="w-full pr-8 px-2 py-1.5 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-center font-semibold disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500"
                       placeholder="0"
                     />
                     <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-medium">TL</span>

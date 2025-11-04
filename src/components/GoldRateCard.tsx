@@ -72,7 +72,7 @@ export default function GoldRateCard({ goldInfo, onGoldInfoChange }: Props) {
                 update('goldPrice', isNaN(num) ? 0 : Math.max(0, Math.round(num)))
               }}
               onBlur={() => setPriceInput('')}
-              className="w-full px-3 py-2 text-sm border border-slate-300/70 rounded-xl focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 bg-white transition-all font-medium text-slate-900 hover:border-slate-400 shadow-sm"
+              className="w-full px-3 py-2 text-sm border border-slate-300/70 rounded-xl focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 bg-white transition-all font-medium text-slate-900 hover:border-slate-400 shadow-sm"
               placeholder="0"
             />
             <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500 font-medium">TL</span>

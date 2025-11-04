@@ -8,7 +8,9 @@ export function formatTL(value: number, fraction: 0 | 2 = 0): string {
 
 export function formatPercent(value: number): string {
   if (!isFinite(value)) return '-'
-  return value.toFixed(1).replace('.', ',') + '%'
+  // Tutarlı yuvarlama: 1 ondalık basamağa yuvarla
+  const rounded = Math.round(value * 10) / 10
+  return rounded.toFixed(1).replace('.', ',') + '%'
 }
 
 export function formatNumber(value: number): string {
