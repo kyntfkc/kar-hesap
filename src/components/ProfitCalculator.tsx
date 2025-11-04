@@ -10,7 +10,7 @@ import ResultsTable from './ResultsTable'
 import SettingsModal, { AppSettings } from './SettingsModal'
 
 const defaultProductInfo: ProductInfo = {
-  productGram: 0.40,
+  productGram: 0.80,
   laborMillem: 0.050,
   pureGoldGram: 0.25,
   laserCuttingEnabled: false,
@@ -33,13 +33,13 @@ const defaultExpenses: Expenses = {
   specialPackaging: 0,
 }
 
-const getDefaultPlatforms = (productGram: number = 0.40, goldPrice: number = 5900): Platform[] => [
+const getDefaultPlatforms = (productGram: number = 0.80, goldPrice: number = 5900): Platform[] => [
   { name: 'Standart', commissionRate: 22, salePrice: productGram * goldPrice * 1.2, targetProfitRate: 15 },
 ]
 
 function ProfitCalculator() {
   const defaultAppSettings: AppSettings = {
-    defaultProductGram: 0.40,
+    defaultProductGram: 0.80,
     defaultGoldPrice: 5900,
     defaultShipping: 120,
     defaultPackaging: 120,
