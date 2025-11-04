@@ -6,8 +6,8 @@
 :root {
   --bg: 246 248 253; /* slate-50 like */
   --surface: 255 255 255;
-  --primary-start: 37 99 235; /* blue-600 */
-  --primary-end: 79 70 229;  /* indigo-600 */
+  --primary-start: 245 158 11; /* amber-500 */
+  --primary-end: 234 179 8;  /* yellow-500 */
   --ring: 226 232 240; /* slate-200 */
 }
 
@@ -20,7 +20,7 @@ html, body {
     @apply bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 ring-1 ring-slate-200/50;
   }
   .btn-primary {
-    @apply h-9 px-3 rounded-xl text-white text-xs font-semibold shadow-lg shadow-blue-600/30 hover:shadow-xl hover:shadow-blue-600/40 disabled:opacity-60 flex items-center justify-center bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:via-indigo-700 hover:to-blue-800 transition-all;
+    @apply h-9 px-3 rounded-xl text-white text-xs font-semibold shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 disabled:opacity-60 flex items-center justify-center bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:via-yellow-600 hover:to-amber-700 transition-all;
   }
   .btn-outline {
     @apply h-9 px-3 rounded-xl border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 flex items-center justify-center;

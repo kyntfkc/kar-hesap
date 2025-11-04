@@ -14,7 +14,7 @@ function ResultsTableImpl({ results, onSaveScenario, showCommission = false, sho
     <div className="overflow-x-auto -mx-2 sm:mx-0">
       <table className="w-full min-w-[720px] sm:min-w-0 table-fixed">
         <thead>
-          <tr className="border-b-2 border-slate-200/80 bg-gradient-to-r from-slate-50 via-blue-50/60 to-indigo-50/70">
+          <tr className="border-b-2 border-slate-200/80 bg-gradient-to-r from-slate-50 via-amber-50/60 to-yellow-50/70">
             <th className="px-2 py-2 text-left text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
               Senaryo
             </th>
@@ -72,9 +72,9 @@ function ResultsTableImpl({ results, onSaveScenario, showCommission = false, sho
               : `${formatNumber(result.commissionAmount)} TL`
 
             return (
-              <tr key={index} className="hover:bg-blue-50/50 transition-all duration-200 border-b border-slate-100/80 group">
+              <tr key={index} className="hover:bg-amber-50/50 transition-all duration-200 border-b border-slate-100/80 group">
                 <td className="px-2 py-2 whitespace-nowrap">
-                  <span className="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
+                  <span className="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-amber-700 transition-colors">
                     {result.platform}
                   </span>
                 </td>
@@ -123,7 +123,7 @@ function ResultsTableImpl({ results, onSaveScenario, showCommission = false, sho
                 </td>
                 {showBank && (
                   <td className="px-2 py-2 whitespace-nowrap text-center">
-                    <span className="text-xs sm:text-sm font-semibold text-blue-800">
+                    <span className="text-xs sm:text-sm font-semibold text-amber-800">
                       {formatNumber(result.bankayaYatan)} TL
                     </span>
                   </td>
