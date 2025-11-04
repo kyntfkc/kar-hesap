@@ -47,7 +47,7 @@ function ProfitCalculator() {
     defaultETaxRate: 1.0,
     defaultCommission: 22,
     defaultStandardProfit: 15,
-    defaultLinedProfit: 30,
+    defaultLinedProfit: 20,
     defaultLaborMillem: 0.050,
     defaultExtraCost: 150,
   }
@@ -206,7 +206,7 @@ function ProfitCalculator() {
         const idx = prevPlatforms.findIndex(p => p.name === name)
         if (idx !== -1) {
           const commissionRate = prevPlatforms[idx].commissionRate || 22
-          const defaultTarget = name === 'Astarlı Ürün' ? 30 : 15
+          const defaultTarget = name === 'Astarlı Ürün' ? 20 : 15
           const targetProfitRate = prevPlatforms[idx].targetProfitRate ?? defaultTarget
           const newSalePrice = calculateStandardSalePrice(
             productInfo,

@@ -153,11 +153,11 @@ function InputForm({
       goldInfo,
       expenses,
       22,
-      30
+      20
     )
     onPlatformsChange([
       ...platforms,
-      { name: 'Astarlı Ürün', commissionRate: 22, salePrice: sale, targetProfitRate: 30 },
+      { name: 'Astarlı Ürün', commissionRate: 22, salePrice: sale, targetProfitRate: 20 },
     ])
   }
 
@@ -431,13 +431,13 @@ function InputForm({
                     <input
                       type="number"
                       step="0.1"
-                      value={(platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 30 : 15)) === 0 ? '' : (platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 30 : 15))}
+                      value={(platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 20 : 15)) === 0 ? '' : (platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 20 : 15))}
                       onChange={(e) => {
                         const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
                         updatePlatform(index, 'targetProfitRate', value)
                       }}
                       className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 bg-white text-center font-semibold shadow-sm"
-                      placeholder={platform.name === 'Astarlı Ürün' ? '30' : '15'}
+                      placeholder={platform.name === 'Astarlı Ürün' ? '20' : '15'}
                     />
                   </div>
                 </div>
