@@ -206,7 +206,7 @@ function ProfitCalculator() {
         const idx = prevPlatforms.findIndex(p => p.name === name)
         if (idx !== -1) {
           const commissionRate = prevPlatforms[idx].commissionRate || 22
-          const defaultTarget = name === 'Astarlı Ürün' ? 20 : 15
+          const defaultTarget = name === 'Astarlı Ürün' ? appSettings.defaultLinedProfit : appSettings.defaultStandardProfit
           const targetProfitRate = prevPlatforms[idx].targetProfitRate ?? defaultTarget
           const newSalePrice = calculateStandardSalePrice(
             productInfo,
@@ -224,7 +224,7 @@ function ProfitCalculator() {
 
       return updated ?? prevPlatforms
     })
-  }, [productInfo, goldInfo, expenses])
+  }, [productInfo, goldInfo, expenses, appSettings])
 
   // Auto-calculate only after first manual calculation
   useEffect(() => {
