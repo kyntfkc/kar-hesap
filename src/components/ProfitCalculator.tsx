@@ -230,6 +230,7 @@ function ProfitCalculator() {
   useEffect(() => {
     if (!hasCalculated) return
     setIsCalculating(true)
+    setResults([]) // Eski sonuçları temizle
     const timer = setTimeout(() => {
       const calculatedResults = calculateAllPlatforms(
         productInfo,
@@ -246,6 +247,7 @@ function ProfitCalculator() {
 
   const handleCalculate = useCallback(() => {
     setIsCalculating(true)
+    setResults([]) // Eski sonuçları temizle
     if (apiEnabled) {
       postCalculate({ productInfo, goldInfo, expenses, platforms })
         .then((resp: any) => {

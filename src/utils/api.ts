@@ -11,7 +11,12 @@ async function request(path: string, options: RequestInit = {}, timeoutMs = 8000
   const t = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const r = await fetch(`${BASE}${path}`, {
-      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        ...(options.headers || {}) 
+      },
       signal: controller.signal,
       ...options,
     });
