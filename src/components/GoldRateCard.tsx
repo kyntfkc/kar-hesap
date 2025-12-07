@@ -80,7 +80,19 @@ export default function GoldRateCard({ goldInfo, onGoldInfoChange }: Props) {
         </div>
         <div className="flex flex-col sm:flex-row sm:items-end gap-2">
           {!xauusd && (
-            <input type="number" value={manualXau} onChange={e=>setManualXau(e.target.value)} placeholder="Ons (USD)" className="w-full sm:w-32 px-2 py-2 rounded-xl border border-slate-300 text-slate-700" />
+            <input 
+              type="text" 
+              inputMode="decimal"
+              value={manualXau} 
+              onChange={(e) => {
+                const raw = e.target.value.replace(',', '.')
+                if (raw === '' || /^(\d+)?([.,]\d*)?$/.test(raw)) {
+                  setManualXau(e.target.value)
+                }
+              }}
+              placeholder="Ons (USD)" 
+              className="w-full sm:w-32 px-2 py-2 rounded-xl border border-slate-300 text-slate-700" 
+            />
           )}
           <div className="flex items-stretch gap-2">
             <button onClick={refresh} className="btn-primary" disabled={loading}>

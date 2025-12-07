@@ -61,9 +61,18 @@ export default function SettingsModal({ open, initial, onClose, onSave }: Settin
     setDraft(prev => ({ ...prev, [key]: v }))
   }
   const commitNumber = (key: keyof AppSettings) => {
-    const raw = draft[key]
-    const n = parseFloat(raw)
-    setForm(prev => ({ ...prev, [key]: isNaN(n) ? 0 : n }))
+    const raw = draft[key].trim()
+    if (raw === '' || raw === '.' || raw === ',') {
+      setForm(prev => ({ ...prev, [key]: 0 }))
+      setDraft(prev => ({ ...prev, [key]: '0' }))
+    } else {
+      const normalized = raw.replace(',', '.')
+      const n = parseFloat(normalized)
+      setForm(prev => ({ ...prev, [key]: isNaN(n) ? 0 : n }))
+      if (!isNaN(n)) {
+        setDraft(prev => ({ ...prev, [key]: normalized }))
+      }
+    }
   }
 
   return (
