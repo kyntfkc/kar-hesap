@@ -155,11 +155,7 @@ function ProfitCalculator() {
   const loadPresetsFromBackend = useCallback(() => {
     if (!apiEnabled) return
     
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ProfitCalculator.tsx:155',message:'loadPresetsFromBackend called',data:{apiEnabled:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
-    
-    // Local preset'leri önce yükle (fallback olarak) - localStorage'dan direkt oku
+    // Local preset'leri localStorage'dan yükle
     const localPresets = (() => {
       const saved = localStorage.getItem('productPresets')
       if (saved) {
@@ -171,89 +167,13 @@ function ProfitCalculator() {
       }
       return []
     })()
-    // #region agent log
-    const logDataLocal = {location:'ProfitCalculator.tsx:174',message:'Local presets loaded',data:{localPresetsCount:localPresets.length,localPresetIds:localPresets.map(p=>p.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'};
-    console.log('[DEBUG]', logDataLocal);
-    fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logDataLocal)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
-    // #endregion
     
-    // Backend'de GET /sync endpoint'i yok, bu yüzden sadece postSync kullanıyoruz
-    // postSync çağrıldığında backend'e mevcut veriler gönderilir, response'unda preset'ler dönebilir
-    const currentSync = {
-      appSettings,
-      productInfo,
-      goldInfo,
-      expenses,
-      platforms,
-      savedCalculations,
-      productPresets: localPresets,
+    // Sadece local preset'leri yükle (backend'de GET endpoint yok)
+    // Backend sync işlemi ayrı bir useEffect ile yapılıyor
+    if (localPresets.length > 0) {
+      setProductPresets(localPresets)
     }
-    
-    // #region agent log
-    const logDataPostSync = {location:'ProfitCalculator.tsx:186',message:'postSync called to load presets',data:{localPresetsCount:localPresets.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'};
-    console.log('[DEBUG]', logDataPostSync);
-    fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logDataPostSync)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
-    // #endregion
-    
-    postSync(currentSync)
-      .then((resp: any) => {
-        // #region agent log
-        const logDataResp = {location:'ProfitCalculator.tsx:192',message:'postSync response for loading presets',data:{responseType:typeof resp,hasProductPresets:!!resp?.productPresets,isArray:Array.isArray(resp?.productPresets),responsePresetsCount:resp?.productPresets?.length||0,responseKeys:Object.keys(resp||{})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'};
-        console.log('[DEBUG]', logDataResp);
-        fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logDataResp)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
-        // #endregion
-        
-        // Backend'den gelen preset'leri yükle
-        if (resp && resp.productPresets && Array.isArray(resp.productPresets)) {
-          const backendPresets = resp.productPresets as ProductPreset[]
-          // #region agent log
-          const logDataBackend = {location:'ProfitCalculator.tsx:197',message:'Backend presets extracted',data:{backendPresetsCount:backendPresets.length,backendPresetIds:backendPresets.map(p=>p.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'};
-          console.log('[DEBUG]', logDataBackend);
-          fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logDataBackend)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
-          // #endregion
-          
-          // Backend ve local preset'leri birleştir (duplicate kontrolü ile)
-          const backendIds = new Set(backendPresets.map(p => p.id))
-          const uniqueLocalPresets = localPresets.filter(p => !backendIds.has(p.id))
-          const mergedPresets = [...backendPresets, ...uniqueLocalPresets]
-          
-          if (mergedPresets.length > 0) {
-            setProductPresets(mergedPresets)
-            localStorage.setItem('productPresets', JSON.stringify(mergedPresets))
-            // #region agent log
-            const logDataMerged = {location:'ProfitCalculator.tsx:207',message:'Presets updated from backend',data:{finalCount:mergedPresets.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'};
-            console.log('[DEBUG]', logDataMerged);
-            fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logDataMerged)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
-            // #endregion
-          } else if (localPresets.length > 0) {
-            // Backend'de preset yoksa local'i koru
-            setProductPresets(localPresets)
-          }
-        } else {
-          // postSync response'unda preset'ler yok, local'i koru
-          // Backend'e gönderilen preset'ler kaydedildi, diğer PC'ler periyodik kontrol ile yükleyecek
-          if (localPresets.length > 0) {
-            setProductPresets(localPresets)
-            // #region agent log
-            const logDataNoPresets = {location:'ProfitCalculator.tsx:219',message:'Using local presets (postSync no presets in response)',data:{localCount:localPresets.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'};
-            console.log('[DEBUG]', logDataNoPresets);
-            fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logDataNoPresets)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
-            // #endregion
-          }
-        }
-      })
-      .catch((err: any) => {
-        // #region agent log
-        const logDataError = {location:'ProfitCalculator.tsx:225',message:'postSync error loading presets',data:{error:err?.message||String(err),localPresetsCount:localPresets.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'};
-        console.error('[DEBUG]', logDataError);
-        fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logDataError)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
-        // #endregion
-        // Tüm istekler başarısız olursa local preset'leri koru
-        if (localPresets.length > 0) {
-          setProductPresets(localPresets)
-        }
-      })
-  }, [apiEnabled, appSettings, productInfo, goldInfo, expenses, platforms, savedCalculations])
+  }, [apiEnabled])
 
   // Load persisted saved calculations and presets from backend
   useEffect(() => {
@@ -267,7 +187,9 @@ function ProfitCalculator() {
           localStorage.setItem('savedCalculations', JSON.stringify(resp.items))
         }
       })
-      .catch(() => {})
+      .catch((err) => {
+        console.error('Failed to load saved calculations:', err)
+      })
     
     // İlk yüklemede preset'leri yükle
     loadPresetsFromBackend()
@@ -302,8 +224,10 @@ function ProfitCalculator() {
         savedCalculations,
         productPresets,
       }
-      postSync(snapshot).catch(() => {})
-    }, 500)
+      postSync(snapshot).catch((err) => {
+        console.error('Sync error:', err)
+      })
+    }, 2000)
     return () => clearTimeout(timer)
   }, [appSettings, productInfo, goldInfo, expenses, platforms, savedCalculations, productPresets])
 
@@ -442,7 +366,9 @@ function ProfitCalculator() {
     const updated = savedCalculations.filter(s => s.id !== id)
     setSavedCalculations(updated)
     localStorage.setItem('savedCalculations', JSON.stringify(updated))
-    if (apiEnabled) deleteSavedCalculation(id).catch(() => {})
+    if (apiEnabled) deleteSavedCalculation(id).catch((err) => {
+      console.error('Failed to delete saved calculation:', err)
+    })
   }
 
   const handleClearAllSaved = () => {
@@ -464,11 +390,6 @@ function ProfitCalculator() {
   // Preset yönetim fonksiyonları
   const handleSavePreset = (name: string) => {
     if (!name.trim()) return
-    // #region agent log
-    const logData1 = {location:'ProfitCalculator.tsx:489',message:'handleSavePreset called',data:{name:name.trim(),currentPresetsCount:productPresets.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'};
-    console.log('[DEBUG]', logData1);
-    fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData1)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
-    // #endregion
     const newPreset: ProductPreset = {
       id: `${Date.now()}`,
       name: name.trim(),
@@ -476,11 +397,6 @@ function ProfitCalculator() {
       productInfo: { ...productInfo },
     }
     const updated = [newPreset, ...productPresets]
-    // #region agent log
-    const logData2 = {location:'ProfitCalculator.tsx:500',message:'New preset created',data:{presetId:newPreset.id,presetName:newPreset.name,updatedCount:updated.length,hasProductPresets:updated.some(p=>p.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'};
-    console.log('[DEBUG]', logData2);
-    fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData2)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
-    // #endregion
     setProductPresets(updated)
     // Hemen backend'e sync et
     if (apiEnabled) {
@@ -493,31 +409,9 @@ function ProfitCalculator() {
         savedCalculations,
         productPresets: updated,
       }
-      // #region agent log
-      const logData3 = {location:'ProfitCalculator.tsx:507',message:'postSync request - saving preset',data:{snapshotHasProductPresets:!!snapshot.productPresets,presetsCount:snapshot.productPresets?.length||0,presetIds:snapshot.productPresets?.map((p:any)=>p.id)||[]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'};
-      console.log('[DEBUG]', logData3);
-      fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData3)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
-      // #endregion
-      postSync(snapshot)
-        .then((resp: any) => {
-          // #region agent log
-          const logData4 = {location:'ProfitCalculator.tsx:515',message:'postSync response - preset saved',data:{responseType:typeof resp,hasProductPresets:!!resp?.productPresets,responsePresetsCount:resp?.productPresets?.length||0,responseKeys:Object.keys(resp||{})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'};
-          console.log('[DEBUG]', logData4);
-          fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData4)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
-          // #endregion
-          // postSync başarılı olduktan sonra, backend'den preset'leri tekrar yükle (diğer PC'ler için)
-          // Kısa bir gecikme ile yükle ki backend işlemi tamamlasın
-          setTimeout(() => {
-            loadPresetsFromBackend()
-          }, 1000)
-        })
-        .catch((err: any) => {
-          // #region agent log
-          const logData5 = {location:'ProfitCalculator.tsx:519',message:'postSync error - preset save failed',data:{error:err?.message||String(err),errorType:typeof err},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'};
-          console.error('[DEBUG]', logData5);
-          fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData5)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
-          // #endregion
-        })
+      postSync(snapshot).catch((err) => {
+        console.error('Preset sync error:', err)
+      })
     }
     setToast({ message: 'Preset kaydedildi', type: 'success' })
   }
@@ -538,14 +432,9 @@ function ProfitCalculator() {
         savedCalculations,
         productPresets: updated,
       }
-      postSync(snapshot)
-        .then(() => {
-          // postSync başarılı olduktan sonra, backend'den preset'leri tekrar yükle
-          setTimeout(() => {
-            loadPresetsFromBackend()
-          }, 1000)
-        })
-        .catch(() => {})
+      postSync(snapshot).catch((err) => {
+        console.error('Preset sync error:', err)
+      })
     }
     setToast({ message: 'Preset güncellendi', type: 'success' })
   }
@@ -564,14 +453,9 @@ function ProfitCalculator() {
         savedCalculations,
         productPresets: updated,
       }
-      postSync(snapshot)
-        .then(() => {
-          // postSync başarılı olduktan sonra, backend'den preset'leri tekrar yükle
-          setTimeout(() => {
-            loadPresetsFromBackend()
-          }, 1000)
-        })
-        .catch(() => {})
+      postSync(snapshot).catch((err) => {
+        console.error('Preset sync error:', err)
+      })
     }
     setToast({ message: 'Preset silindi', type: 'success' })
   }
@@ -631,7 +515,9 @@ function ProfitCalculator() {
     updated.splice(index, 0, moved)
     setSavedCalculations(updated)
     localStorage.setItem('savedCalculations', JSON.stringify(updated))
-    if (apiEnabled) postSync({ savedCalculations: updated }).catch(() => {})
+    if (apiEnabled) postSync({ savedCalculations: updated }).catch((err) => {
+      console.error('Sync error:', err)
+    })
     setDragIndex(null)
   }
 

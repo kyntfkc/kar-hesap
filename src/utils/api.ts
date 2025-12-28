@@ -43,22 +43,7 @@ export function postStandardSalePrice(payload: unknown) {
 }
 
 export function postSync(payload: unknown) {
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:45',message:'postSync called',data:{hasProductPresets:!!(payload as any)?.productPresets,presetsCount:(payload as any)?.productPresets?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-  // #endregion
   return request('/sync', { method: 'POST', body: JSON.stringify(payload) })
-    .then((resp: any) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:47',message:'postSync response',data:{responseType:typeof resp,hasProductPresets:!!resp?.productPresets,responseKeys:Object.keys(resp||{})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
-      return resp;
-    })
-    .catch((err: any) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:50',message:'postSync error',data:{error:err?.message||String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
-      throw err;
-    });
 }
 
 export function getSavedCalculations() {
