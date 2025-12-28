@@ -177,7 +177,7 @@ function ProfitCalculator() {
     fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logDataLocal)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
     // #endregion
     
-    // Backend'de GET /sync endpoint'i yok (404 hatası), bu yüzden sadece postSync kullanıyoruz
+    // Backend'de GET /sync endpoint'i yok, bu yüzden sadece postSync kullanıyoruz
     // postSync çağrıldığında backend'e mevcut veriler gönderilir, response'unda preset'ler dönebilir
     const currentSync = {
       appSettings,
