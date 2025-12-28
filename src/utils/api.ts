@@ -99,3 +99,4 @@ export async function getRates(): Promise<{ usdtry: number; xauusd: number; ts: 
 }
 
 
+// Force rebuild Sun Dec 28 18:54:57 +03 2025
