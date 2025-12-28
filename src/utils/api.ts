@@ -73,25 +73,6 @@ export function deleteSavedCalculation(id: string) {
   return request(`/saved-calculations/${id}`, { method: 'DELETE' });
 }
 
-export function getSync() {
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:61',message:'getSync called',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-  // #endregion
-  return request('/sync', { method: 'GET' })
-    .then((resp: any) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:63',message:'getSync response',data:{responseType:typeof resp,hasProductPresets:!!resp?.productPresets,isArray:Array.isArray(resp?.productPresets),responseKeys:Object.keys(resp||{})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
-      return resp;
-    })
-    .catch((err: any) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:66',message:'getSync error',data:{error:err?.message||String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
-      throw err;
-    });
-}
-
 // ExchangeRate API – USD->TRY kuru
 export async function getUsdTryRate(): Promise<number> {
   const KEY = '955af145bf3c2926aa413512'
