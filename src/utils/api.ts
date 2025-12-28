@@ -43,7 +43,22 @@ export function postStandardSalePrice(payload: unknown) {
 }
 
 export function postSync(payload: unknown) {
-  return request('/sync', { method: 'POST', body: JSON.stringify(payload) });
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:45',message:'postSync called',data:{hasProductPresets:!!(payload as any)?.productPresets,presetsCount:(payload as any)?.productPresets?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
+  return request('/sync', { method: 'POST', body: JSON.stringify(payload) })
+    .then((resp: any) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:47',message:'postSync response',data:{responseType:typeof resp,hasProductPresets:!!resp?.productPresets,responseKeys:Object.keys(resp||{})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      return resp;
+    })
+    .catch((err: any) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:50',message:'postSync error',data:{error:err?.message||String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      throw err;
+    });
 }
 
 export function getSavedCalculations() {
@@ -56,6 +71,25 @@ export function postSavedCalculation(payload: unknown) {
 
 export function deleteSavedCalculation(id: string) {
   return request(`/saved-calculations/${id}`, { method: 'DELETE' });
+}
+
+export function getSync() {
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:61',message:'getSync called',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+  // #endregion
+  return request('/sync', { method: 'GET' })
+    .then((resp: any) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:63',message:'getSync response',data:{responseType:typeof resp,hasProductPresets:!!resp?.productPresets,isArray:Array.isArray(resp?.productPresets),responseKeys:Object.keys(resp||{})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+      return resp;
+    })
+    .catch((err: any) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'api.ts:66',message:'getSync error',data:{error:err?.message||String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+      throw err;
+    });
 }
 
 // ExchangeRate API – USD->TRY kuru

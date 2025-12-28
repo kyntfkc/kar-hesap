@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, SavedCalculation } from '../types'
+import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, SavedCalculation, ProductPreset } from '../types'
 import { calculateAllPlatforms, calculateStandardSalePrice } from '../utils/calculations'
 import { apiEnabled, postCalculate, postSync, getSavedCalculations, postSavedCalculation, deleteSavedCalculation } from '../utils/api'
 import { TrendingUp, Loader2, Settings } from 'lucide-react'
@@ -8,6 +8,7 @@ import Toast from './Toast'
 import InputForm from './InputForm'
 import ResultsTable from './ResultsTable'
 import SettingsModal, { AppSettings } from './SettingsModal'
+import ProductPresetModal from './ProductPresetModal'
 
 const defaultProductInfo: ProductInfo = {
   productGram: 0.80,
@@ -116,6 +117,18 @@ function ProfitCalculator() {
   const [maxProfit, setMaxProfit] = useState<string>('')
   const [minSale, setMinSale] = useState<string>('')
   const [maxSale, setMaxSale] = useState<string>('')
+  const [productPresets, setProductPresets] = useState<ProductPreset[]>(() => {
+    const saved = localStorage.getItem('productPresets')
+    if (saved) {
+      try {
+        return JSON.parse(saved)
+      } catch {
+        return []
+      }
+    }
+    return []
+  })
+  const [showPresetModal, setShowPresetModal] = useState(false)
 
   // Auto-save to localStorage
   useEffect(() => {
@@ -134,9 +147,119 @@ function ProfitCalculator() {
     localStorage.setItem('platforms', JSON.stringify(platforms))
   }, [platforms])
 
-  // Load persisted saved calculations from backend
+  useEffect(() => {
+    localStorage.setItem('productPresets', JSON.stringify(productPresets))
+  }, [productPresets])
+
+  // Preset'leri backend'den yükle ve birleştir
+  const loadPresetsFromBackend = useCallback(() => {
+    if (!apiEnabled) return
+    
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ProfitCalculator.tsx:155',message:'loadPresetsFromBackend called',data:{apiEnabled:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    // #endregion
+    
+    // Local preset'leri önce yükle (fallback olarak) - localStorage'dan direkt oku
+    const localPresets = (() => {
+      const saved = localStorage.getItem('productPresets')
+      if (saved) {
+        try {
+          return JSON.parse(saved) as ProductPreset[]
+        } catch {
+          return []
+        }
+      }
+      return []
+    })()
+    // #region agent log
+    const logDataLocal = {location:'ProfitCalculator.tsx:174',message:'Local presets loaded',data:{localPresetsCount:localPresets.length,localPresetIds:localPresets.map(p=>p.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'};
+    console.log('[DEBUG]', logDataLocal);
+    fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logDataLocal)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
+    // #endregion
+    
+    // Backend'de GET /sync endpoint'i yok (404 hatası), bu yüzden sadece postSync kullanıyoruz
+    // postSync çağrıldığında backend'e mevcut veriler gönderilir, response'unda preset'ler dönebilir
+    const currentSync = {
+      appSettings,
+      productInfo,
+      goldInfo,
+      expenses,
+      platforms,
+      savedCalculations,
+      productPresets: localPresets,
+    }
+    
+    // #region agent log
+    const logDataPostSync = {location:'ProfitCalculator.tsx:186',message:'postSync called to load presets',data:{localPresetsCount:localPresets.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'};
+    console.log('[DEBUG]', logDataPostSync);
+    fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logDataPostSync)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
+    // #endregion
+    
+    postSync(currentSync)
+      .then((resp: any) => {
+        // #region agent log
+        const logDataResp = {location:'ProfitCalculator.tsx:192',message:'postSync response for loading presets',data:{responseType:typeof resp,hasProductPresets:!!resp?.productPresets,isArray:Array.isArray(resp?.productPresets),responsePresetsCount:resp?.productPresets?.length||0,responseKeys:Object.keys(resp||{})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'};
+        console.log('[DEBUG]', logDataResp);
+        fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logDataResp)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
+        // #endregion
+        
+        // Backend'den gelen preset'leri yükle
+        if (resp && resp.productPresets && Array.isArray(resp.productPresets)) {
+          const backendPresets = resp.productPresets as ProductPreset[]
+          // #region agent log
+          const logDataBackend = {location:'ProfitCalculator.tsx:197',message:'Backend presets extracted',data:{backendPresetsCount:backendPresets.length,backendPresetIds:backendPresets.map(p=>p.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'};
+          console.log('[DEBUG]', logDataBackend);
+          fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logDataBackend)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
+          // #endregion
+          
+          // Backend ve local preset'leri birleştir (duplicate kontrolü ile)
+          const backendIds = new Set(backendPresets.map(p => p.id))
+          const uniqueLocalPresets = localPresets.filter(p => !backendIds.has(p.id))
+          const mergedPresets = [...backendPresets, ...uniqueLocalPresets]
+          
+          if (mergedPresets.length > 0) {
+            setProductPresets(mergedPresets)
+            localStorage.setItem('productPresets', JSON.stringify(mergedPresets))
+            // #region agent log
+            const logDataMerged = {location:'ProfitCalculator.tsx:207',message:'Presets updated from backend',data:{finalCount:mergedPresets.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'};
+            console.log('[DEBUG]', logDataMerged);
+            fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logDataMerged)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
+            // #endregion
+          } else if (localPresets.length > 0) {
+            // Backend'de preset yoksa local'i koru
+            setProductPresets(localPresets)
+          }
+        } else {
+          // postSync response'unda preset'ler yok, local'i koru
+          // Backend'e gönderilen preset'ler kaydedildi, diğer PC'ler periyodik kontrol ile yükleyecek
+          if (localPresets.length > 0) {
+            setProductPresets(localPresets)
+            // #region agent log
+            const logDataNoPresets = {location:'ProfitCalculator.tsx:219',message:'Using local presets (postSync no presets in response)',data:{localCount:localPresets.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'};
+            console.log('[DEBUG]', logDataNoPresets);
+            fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logDataNoPresets)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
+            // #endregion
+          }
+        }
+      })
+      .catch((err: any) => {
+        // #region agent log
+        const logDataError = {location:'ProfitCalculator.tsx:225',message:'postSync error loading presets',data:{error:err?.message||String(err),localPresetsCount:localPresets.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'};
+        console.error('[DEBUG]', logDataError);
+        fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logDataError)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
+        // #endregion
+        // Tüm istekler başarısız olursa local preset'leri koru
+        if (localPresets.length > 0) {
+          setProductPresets(localPresets)
+        }
+      })
+  }, [apiEnabled, appSettings, productInfo, goldInfo, expenses, platforms, savedCalculations])
+
+  // Load persisted saved calculations and presets from backend
   useEffect(() => {
     if (!apiEnabled) return
+    
+    // Saved calculations yükle
     getSavedCalculations()
       .then((resp: any) => {
         if (resp && Array.isArray(resp.items)) {
@@ -145,7 +268,26 @@ function ProfitCalculator() {
         }
       })
       .catch(() => {})
-  }, [])
+    
+    // İlk yüklemede preset'leri yükle
+    loadPresetsFromBackend()
+    
+    // Periyodik olarak preset'leri kontrol et (30 saniyede bir)
+    const interval = setInterval(() => {
+      loadPresetsFromBackend()
+    }, 30000)
+    
+    // Sayfa focus olduğunda preset'leri kontrol et
+    const handleFocus = () => {
+      loadPresetsFromBackend()
+    }
+    window.addEventListener('focus', handleFocus)
+    
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [loadPresetsFromBackend])
 
   // Backend sync (debounced) with localStorage snapshot
   useEffect(() => {
@@ -158,11 +300,12 @@ function ProfitCalculator() {
         expenses,
         platforms,
         savedCalculations,
+        productPresets,
       }
       postSync(snapshot).catch(() => {})
     }, 500)
     return () => clearTimeout(timer)
-  }, [appSettings, productInfo, goldInfo, expenses, platforms, savedCalculations])
+  }, [appSettings, productInfo, goldInfo, expenses, platforms, savedCalculations, productPresets])
 
   const applySettingsToState = (s: AppSettings) => {
     setProductInfo(prev => ({ ...prev, productGram: s.defaultProductGram, laborMillem: s.defaultLaborMillem }))
@@ -318,6 +461,126 @@ function ProfitCalculator() {
     setToast({ message: 'Tüm kayıtlar silindi', type: 'success' })
   }
 
+  // Preset yönetim fonksiyonları
+  const handleSavePreset = (name: string) => {
+    if (!name.trim()) return
+    // #region agent log
+    const logData1 = {location:'ProfitCalculator.tsx:489',message:'handleSavePreset called',data:{name:name.trim(),currentPresetsCount:productPresets.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'};
+    console.log('[DEBUG]', logData1);
+    fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData1)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
+    // #endregion
+    const newPreset: ProductPreset = {
+      id: `${Date.now()}`,
+      name: name.trim(),
+      createdAt: Date.now(),
+      productInfo: { ...productInfo },
+    }
+    const updated = [newPreset, ...productPresets]
+    // #region agent log
+    const logData2 = {location:'ProfitCalculator.tsx:500',message:'New preset created',data:{presetId:newPreset.id,presetName:newPreset.name,updatedCount:updated.length,hasProductPresets:updated.some(p=>p.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'};
+    console.log('[DEBUG]', logData2);
+    fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData2)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
+    // #endregion
+    setProductPresets(updated)
+    // Hemen backend'e sync et
+    if (apiEnabled) {
+      const snapshot = {
+        appSettings,
+        productInfo,
+        goldInfo,
+        expenses,
+        platforms,
+        savedCalculations,
+        productPresets: updated,
+      }
+      // #region agent log
+      const logData3 = {location:'ProfitCalculator.tsx:507',message:'postSync request - saving preset',data:{snapshotHasProductPresets:!!snapshot.productPresets,presetsCount:snapshot.productPresets?.length||0,presetIds:snapshot.productPresets?.map((p:any)=>p.id)||[]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'};
+      console.log('[DEBUG]', logData3);
+      fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData3)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
+      // #endregion
+      postSync(snapshot)
+        .then((resp: any) => {
+          // #region agent log
+          const logData4 = {location:'ProfitCalculator.tsx:515',message:'postSync response - preset saved',data:{responseType:typeof resp,hasProductPresets:!!resp?.productPresets,responsePresetsCount:resp?.productPresets?.length||0,responseKeys:Object.keys(resp||{})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'};
+          console.log('[DEBUG]', logData4);
+          fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData4)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
+          // #endregion
+          // postSync başarılı olduktan sonra, backend'den preset'leri tekrar yükle (diğer PC'ler için)
+          // Kısa bir gecikme ile yükle ki backend işlemi tamamlasın
+          setTimeout(() => {
+            loadPresetsFromBackend()
+          }, 1000)
+        })
+        .catch((err: any) => {
+          // #region agent log
+          const logData5 = {location:'ProfitCalculator.tsx:519',message:'postSync error - preset save failed',data:{error:err?.message||String(err),errorType:typeof err},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'};
+          console.error('[DEBUG]', logData5);
+          fetch('http://127.0.0.1:7242/ingest/5ddec7d1-038b-42e3-8a62-2bc1482a26ae',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(logData5)}).catch((e)=>{console.error('[DEBUG] Log fetch error:',e);});
+          // #endregion
+        })
+    }
+    setToast({ message: 'Preset kaydedildi', type: 'success' })
+  }
+
+  const handleUpdatePreset = (id: string, name: string) => {
+    const updated = productPresets.map(p => 
+      p.id === id ? { ...p, name: name.trim() } : p
+    )
+    setProductPresets(updated)
+    // Hemen backend'e sync et
+    if (apiEnabled) {
+      const snapshot = {
+        appSettings,
+        productInfo,
+        goldInfo,
+        expenses,
+        platforms,
+        savedCalculations,
+        productPresets: updated,
+      }
+      postSync(snapshot)
+        .then(() => {
+          // postSync başarılı olduktan sonra, backend'den preset'leri tekrar yükle
+          setTimeout(() => {
+            loadPresetsFromBackend()
+          }, 1000)
+        })
+        .catch(() => {})
+    }
+    setToast({ message: 'Preset güncellendi', type: 'success' })
+  }
+
+  const handleDeletePreset = (id: string) => {
+    const updated = productPresets.filter(p => p.id !== id)
+    setProductPresets(updated)
+    // Hemen backend'e sync et
+    if (apiEnabled) {
+      const snapshot = {
+        appSettings,
+        productInfo,
+        goldInfo,
+        expenses,
+        platforms,
+        savedCalculations,
+        productPresets: updated,
+      }
+      postSync(snapshot)
+        .then(() => {
+          // postSync başarılı olduktan sonra, backend'den preset'leri tekrar yükle
+          setTimeout(() => {
+            loadPresetsFromBackend()
+          }, 1000)
+        })
+        .catch(() => {})
+    }
+    setToast({ message: 'Preset silindi', type: 'success' })
+  }
+
+  const handleLoadPreset = (preset: ProductPreset) => {
+    setProductInfo(preset.productInfo)
+    setToast({ message: `"${preset.name}" yüklendi`, type: 'success' })
+  }
+
   const handleSaveSingleScenario = (result: ProfitResult) => {
     setSaveModalResult(result)
     setSaveModalName('')
@@ -388,10 +651,13 @@ function ProfitCalculator() {
           goldInfo={goldInfo}
           expenses={expenses}
           platforms={platforms}
+          productPresets={productPresets}
           onProductInfoChange={setProductInfo}
           onGoldInfoChange={setGoldInfo}
           onExpensesChange={setExpenses}
           onPlatformsChange={setPlatforms}
+          onLoadPreset={handleLoadPreset}
+          onShowPresetModal={() => setShowPresetModal(true)}
         />
         <button
           onClick={handleCalculate}
@@ -757,6 +1023,16 @@ function ProfitCalculator() {
           </div>
         </div>
       )}
+      <ProductPresetModal
+        open={showPresetModal}
+        presets={productPresets}
+        currentProductInfo={productInfo}
+        onClose={() => setShowPresetModal(false)}
+        onSave={handleSavePreset}
+        onUpdate={handleUpdatePreset}
+        onDelete={handleDeletePreset}
+        onLoad={handleLoadPreset}
+      />
       {toast && <Toast message={toast.message} type={toast.type} onClose={()=>setToast(null)} />}
     </div>
   )

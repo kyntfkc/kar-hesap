@@ -1,22 +1,25 @@
 import { useState, useEffect } from 'react'
-import { ProductInfo, GoldInfo, Expenses, Platform } from '../types'
+import { ProductInfo, GoldInfo, Expenses, Platform, ProductPreset } from '../types'
 import { 
   calculatePureGoldGram, 
   calculateProductAmount, 
   calculatePurchasePrice 
 } from '../utils/calculations'
 import { calculateStandardSalePrice } from '../utils/calculations'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, Package } from 'lucide-react'
 
 interface InputFormProps {
   productInfo: ProductInfo
   goldInfo: GoldInfo
   expenses: Expenses
   platforms: Platform[]
+  productPresets: ProductPreset[]
   onProductInfoChange: (info: ProductInfo) => void
   onGoldInfoChange: (info: GoldInfo) => void
   onExpensesChange: (expenses: Expenses) => void
   onPlatformsChange: (platforms: Platform[]) => void
+  onLoadPreset: (preset: ProductPreset) => void
+  onShowPresetModal: () => void
 }
 
 const calculateDefaultSalePrice = (productAmount: number): number => {
@@ -30,10 +33,13 @@ function InputForm({
   goldInfo,
   expenses,
   platforms,
+  productPresets,
   onProductInfoChange,
   onGoldInfoChange,
   onExpensesChange,
   onPlatformsChange,
+  onLoadPreset,
+  onShowPresetModal,
 }: InputFormProps) {
   const [expandedSections, setExpandedSections] = useState({
     labor: false,
@@ -119,7 +125,27 @@ function InputForm({
 
   const updatePlatform = (index: number, field: keyof Platform, value: string | number) => {
     const updated = [...platforms]
-    updated[index] = { ...updated[index], [field]: value }
+    const platform = updated[index]
+    const isAutoPlatform = platform.name === 'Standart' || platform.name === 'Astarlı Ürün'
+    
+    // Standart veya Astarlı Ürün'de targetProfitRate değiştiğinde satış fiyatını güncelle
+    if (isAutoPlatform && field === 'targetProfitRate') {
+      const newTargetProfitRate = typeof value === 'number' ? value : parseFloat(String(value))
+      if (!isNaN(newTargetProfitRate)) {
+        const newSalePrice = calculateStandardSalePrice(
+          productInfo,
+          goldInfo,
+          expenses,
+          platform.commissionRate || 22,
+          newTargetProfitRate
+        )
+        updated[index] = { ...platform, [field]: newTargetProfitRate, salePrice: newSalePrice }
+      } else {
+        updated[index] = { ...platform, [field]: value }
+      }
+    } else {
+      updated[index] = { ...platform, [field]: value }
+    }
     onPlatformsChange(updated)
   }
 
@@ -175,6 +201,37 @@ function InputForm({
 
   return (
     <div className="space-y-3">
+      {/* Preset Seçici */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex-1 min-w-[200px]">
+          <select
+            value=""
+            onChange={(e) => {
+              const preset = productPresets.find(p => p.id === e.target.value)
+              if (preset) {
+                onLoadPreset(preset)
+              }
+            }}
+            className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white font-medium text-slate-900"
+          >
+            <option value="">Preset seçin...</option>
+            {productPresets.map((preset) => (
+              <option key={preset.id} value={preset.id}>
+                {preset.name} ({preset.productInfo.productGram.toFixed(2)}g)
+              </option>
+            ))}
+          </select>
+        </div>
+        <button
+          onClick={onShowPresetModal}
+          className="px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-sm font-semibold rounded-lg hover:from-amber-600 hover:to-yellow-600 transition-all flex items-center gap-2 shadow-md shadow-amber-500/30"
+        >
+          <Package className="w-4 h-4" />
+          <span className="hidden sm:inline">Preset Yönet</span>
+          <span className="sm:hidden">Preset</span>
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 gap-3">
         <div>
           <label className="block text-sm font-extrabold text-slate-900 mb-1.5 uppercase tracking-wider">Ürün Gram</label>
@@ -246,44 +303,87 @@ function InputForm({
             </button>
             </div>
 
-            {/* Ekstra Maliyet Farkı */}
-            <div className="flex items-center gap-2 bg-slate-50/80 px-2.5 py-1.5 rounded-lg border border-slate-200">
-              <span className="text-xs font-medium text-slate-700">Ekstra Maliyet</span>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={expenses.specialPackaging === 0 ? '' : expenses.specialPackaging.toLocaleString('tr-TR')}
-                onChange={(e) => {
-                  const raw = e.target.value.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
-                  if (raw === '' || raw === '.') {
-                    updateExpenses('specialPackaging', 0)
-                  } else {
-                    const num = parseFloat(raw)
-                    if (!isNaN(num)) {
-                      updateExpenses('specialPackaging', num)
-                    }
-                  }
-                }}
-                onBlur={(e) => {
-                  const raw = e.target.value.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
-                  if (raw === '' || raw === '.') {
-                    updateExpenses('specialPackaging', 0)
-                  }
-                }}
-                disabled={expenses.specialPackaging === 0}
-                className={`w-20 px-2 py-1 text-xs border border-slate-300/70 rounded-md focus:ring-1 focus:ring-amber-500 focus:border-amber-500 bg-white shadow-sm disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed ${expenses.specialPackaging === 0 ? 'pointer-events-none opacity-60' : ''}`}
-                placeholder="150"
-              />
-              <span className="text-[11px] text-gray-500">TL</span>
-              <label className="relative inline-flex items-center cursor-pointer">
+            {/* Ekstra Maliyet ve Lazer Kesim */}
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* Ekstra Maliyet Farkı */}
+              <div className="flex items-center gap-2 bg-slate-50/80 px-2.5 py-1.5 rounded-lg border border-slate-200">
+                <span className="text-xs font-medium text-slate-700">Ekstra Maliyet</span>
                 <input
-                  type="checkbox"
-                  checked={expenses.specialPackaging > 0}
-                  onChange={handleSpecialPackagingToggle}
-                  className="sr-only peer"
+                  type="text"
+                  inputMode="numeric"
+                  value={expenses.specialPackaging === 0 ? '' : expenses.specialPackaging.toLocaleString('tr-TR')}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
+                    if (raw === '' || raw === '.') {
+                      updateExpenses('specialPackaging', 0)
+                    } else {
+                      const num = parseFloat(raw)
+                      if (!isNaN(num)) {
+                        updateExpenses('specialPackaging', num)
+                      }
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const raw = e.target.value.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
+                    if (raw === '' || raw === '.') {
+                      updateExpenses('specialPackaging', 0)
+                    }
+                  }}
+                  disabled={expenses.specialPackaging === 0}
+                  className={`w-20 px-2 py-1 text-xs border border-slate-300/70 rounded-md focus:ring-1 focus:ring-amber-500 focus:border-amber-500 bg-white shadow-sm disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed ${expenses.specialPackaging === 0 ? 'pointer-events-none opacity-60' : ''}`}
+                  placeholder="150"
                 />
-                <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-amber-500 peer-checked:to-yellow-500"></div>
-              </label>
+                <span className="text-[11px] text-gray-500">TL</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={expenses.specialPackaging > 0}
+                    onChange={handleSpecialPackagingToggle}
+                    className="sr-only peer"
+                  />
+                  <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-amber-500 peer-checked:to-yellow-500"></div>
+                </label>
+              </div>
+
+              {/* Lazer Kesim */}
+              <div className="flex items-center gap-2 bg-slate-50/80 px-2.5 py-1.5 rounded-lg border border-slate-200">
+                <span className="text-xs font-medium text-slate-700">Lazer Kesim</span>
+                {productInfo.laserCuttingEnabled && (
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={productInfo.laserCuttingMillem === 0 ? '' : productInfo.laserCuttingMillem.toString().replace('.', ',')}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(',', '.')
+                      if (raw === '' || raw === '.') {
+                        updateProductInfo('laserCuttingMillem', 0)
+                      } else if (/^(\d+)?([.,]\d*)?$/.test(raw)) {
+                        const num = parseFloat(raw)
+                        if (!isNaN(num)) {
+                          updateProductInfo('laserCuttingMillem', num)
+                        }
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const raw = e.target.value.replace(',', '.')
+                      if (raw === '' || raw === '.') {
+                        updateProductInfo('laserCuttingMillem', 0)
+                      }
+                    }}
+                    className="w-16 px-2 py-1 text-xs border border-slate-300/70 rounded-md focus:ring-1 focus:ring-amber-500 focus:border-amber-500 bg-white shadow-sm"
+                    placeholder="0.020"
+                  />
+                )}
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={productInfo.laserCuttingEnabled}
+                    onChange={(e) => updateProductInfo('laserCuttingEnabled', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-amber-500 peer-checked:to-yellow-500"></div>
+                </label>
+              </div>
             </div>
           </div>
         </div>

@@ -48,3 +48,10 @@ export interface SavedCalculation {
   results: ProfitResult[]
 }
 
+export interface ProductPreset {
+  id: string
+  name: string
+  createdAt: number
+  productInfo: ProductInfo
+}
+
