@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ProductInfo, GoldInfo, Expenses, Platform, ProductPreset } from '../types'
 import { 
   calculatePureGoldGram, 
@@ -50,6 +50,8 @@ function InputForm({
   const [productGramInput, setProductGramInput] = useState<string>('')
   const [goldPriceInput, setGoldPriceInput] = useState<string>('')
   const [lengthOption, setLengthOption] = useState<'none' | '50' | '60'>('none')
+  // Dış atölye açılmadan önceki ana işçilik değerini sakla
+  const previousLaborMillemRef = useRef<number>(productInfo.laborMillem)
 
   const pureGoldGram = calculatePureGoldGram(productInfo)
   
@@ -70,6 +72,13 @@ function InputForm({
       onProductInfoChange(updatedProductInfo)
     }
   }, [productInfo.productGram, productInfo.laborMillem, productInfo.laserCuttingEnabled, productInfo.laserCuttingMillem, productInfo.pureGoldGram, pureGoldGram])
+
+  // Ana işçilik değiştiğinde, dış atölye kapalıyken ref'i güncelle
+  useEffect(() => {
+    if (!productInfo.laserCuttingEnabled) {
+      previousLaborMillemRef.current = productInfo.laborMillem
+    }
+  }, [productInfo.laborMillem, productInfo.laserCuttingEnabled])
 
   useEffect(() => {
     const updatedGoldInfo = {
@@ -381,6 +390,8 @@ function InputForm({
                     onChange={(e) => {
                       const enabled = e.target.checked
                       if (enabled) {
+                        // Dış atölye açılmadan önceki ana işçilik değerini sakla
+                        previousLaborMillemRef.current = productInfo.laborMillem
                         // Dış atölye açıldığında: ana işçiliği sıfırla, dış atölye milyemini 0.100 yap
                         onProductInfoChange({
                           ...productInfo,
@@ -389,9 +400,10 @@ function InputForm({
                           laserCuttingEnabled: true
                         })
                       } else {
-                        // Dış atölye kapatıldığında sadece toggle'ı kapat
+                        // Dış atölye kapatıldığında: toggle'ı kapat ve ana işçiliği geri yükle
                         onProductInfoChange({
                           ...productInfo,
+                          laborMillem: previousLaborMillemRef.current,
                           laserCuttingEnabled: false
                         })
                       }
