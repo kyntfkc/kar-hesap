@@ -15,7 +15,7 @@ const defaultProductInfo: ProductInfo = {
   laborMillem: 0.050,
   pureGoldGram: 0.25,
   laserCuttingEnabled: false,
-  laserCuttingMillem: 0.020,
+  laserCuttingMillem: 0.100,
 }
 
 const defaultGoldInfo: GoldInfo = {
@@ -297,7 +297,6 @@ function ProfitCalculator() {
   useEffect(() => {
     if (!hasCalculated) return
     setIsCalculating(true)
-    setResults([]) // Eski sonuçları temizle
     const timer = setTimeout(() => {
       const calculatedResults = calculateAllPlatforms(
         productInfo,
@@ -314,7 +313,6 @@ function ProfitCalculator() {
 
   const handleCalculate = useCallback(() => {
     setIsCalculating(true)
-    setResults([]) // Eski sonuçları temizle
     if (apiEnabled) {
       postCalculate({ productInfo, goldInfo, expenses, platforms })
         .then((resp: any) => {

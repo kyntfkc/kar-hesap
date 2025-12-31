@@ -303,7 +303,7 @@ function InputForm({
             </button>
             </div>
 
-            {/* Ekstra Maliyet ve Lazer Kesim */}
+            {/* Ekstra Maliyet ve Dış Atölye */}
             <div className="flex items-center gap-3 flex-wrap">
               {/* Ekstra Maliyet Farkı */}
               <div className="flex items-center gap-2 bg-slate-50/80 px-2.5 py-1.5 rounded-lg border border-slate-200">
@@ -345,9 +345,9 @@ function InputForm({
                 </label>
               </div>
 
-              {/* Lazer Kesim */}
+              {/* Dış Atölye */}
               <div className="flex items-center gap-2 bg-slate-50/80 px-2.5 py-1.5 rounded-lg border border-slate-200">
-                <span className="text-xs font-medium text-slate-700">Lazer Kesim</span>
+                <span className="text-xs font-medium text-slate-700">Dış Atölye</span>
                 {productInfo.laserCuttingEnabled && (
                   <input
                     type="text"
@@ -371,14 +371,31 @@ function InputForm({
                       }
                     }}
                     className="w-16 px-2 py-1 text-xs border border-slate-300/70 rounded-md focus:ring-1 focus:ring-amber-500 focus:border-amber-500 bg-white shadow-sm"
-                    placeholder="0.020"
+                    placeholder="0.100"
                   />
                 )}
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
                     checked={productInfo.laserCuttingEnabled}
-                    onChange={(e) => updateProductInfo('laserCuttingEnabled', e.target.checked)}
+                    onChange={(e) => {
+                      const enabled = e.target.checked
+                      if (enabled) {
+                        // Dış atölye açıldığında: ana işçiliği sıfırla, dış atölye milyemini 0.100 yap
+                        onProductInfoChange({
+                          ...productInfo,
+                          laborMillem: 0,
+                          laserCuttingMillem: 0.100,
+                          laserCuttingEnabled: true
+                        })
+                      } else {
+                        // Dış atölye kapatıldığında sadece toggle'ı kapat
+                        onProductInfoChange({
+                          ...productInfo,
+                          laserCuttingEnabled: false
+                        })
+                      }
+                    }}
                     className="sr-only peer"
                   />
                   <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-amber-500 peer-checked:to-yellow-500"></div>
@@ -407,26 +424,10 @@ function InputForm({
                 <div className="col-span-2">
                   <label className="block text-xs text-gray-700 mb-1 font-medium">İşçilik (milyem)</label>
                   <input
-                    type="text"
-                    inputMode="decimal"
-                    value={productInfo.laborMillem === 0 ? '' : productInfo.laborMillem.toString().replace('.', ',')}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(',', '.')
-                      if (raw === '' || raw === '.') {
-                        updateProductInfo('laborMillem', 0)
-                      } else if (/^(\d+)?([.,]\d*)?$/.test(raw)) {
-                        const num = parseFloat(raw)
-                        if (!isNaN(num)) {
-                          updateProductInfo('laborMillem', num)
-                        }
-                      }
-                    }}
-                    onBlur={(e) => {
-                      const raw = e.target.value.replace(',', '.')
-                      if (raw === '' || raw === '.') {
-                        updateProductInfo('laborMillem', 0)
-                      }
-                    }}
+                    type="number"
+                    step="0.001"
+                    value={productInfo.laborMillem}
+                    onChange={(e) => updateProductInfo('laborMillem', parseFloat(e.target.value) || 0)}
                     className="w-full px-2.5 py-2 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 bg-white shadow-sm"
                     placeholder="0.050"
                   />
@@ -442,26 +443,10 @@ function InputForm({
                 <label className="block text-xs text-slate-600 mb-1 font-medium">Kargo</label>
                 <div className="relative">
                 <input
-                  type="text"
-                  inputMode="numeric"
-                  value={expenses.shipping === 0 ? '' : expenses.shipping.toLocaleString('tr-TR')}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
-                    if (raw === '' || raw === '.') {
-                      updateExpenses('shipping', 0)
-                    } else {
-                      const num = parseFloat(raw)
-                      if (!isNaN(num)) {
-                        updateExpenses('shipping', num)
-                      }
-                    }
-                  }}
-                  onBlur={(e) => {
-                    const raw = e.target.value.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
-                    if (raw === '' || raw === '.') {
-                      updateExpenses('shipping', 0)
-                    }
-                  }}
+                  type="number"
+                  step="0.01"
+                  value={expenses.shipping}
+                  onChange={(e) => updateExpenses('shipping', parseFloat(e.target.value) || 0)}
                     className="h-9 w-full px-2 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 bg-white text-center shadow-sm"
                 />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-medium">TL</span>
@@ -471,26 +456,10 @@ function InputForm({
                 <label className="block text-xs text-slate-600 mb-1 font-medium">Ambalaj</label>
                 <div className="relative">
                 <input
-                  type="text"
-                  inputMode="numeric"
-                  value={expenses.packaging === 0 ? '' : expenses.packaging.toLocaleString('tr-TR')}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
-                    if (raw === '' || raw === '.') {
-                      updateExpenses('packaging', 0)
-                    } else {
-                      const num = parseFloat(raw)
-                      if (!isNaN(num)) {
-                        updateExpenses('packaging', num)
-                      }
-                    }
-                  }}
-                  onBlur={(e) => {
-                    const raw = e.target.value.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
-                    if (raw === '' || raw === '.') {
-                      updateExpenses('packaging', 0)
-                    }
-                  }}
+                  type="number"
+                  step="0.01"
+                  value={expenses.packaging}
+                  onChange={(e) => updateExpenses('packaging', parseFloat(e.target.value) || 0)}
                     className="h-9 w-full px-2 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 bg-white text-center shadow-sm"
                 />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-medium">TL</span>
@@ -500,26 +469,10 @@ function InputForm({
                 <label className="block text-xs text-slate-600 mb-1 font-medium">Hizmet Bedeli</label>
                 <div className="relative">
                 <input
-                  type="text"
-                  inputMode="numeric"
-                  value={expenses.serviceFee === 0 ? '' : expenses.serviceFee.toLocaleString('tr-TR')}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
-                    if (raw === '' || raw === '.') {
-                      updateExpenses('serviceFee', 0)
-                    } else {
-                      const num = parseFloat(raw)
-                      if (!isNaN(num)) {
-                        updateExpenses('serviceFee', num)
-                      }
-                    }
-                  }}
-                  onBlur={(e) => {
-                    const raw = e.target.value.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
-                    if (raw === '' || raw === '.') {
-                      updateExpenses('serviceFee', 0)
-                    }
-                  }}
+                  type="number"
+                  step="0.01"
+                  value={expenses.serviceFee}
+                  onChange={(e) => updateExpenses('serviceFee', parseFloat(e.target.value) || 0)}
                     className="h-9 w-full px-2 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 bg-white text-center shadow-sm"
                 />
                   <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-medium">TL</span>
@@ -528,25 +481,12 @@ function InputForm({
               <div>
                 <label className="block text-xs text-slate-600 mb-1 font-medium">E-ticaret Stopajı (%)</label>
                 <input
-                  type="text"
-                  inputMode="decimal"
-                  value={expenses.eCommerceTaxRate === 0 ? '' : expenses.eCommerceTaxRate.toString().replace('.', ',')}
+                  type="number"
+                  step="0.01"
+                  value={expenses.eCommerceTaxRate === 0 ? '' : expenses.eCommerceTaxRate}
                   onChange={(e) => {
-                    const raw = e.target.value.replace(',', '.')
-                    if (raw === '' || raw === '.') {
-                      updateExpenses('eCommerceTaxRate', 0)
-                    } else if (/^(\d+)?([.,]\d*)?$/.test(raw)) {
-                      const num = parseFloat(raw)
-                      if (!isNaN(num)) {
-                        updateExpenses('eCommerceTaxRate', num)
-                      }
-                    }
-                  }}
-                  onBlur={(e) => {
-                    const raw = e.target.value.replace(',', '.')
-                    if (raw === '' || raw === '.') {
-                      updateExpenses('eCommerceTaxRate', 0)
-                    }
+                    const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
+                    updateExpenses('eCommerceTaxRate', value)
                   }}
                   className="h-9 w-full px-2 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 bg-white text-center shadow-sm"
                   placeholder="1.00"
@@ -609,26 +549,12 @@ function InputForm({
                   <div>
                     <label className="block text-xs text-slate-600 mb-1 font-medium">Komisyon</label>
                     <input
-                      type="text"
-                      inputMode="decimal"
-                      value={platform.commissionRate === 0 ? '' : platform.commissionRate.toString().replace('.', ',')}
-                      onChange={(e) => {
-                        const raw = e.target.value.replace(',', '.')
-                        if (raw === '' || raw === '.') {
-                          updatePlatform(index, 'commissionRate', 0)
-                        } else if (/^(\d+)?([.,]\d*)?$/.test(raw)) {
-                          const num = parseFloat(raw)
-                          if (!isNaN(num)) {
-                            updatePlatform(index, 'commissionRate', num)
-                          }
-                        }
-                      }}
-                      onBlur={(e) => {
-                        const raw = e.target.value.replace(',', '.')
-                        if (raw === '' || raw === '.') {
-                          updatePlatform(index, 'commissionRate', 0)
-                        }
-                      }}
+                      type="number"
+                      step="0.1"
+                      value={platform.commissionRate}
+                      onChange={(e) =>
+                        updatePlatform(index, 'commissionRate', parseFloat(e.target.value) || 0)
+                      }
                       className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 bg-white text-center font-semibold shadow-sm"
                       placeholder="0"
                     />
@@ -636,25 +562,12 @@ function InputForm({
                   <div>
                     <label className="block text-xs text-slate-600 mb-1 font-medium">Kâr Oranı (%)</label>
                     <input
-                      type="text"
-                      inputMode="decimal"
-                      value={(platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 20 : 15)) === 0 ? '' : (platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 20 : 15)).toString().replace('.', ',')}
+                      type="number"
+                      step="0.1"
+                      value={(platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 20 : 15)) === 0 ? '' : (platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 20 : 15))}
                       onChange={(e) => {
-                        const raw = e.target.value.replace(',', '.')
-                        if (raw === '' || raw === '.') {
-                          updatePlatform(index, 'targetProfitRate', 0)
-                        } else if (/^(\d+)?([.,]\d*)?$/.test(raw)) {
-                          const num = parseFloat(raw)
-                          if (!isNaN(num)) {
-                            updatePlatform(index, 'targetProfitRate', num)
-                          }
-                        }
-                      }}
-                      onBlur={(e) => {
-                        const raw = e.target.value.replace(',', '.')
-                        if (raw === '' || raw === '.') {
-                          updatePlatform(index, 'targetProfitRate', 0)
-                        }
+                        const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
+                        updatePlatform(index, 'targetProfitRate', value)
                       }}
                       className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 bg-white text-center font-semibold shadow-sm"
                       placeholder={platform.name === 'Astarlı Ürün' ? '20' : '15'}
@@ -665,26 +578,12 @@ function InputForm({
                 <div>
                   <label className="block text-xs text-slate-600 mb-1 font-medium">Komisyon</label>
                   <input
-                    type="text"
-                    inputMode="decimal"
-                    value={platform.commissionRate === 0 ? '' : platform.commissionRate.toString().replace('.', ',')}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(',', '.')
-                      if (raw === '' || raw === '.') {
-                        updatePlatform(index, 'commissionRate', 0)
-                      } else if (/^(\d+)?([.,]\d*)?$/.test(raw)) {
-                        const num = parseFloat(raw)
-                        if (!isNaN(num)) {
-                          updatePlatform(index, 'commissionRate', num)
-                        }
-                      }
-                    }}
-                    onBlur={(e) => {
-                      const raw = e.target.value.replace(',', '.')
-                      if (raw === '' || raw === '.') {
-                        updatePlatform(index, 'commissionRate', 0)
-                      }
-                    }}
+                    type="number"
+                    step="0.1"
+                    value={platform.commissionRate}
+                    onChange={(e) =>
+                      updatePlatform(index, 'commissionRate', parseFloat(e.target.value) || 0)
+                    }
                     className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center font-semibold shadow-sm"
                     placeholder="0"
                   />
@@ -699,28 +598,12 @@ function InputForm({
                 </label>
                   <div className="relative">
                     <input
-                      type="text"
-                      inputMode="numeric"
-                      value={platform.salePrice === 0 ? '' : platform.salePrice.toLocaleString('tr-TR')}
+                      type="number"
+                      step="1"
+                      value={platform.salePrice}
                       onChange={(e) => {
                         if (platform.name === 'Standart' || platform.name === 'Astarlı Ürün') return
-                        const raw = e.target.value
-                        const cleaned = raw.replace(/[^\d]/g, '')
-                        if (cleaned === '') {
-                          updatePlatform(index, 'salePrice', 0)
-                        } else {
-                          const num = parseInt(cleaned)
-                          if (!isNaN(num)) {
-                            updatePlatform(index, 'salePrice', num)
-                          }
-                        }
-                      }}
-                      onBlur={(e) => {
-                        if (platform.name === 'Standart' || platform.name === 'Astarlı Ürün') return
-                        const raw = e.target.value.replace(/[^\d]/g, '')
-                        if (raw === '') {
-                          updatePlatform(index, 'salePrice', 0)
-                        }
+                        updatePlatform(index, 'salePrice', parseInt(e.target.value) || 0)
                       }}
                       disabled={platform.name === 'Standart' || platform.name === 'Astarlı Ürün'}
                       className="w-full pr-8 px-2 py-1.5 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 bg-white text-center font-semibold disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500"
