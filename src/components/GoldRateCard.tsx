@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { GoldInfo } from '../types'
-import { getRates } from '../utils/api'
 
 interface Props {
   goldInfo: GoldInfo
@@ -8,43 +7,14 @@ interface Props {
 }
 
 export default function GoldRateCard({ goldInfo, onGoldInfoChange }: Props) {
-  const [usdtry, setUsdtry] = useState<number | null>(null)
-  const [xauusd, setXauusd] = useState<number | null>(null)
   const [priceInput, setPriceInput] = useState('')
 
   const update = (field: keyof GoldInfo, value: number) => onGoldInfoChange({ ...goldInfo, [field]: value })
 
-  useEffect(() => {
-    const loadRates = async () => {
-      try {
-        const r = await getRates()
-        setUsdtry(r.usdtry)
-        setXauusd(r.xauusd)
-      } catch (err) {
-        console.error('Failed to load rates:', err)
-      }
-    }
-    loadRates()
-  }, [])
-
   return (
     <div className="card p-4 sm:p-5">
-      <div className="mb-2 flex items-center justify-between">
+      <div className="mb-2">
         <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wide">Altın Kuru</h3>
-        <div className="hidden sm:flex items-center gap-2 text-[11px] text-slate-500">
-          {usdtry && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 ring-1 ring-slate-200">
-              <span className="text-slate-500">USD/TRY</span>
-              <b className="text-slate-800">{usdtry.toLocaleString('tr-TR')}</b>
-            </span>
-          )}
-          {xauusd && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 ring-1 ring-slate-200">
-              <span className="text-slate-500">XAU/USD</span>
-              <b className="text-slate-800">{xauusd.toLocaleString('tr-TR')}</b>
-            </span>
-          )}
-        </div>
       </div>
       <div>
         <label className="block text-xs text-slate-600 mb-1 font-medium">TL / Gram</label>
