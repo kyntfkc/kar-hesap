@@ -1,14 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, SavedCalculation, ProductPreset } from '../types'
+import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, SavedCalculation } from '../types'
 import { calculateAllPlatforms, calculateStandardSalePrice } from '../utils/calculations'
 import { apiEnabled, postCalculate, postSync, getSavedCalculations, postSavedCalculation, deleteSavedCalculation } from '../utils/api'
-import { TrendingUp, Loader2, Settings, Package } from 'lucide-react'
+import { TrendingUp, Loader2, Settings } from 'lucide-react'
 import GoldRateCard from './GoldRateCard'
 import Toast from './Toast'
 import InputForm from './InputForm'
 import ResultsTable from './ResultsTable'
 import SettingsModal, { AppSettings } from './SettingsModal'
-import ProductPresetModal from './ProductPresetModal'
 
 const defaultProductInfo: ProductInfo = {
   productGram: 0.80,
@@ -121,18 +120,6 @@ function ProfitCalculator({ onNavigateToWholesale }: ProfitCalculatorProps = {})
   const [maxProfit, setMaxProfit] = useState<string>('')
   const [minSale, setMinSale] = useState<string>('')
   const [maxSale, setMaxSale] = useState<string>('')
-  const [productPresets, setProductPresets] = useState<ProductPreset[]>(() => {
-    const saved = localStorage.getItem('productPresets')
-    if (saved) {
-      try {
-        return JSON.parse(saved)
-      } catch {
-        return []
-      }
-    }
-    return []
-  })
-  const [showPresetModal, setShowPresetModal] = useState(false)
 
   // Auto-save to localStorage
   useEffect(() => {
@@ -151,35 +138,7 @@ function ProfitCalculator({ onNavigateToWholesale }: ProfitCalculatorProps = {})
     localStorage.setItem('platforms', JSON.stringify(platforms))
   }, [platforms])
 
-  useEffect(() => {
-    localStorage.setItem('productPresets', JSON.stringify(productPresets))
-  }, [productPresets])
-
-  // Preset'leri backend'den yükle ve birleştir
-  const loadPresetsFromBackend = useCallback(() => {
-    if (!apiEnabled) return
-    
-    // Local preset'leri localStorage'dan yükle
-    const localPresets = (() => {
-      const saved = localStorage.getItem('productPresets')
-      if (saved) {
-        try {
-          return JSON.parse(saved) as ProductPreset[]
-        } catch {
-          return []
-        }
-      }
-      return []
-    })()
-    
-    // Sadece local preset'leri yükle (backend'de GET endpoint yok)
-    // Backend sync işlemi ayrı bir useEffect ile yapılıyor
-    if (localPresets.length > 0) {
-      setProductPresets(localPresets)
-    }
-  }, [apiEnabled])
-
-  // Load persisted saved calculations and presets from backend
+  // Load persisted saved calculations from backend
   useEffect(() => {
     if (!apiEnabled) return
     
@@ -194,26 +153,7 @@ function ProfitCalculator({ onNavigateToWholesale }: ProfitCalculatorProps = {})
       .catch((err) => {
         console.error('Failed to load saved calculations:', err)
       })
-    
-    // İlk yüklemede preset'leri yükle
-    loadPresetsFromBackend()
-    
-    // Periyodik olarak preset'leri kontrol et (30 saniyede bir)
-    const interval = setInterval(() => {
-      loadPresetsFromBackend()
-    }, 30000)
-    
-    // Sayfa focus olduğunda preset'leri kontrol et
-    const handleFocus = () => {
-      loadPresetsFromBackend()
-    }
-    window.addEventListener('focus', handleFocus)
-    
-    return () => {
-      clearInterval(interval)
-      window.removeEventListener('focus', handleFocus)
-    }
-  }, [loadPresetsFromBackend])
+  }, [apiEnabled])
 
   // Backend sync (debounced) with localStorage snapshot
   useEffect(() => {
@@ -226,14 +166,13 @@ function ProfitCalculator({ onNavigateToWholesale }: ProfitCalculatorProps = {})
         expenses,
         platforms,
         savedCalculations,
-        productPresets,
       }
       postSync(snapshot).catch((err) => {
         console.error('Sync error:', err)
       })
     }, 2000)
     return () => clearTimeout(timer)
-  }, [appSettings, productInfo, goldInfo, expenses, platforms, savedCalculations, productPresets])
+  }, [appSettings, productInfo, goldInfo, expenses, platforms, savedCalculations])
 
   const applySettingsToState = (s: AppSettings) => {
     setProductInfo(prev => ({ ...prev, productGram: s.defaultProductGram, laborMillem: s.defaultLaborMillem }))
@@ -389,84 +328,6 @@ function ProfitCalculator({ onNavigateToWholesale }: ProfitCalculatorProps = {})
     setToast({ message: 'Tüm kayıtlar silindi', type: 'success' })
   }
 
-  // Preset yönetim fonksiyonları
-  const handleSavePreset = (name: string) => {
-    if (!name.trim()) return
-    const newPreset: ProductPreset = {
-      id: `${Date.now()}`,
-      name: name.trim(),
-      createdAt: Date.now(),
-      productInfo: { ...productInfo },
-    }
-    const updated = [newPreset, ...productPresets]
-    setProductPresets(updated)
-    // Hemen backend'e sync et
-    if (apiEnabled) {
-      const snapshot = {
-        appSettings,
-        productInfo,
-        goldInfo,
-        expenses,
-        platforms,
-        savedCalculations,
-        productPresets: updated,
-      }
-      postSync(snapshot).catch((err) => {
-        console.error('Preset sync error:', err)
-      })
-    }
-    setToast({ message: 'Preset kaydedildi', type: 'success' })
-  }
-
-  const handleUpdatePreset = (id: string, name: string) => {
-    const updated = productPresets.map(p => 
-      p.id === id ? { ...p, name: name.trim() } : p
-    )
-    setProductPresets(updated)
-    // Hemen backend'e sync et
-    if (apiEnabled) {
-      const snapshot = {
-        appSettings,
-        productInfo,
-        goldInfo,
-        expenses,
-        platforms,
-        savedCalculations,
-        productPresets: updated,
-      }
-      postSync(snapshot).catch((err) => {
-        console.error('Preset sync error:', err)
-      })
-    }
-    setToast({ message: 'Preset güncellendi', type: 'success' })
-  }
-
-  const handleDeletePreset = (id: string) => {
-    const updated = productPresets.filter(p => p.id !== id)
-    setProductPresets(updated)
-    // Hemen backend'e sync et
-    if (apiEnabled) {
-      const snapshot = {
-        appSettings,
-        productInfo,
-        goldInfo,
-        expenses,
-        platforms,
-        savedCalculations,
-        productPresets: updated,
-      }
-      postSync(snapshot).catch((err) => {
-        console.error('Preset sync error:', err)
-      })
-    }
-    setToast({ message: 'Preset silindi', type: 'success' })
-  }
-
-  const handleLoadPreset = (preset: ProductPreset) => {
-    setProductInfo(preset.productInfo)
-    setToast({ message: `"${preset.name}" yüklendi`, type: 'success' })
-  }
-
   const handleSaveSingleScenario = (result: ProfitResult) => {
     setSaveModalResult(result)
     setSaveModalName('')
@@ -539,13 +400,10 @@ function ProfitCalculator({ onNavigateToWholesale }: ProfitCalculatorProps = {})
           goldInfo={goldInfo}
           expenses={expenses}
           platforms={platforms}
-          productPresets={productPresets}
           onProductInfoChange={setProductInfo}
           onGoldInfoChange={setGoldInfo}
           onExpensesChange={setExpenses}
           onPlatformsChange={setPlatforms}
-          onLoadPreset={handleLoadPreset}
-          onShowPresetModal={() => setShowPresetModal(true)}
         />
         <button
           onClick={handleCalculate}
@@ -619,7 +477,7 @@ function ProfitCalculator({ onNavigateToWholesale }: ProfitCalculatorProps = {})
             className="inline-flex items-center gap-2 px-3 sm:px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-2xl shadow-blue-500/40 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 ring-4 ring-blue-400/30 hover:scale-105 transition-all"
             title="Toptan Satış"
           >
-            <Package className="w-4 h-4 text-white" /> <span className="hidden sm:inline">Toptan Satış</span>
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg> <span className="hidden sm:inline">Toptan Satış</span>
           </button>
         )}
         <button
@@ -922,16 +780,6 @@ function ProfitCalculator({ onNavigateToWholesale }: ProfitCalculatorProps = {})
           </div>
         </div>
       )}
-      <ProductPresetModal
-        open={showPresetModal}
-        presets={productPresets}
-        currentProductInfo={productInfo}
-        onClose={() => setShowPresetModal(false)}
-        onSave={handleSavePreset}
-        onUpdate={handleUpdatePreset}
-        onDelete={handleDeletePreset}
-        onLoad={handleLoadPreset}
-      />
       {toast && <Toast message={toast.message} type={toast.type} onClose={()=>setToast(null)} />}
     </div>
   )

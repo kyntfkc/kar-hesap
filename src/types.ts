@@ -26,7 +26,7 @@ export interface Platform {
   name: string
   commissionRate: number
   salePrice: number
-  targetProfitRate?: number // Standart senaryo için kâr oranı (%)
+  targetProfitRate?: number
 }
 
 export interface ProfitResult {
@@ -48,14 +48,6 @@ export interface SavedCalculation {
   results: ProfitResult[]
 }
 
-export interface ProductPreset {
-  id: string
-  name: string
-  createdAt: number
-  productInfo: ProductInfo
-}
-
-// Toptan Satış için Type'lar
 export interface WholesaleInfo {
   gram: number
   goldPrice: number

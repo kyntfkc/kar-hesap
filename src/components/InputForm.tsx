@@ -1,25 +1,22 @@
 import { useState, useEffect, useRef } from 'react'
-import { ProductInfo, GoldInfo, Expenses, Platform, ProductPreset } from '../types'
+import { ProductInfo, GoldInfo, Expenses, Platform } from '../types'
 import { 
   calculatePureGoldGram, 
   calculateProductAmount, 
   calculatePurchasePrice 
 } from '../utils/calculations'
 import { calculateStandardSalePrice } from '../utils/calculations'
-import { Plus, X, Package } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 
 interface InputFormProps {
   productInfo: ProductInfo
   goldInfo: GoldInfo
   expenses: Expenses
   platforms: Platform[]
-  productPresets: ProductPreset[]
   onProductInfoChange: (info: ProductInfo) => void
   onGoldInfoChange: (info: GoldInfo) => void
   onExpensesChange: (expenses: Expenses) => void
   onPlatformsChange: (platforms: Platform[]) => void
-  onLoadPreset: (preset: ProductPreset) => void
-  onShowPresetModal: () => void
 }
 
 const calculateDefaultSalePrice = (productAmount: number): number => {
@@ -33,13 +30,10 @@ function InputForm({
   goldInfo,
   expenses,
   platforms,
-  productPresets,
   onProductInfoChange,
   onGoldInfoChange,
   onExpensesChange,
   onPlatformsChange,
-  onLoadPreset,
-  onShowPresetModal,
 }: InputFormProps) {
   const [expandedSections, setExpandedSections] = useState({
     labor: false,
@@ -210,37 +204,6 @@ function InputForm({
 
   return (
     <div className="space-y-3">
-      {/* Preset Seçici */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <div className="flex-1 min-w-[200px]">
-          <select
-            value=""
-            onChange={(e) => {
-              const preset = productPresets.find(p => p.id === e.target.value)
-              if (preset) {
-                onLoadPreset(preset)
-              }
-            }}
-            className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white font-medium text-slate-900"
-          >
-            <option value="">Preset seçin...</option>
-            {productPresets.map((preset) => (
-              <option key={preset.id} value={preset.id}>
-                {preset.name} ({preset.productInfo.productGram.toFixed(2)}g)
-              </option>
-            ))}
-          </select>
-        </div>
-        <button
-          onClick={onShowPresetModal}
-          className="px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-sm font-semibold rounded-lg hover:from-amber-600 hover:to-yellow-600 transition-all flex items-center gap-2 shadow-md shadow-amber-500/30"
-        >
-          <Package className="w-4 h-4" />
-          <span className="hidden sm:inline">Preset Yönet</span>
-          <span className="sm:hidden">Preset</span>
-        </button>
-      </div>
-
       <div className="grid grid-cols-1 gap-3">
         <div>
           <label className="block text-sm font-extrabold text-slate-900 mb-1.5 uppercase tracking-wider">Ürün Gram</label>
