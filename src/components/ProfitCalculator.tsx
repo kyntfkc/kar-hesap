@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, SavedCalculation, ProductPreset } from '../types'
 import { calculateAllPlatforms, calculateStandardSalePrice } from '../utils/calculations'
 import { apiEnabled, postCalculate, postSync, getSavedCalculations, postSavedCalculation, deleteSavedCalculation } from '../utils/api'
-import { TrendingUp, Loader2, Settings } from 'lucide-react'
+import { TrendingUp, Loader2, Settings, Package } from 'lucide-react'
 import GoldRateCard from './GoldRateCard'
 import Toast from './Toast'
 import InputForm from './InputForm'
@@ -38,7 +38,11 @@ const getDefaultPlatforms = (productGram: number = 0.80, goldPrice: number = 590
   { name: 'Standart', commissionRate: 22, salePrice: productGram * goldPrice * 1.2, targetProfitRate: 15 },
 ]
 
-function ProfitCalculator() {
+interface ProfitCalculatorProps {
+  onNavigateToWholesale?: () => void
+}
+
+function ProfitCalculator({ onNavigateToWholesale }: ProfitCalculatorProps = {}) {
   const defaultAppSettings: AppSettings = {
     defaultProductGram: 0.80,
     defaultGoldPrice: 5900,
@@ -607,14 +611,25 @@ function ProfitCalculator() {
       </div>
       <SettingsModal open={showSettings} initial={appSettings} onClose={()=>setShowSettings(false)} onSave={handleSaveSettings} />
 
-      {/* Floating Settings Button */}
-      <button
-        onClick={()=>setShowSettings(true)}
-        className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40 inline-flex items-center gap-2 px-3 sm:px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-2xl shadow-amber-500/40 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:via-yellow-600 hover:to-amber-700 ring-4 ring-amber-400/30 hover:scale-105 transition-all"
-        title="Ayarlar"
-      >
-        <Settings className="w-4 h-4 text-white" /> <span className="hidden sm:inline">Ayarlar</span>
-      </button>
+      {/* Floating Buttons */}
+      <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40 flex flex-col gap-2">
+        {onNavigateToWholesale && (
+          <button
+            onClick={onNavigateToWholesale}
+            className="inline-flex items-center gap-2 px-3 sm:px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-2xl shadow-blue-500/40 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 ring-4 ring-blue-400/30 hover:scale-105 transition-all"
+            title="Toptan Satış"
+          >
+            <Package className="w-4 h-4 text-white" /> <span className="hidden sm:inline">Toptan Satış</span>
+          </button>
+        )}
+        <button
+          onClick={()=>setShowSettings(true)}
+          className="inline-flex items-center gap-2 px-3 sm:px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-2xl shadow-amber-500/40 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:via-yellow-600 hover:to-amber-700 ring-4 ring-amber-400/30 hover:scale-105 transition-all"
+          title="Ayarlar"
+        >
+          <Settings className="w-4 h-4 text-white" /> <span className="hidden sm:inline">Ayarlar</span>
+        </button>
+      </div>
 
       {/* Saved calculations table */}
       <div className="order-3 md:order-3 mt-6 col-span-1 md:col-span-2 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/80 p-4 sm:p-5 ring-1 ring-slate-200/50 max-w-5xl mx-auto">

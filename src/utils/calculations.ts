@@ -1,4 +1,4 @@
-import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult } from '../types'
+import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, WholesaleInfo, WholesaleExpenses, WholesalePlatform, WholesaleResult } from '../types'
 
 // 14 ayar milyem sabit değeri
 const AYAR_14_MILLEM = 0.585
@@ -190,5 +190,114 @@ export function calculateStandardSalePrice(
   const calculatedSalePrice = roundToTwoDecimals((purchasePrice + fixedExpenses) / denominator)
   
   // Alt sınır yok; doğrudan yukarı yuvarla
+  return Math.ceil(calculatedSalePrice)
+}
+
+// Toptan Satış Hesaplama Fonksiyonları
+
+// Toptan satış için alış fiyatı: Gram × Altın Kuru
+export function calculateWholesalePurchasePrice(gram: number, goldPrice: number): number {
+  return roundToTwoDecimals(gram * goldPrice)
+}
+
+// Toptan satış kâr hesaplama
+export function calculateWholesaleProfit(
+  wholesaleInfo: WholesaleInfo,
+  expenses: WholesaleExpenses,
+  platform: WholesalePlatform
+): WholesaleResult {
+  // Alış Fiyatı: Gram × Altın Kuru
+  const purchasePrice = calculateWholesalePurchasePrice(wholesaleInfo.gram, wholesaleInfo.goldPrice)
+  
+  // Komisyon Tutarı: Satış Tutarı × Komisyon Oranı / 100
+  const commissionAmount = roundToTwoDecimals((platform.salePrice * platform.commissionRate) / 100)
+  
+  // Toplam Masraflar: Komisyon + Diğer Masraflar
+  const totalExpenses = roundToTwoDecimals(commissionAmount + expenses.otherExpenses)
+  
+  // Toplam Maliyet: Alış Fiyatı + Toplam Masraflar
+  const totalCost = roundToTwoDecimals(purchasePrice + totalExpenses)
+  
+  // Net Kazanç: Satış Tutarı - Toplam Maliyet
+  const netProfit = roundToTwoDecimals(platform.salePrice - totalCost)
+  
+  // Kâr %: (Net Kazanç ÷ Satış Tutarı) × 100
+  const profitRate = roundToFourDecimals((netProfit / platform.salePrice) * 100)
+  
+  // Optimum Skor Hesaplama: (Kâr % / 15) × Satış Fiyatı Katsayısı × 100
+  const standardSalePrice = calculateWholesaleStandardSalePrice(
+    wholesaleInfo,
+    expenses,
+    platform.commissionRate,
+    15 // %15 kâr referans olarak
+  )
+  const salePriceCoefficient = standardSalePrice > 0 ? roundToFourDecimals(platform.salePrice / standardSalePrice) : 1
+  const optimumScore = roundToTwoDecimals((profitRate / 15) * salePriceCoefficient * 100)
+  
+  return {
+    platform: platform.name,
+    commissionRate: platform.commissionRate,
+    salePrice: platform.salePrice,
+    commissionAmount,
+    totalExpenses,
+    netProfit,
+    profitRate,
+    optimumScore
+  }
+}
+
+// Tüm platformlar için toptan satış hesaplama
+export function calculateAllWholesalePlatforms(
+  wholesaleInfo: WholesaleInfo,
+  expenses: WholesaleExpenses,
+  platforms: WholesalePlatform[]
+): WholesaleResult[] {
+  // Özel sıralama: Standart ilk, sonra Senaryo 1, Senaryo 2, vb.
+  const sortedPlatforms = [...platforms].sort((a, b) => {
+    if (a.name === 'Standart') return -1
+    if (b.name === 'Standart') return 1
+    
+    const getScenarioNumber = (name: string): number => {
+      const match = name.match(/Senaryo (\d+)/)
+      return match ? parseInt(match[1]) : Infinity
+    }
+    
+    const numA = getScenarioNumber(a.name)
+    const numB = getScenarioNumber(b.name)
+    
+    if (numA !== Infinity && numB !== Infinity) {
+      return numA - numB
+    }
+    
+    return a.name.localeCompare(b.name)
+  })
+  
+  return sortedPlatforms.map(platform => 
+    calculateWholesaleProfit(wholesaleInfo, expenses, platform)
+  )
+}
+
+// Toptan satış için standart satış fiyatı hesaplama
+export function calculateWholesaleStandardSalePrice(
+  wholesaleInfo: WholesaleInfo,
+  expenses: WholesaleExpenses,
+  commissionRate: number = 2, // Toptan satışta genelde düşük komisyon
+  targetProfitRate: number = 5 // Toptan satışta düşük kâr oranı
+): number {
+  // Alış Fiyatı
+  const purchasePrice = calculateWholesalePurchasePrice(wholesaleInfo.gram, wholesaleInfo.goldPrice)
+  
+  // Sabit masraflar (komisyon hariç)
+  const fixedExpenses = expenses.otherExpenses
+  
+  // Formül: Satış Fiyatı = (Alış Fiyatı + Sabit Masraflar) / (1 - Komisyon Oranı/100 - Kâr Oranı/100)
+  const denominator = roundToFourDecimals(1 - (commissionRate / 100) - (targetProfitRate / 100))
+  
+  if (denominator <= 0) {
+    const fallback = roundToTwoDecimals(purchasePrice * 1.1)
+    return Math.ceil(fallback)
+  }
+  
+  const calculatedSalePrice = roundToTwoDecimals((purchasePrice + fixedExpenses) / denominator)
   return Math.ceil(calculatedSalePrice)
 }
