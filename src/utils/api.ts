@@ -3,7 +3,7 @@ const DEFAULT_BASE = '/api'
 // Env varsa onu, yoksa proxy'yi kullan
 const BASE = (import.meta?.env?.VITE_API_BASE_URL as string) || DEFAULT_BASE
 
-export const apiEnabled = true;
+export const apiEnabled = false;
 
 async function request(path: string, options: RequestInit = {}, timeoutMs = 8000, retries = 1) {
   // BASE her zaman tanımlı; yine de koruma
@@ -79,7 +79,16 @@ export async function getXauUsd(): Promise<number> {
 }
 
 export async function getRates(): Promise<{ usdtry: number; xauusd: number; ts: number; cached: boolean }> {
-  if (!apiEnabled) throw new Error('API disabled')
+  if (!apiEnabled) {
+    // Backend kapalıysa sadece USD/TRY kurunu al, XAU/USD için null döndür
+    const usdtry = await getUsdTryRate().catch(() => null)
+    return {
+      usdtry: usdtry || 0,
+      xauusd: 0,
+      ts: Date.now(),
+      cached: false
+    }
+  }
   return request('/rates') as any
 }
 

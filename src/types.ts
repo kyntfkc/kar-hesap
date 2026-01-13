@@ -55,3 +55,32 @@ export interface ProductPreset {
   productInfo: ProductInfo
 }
 
+// Toptan Satış için Type'lar
+export interface WholesaleInfo {
+  gram: number
+  goldPrice: number
+  purchasePrice: number
+}
+
+export interface WholesaleExpenses {
+  commission: number
+  otherExpenses: number
+}
+
+export interface WholesalePlatform {
+  name: string
+  commissionRate: number
+  salePrice: number
+  targetProfitRate?: number
+}
+
+export interface WholesaleResult {
+  platform: string
+  commissionRate: number
+  salePrice: number
+  commissionAmount: number
+  totalExpenses: number
+  netProfit: number
+  profitRate: number
+  optimumScore?: number
+}
