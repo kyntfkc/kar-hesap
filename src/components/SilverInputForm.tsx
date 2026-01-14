@@ -493,48 +493,32 @@ function SilverInputForm({
                   <X className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" strokeWidth={3} />
                 </button>
               </div>
-              {platform.name === 'Standart' || platform.name === 'Astarlı Ürün' ? (
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-xs text-slate-600 mb-1 font-medium">Komisyon</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={platform.commissionRate}
-                      onChange={(e) =>
-                        updatePlatform(index, 'commissionRate', parseFloat(e.target.value) || 0)
-                      }
-                      className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white text-center font-semibold shadow-sm"
-                      placeholder="0"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-600 mb-1 font-medium">Kâr Oranı (%)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={(platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 20 : 15)) === 0 ? '' : (platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 20 : 15))}
-                      onChange={(e) => {
-                        const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
-                        updatePlatform(index, 'targetProfitRate', value)
-                      }}
-                      className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white text-center font-semibold shadow-sm"
-                      placeholder={platform.name === 'Astarlı Ürün' ? '20' : '15'}
-                    />
-                  </div>
-                </div>
-              ) : (
+              <div>
+                <label className="block text-xs text-slate-600 mb-1 font-medium">Komisyon</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={platform.commissionRate}
+                  onChange={(e) =>
+                    updatePlatform(index, 'commissionRate', parseFloat(e.target.value) || 0)
+                  }
+                  className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white text-center font-semibold shadow-sm"
+                  placeholder="0"
+                />
+              </div>
+              {(platform.name === 'Standart' || platform.name === 'Astarlı Ürün') && (
                 <div>
-                  <label className="block text-xs text-slate-600 mb-1 font-medium">Komisyon</label>
+                  <label className="block text-xs text-slate-600 mb-1 font-medium">Kâr Oranı (%)</label>
                   <input
                     type="number"
                     step="0.1"
-                    value={platform.commissionRate}
-                    onChange={(e) =>
-                      updatePlatform(index, 'commissionRate', parseFloat(e.target.value) || 0)
-                    }
-                    className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center font-semibold shadow-sm"
-                    placeholder="0"
+                    value={(platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 20 : 15)) === 0 ? '' : (platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 20 : 15))}
+                    onChange={(e) => {
+                      const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
+                      updatePlatform(index, 'targetProfitRate', value)
+                    }}
+                    className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white text-center font-semibold shadow-sm"
+                    placeholder={platform.name === 'Astarlı Ürün' ? '20' : '15'}
                   />
                 </div>
               )}
