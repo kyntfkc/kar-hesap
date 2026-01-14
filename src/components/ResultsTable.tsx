@@ -150,6 +150,13 @@ function ResultsTableImpl({ results, onSaveScenario, showCommission = false, sho
                       </div>
                     </div>
 
+                    <div className="bg-white rounded-lg p-3 border border-slate-200">
+                      <div className="text-xs text-slate-600 font-medium mb-1">Masraf Toplamı</div>
+                      <div className="text-base font-semibold text-slate-900">
+                        {formatNumber(result.totalExpenses)} <span className="text-sm text-slate-500">TL</span>
+                      </div>
+                    </div>
+
                     {showCommission && (
                       <div className="bg-white rounded-lg p-3 border border-slate-200">
                         <div className="text-xs text-slate-600 font-medium mb-1">Komisyon</div>
