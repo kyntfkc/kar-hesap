@@ -76,3 +76,46 @@ export interface WholesaleResult {
   profitRate: number
   optimumScore?: number
 }
+export interface SilverProductInfo {
+  productGram: number
+  laborUsd: number
+  pureSilverGram: number
+  laserCuttingEnabled: boolean
+  laserCuttingUsd: number
+}
+
+export interface SilverInfo {
+  silverPrice: number
+  usdTryRate: number
+  productAmount: number
+  purchasePrice: number
+}
+
+export interface SilverExpenses {
+  shipping: number
+  packaging: number
+  eCommerceTax: number
+  eCommerceTaxRate: number
+  serviceFee: number
+  extraChain: number
+  specialPackaging: number
+}
+
+export interface SilverPlatform {
+  name: string
+  commissionRate: number
+  salePrice: number
+  targetProfitRate?: number
+}
+
+export interface SilverResult {
+  platform: string
+  commissionRate: number
+  salePrice: number
+  commissionAmount: number
+  totalExpenses: number
+  netProfit: number
+  profitRate: number
+  bankayaYatan: number
+  optimumScore?: number
+}

@@ -1,4 +1,4 @@
-import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, WholesaleInfo, WholesaleExpenses, WholesalePlatform, WholesaleResult } from '../types'
+import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, WholesaleInfo, WholesaleExpenses, WholesalePlatform, WholesaleResult, SilverProductInfo, SilverInfo, SilverExpenses, SilverPlatform, SilverResult } from '../types'
 
 // 14 ayar milyem sabit değeri
 const AYAR_14_MILLEM = 0.585
@@ -299,5 +299,192 @@ export function calculateWholesaleStandardSalePrice(
   }
   
   const calculatedSalePrice = roundToTwoDecimals((purchasePrice + fixedExpenses) / denominator)
+  return Math.ceil(calculatedSalePrice)
+}
+
+// Gümüş Hesaplama Fonksiyonları
+
+// 925 ayar gümüş milyem sabit değeri
+const AYAR_925_MILLEM = 0.925
+
+// Has Gümüş Gram hesaplama: (925 ayar milyemi) × Ürün Gramı
+// Not: Gümüşte işçilik milyemi yok, sadece 925 ayar kullanılıyor
+export function calculatePureSilverGram(productInfo: SilverProductInfo): number {
+  const result = AYAR_925_MILLEM * productInfo.productGram
+  return roundToFourDecimals(result)
+}
+
+// Ürün Tutarı hesaplama: Has Gümüş Gram × Gümüş Kuru
+export function calculateSilverProductAmount(pureSilverGram: number, silverPrice: number): number {
+  const result = pureSilverGram * silverPrice
+  return roundToTwoDecimals(result)
+}
+
+// İşçilik Maliyeti hesaplama: (İşçilik USD + Lazer Kesim USD) × USD/TRY Kuru
+export function calculateSilverLaborCost(productInfo: SilverProductInfo, usdTryRate: number): number {
+  const totalLaborUsd = productInfo.laborUsd + (productInfo.laserCuttingEnabled ? productInfo.laserCuttingUsd : 0)
+  const result = totalLaborUsd * usdTryRate
+  return roundToTwoDecimals(result)
+}
+
+// Alış Fiyatı hesaplama: Ürün Tutarı + İşçilik Maliyeti
+export function calculateSilverPurchasePrice(
+  productAmount: number,
+  laborCost: number
+): number {
+  return roundToTwoDecimals(productAmount + laborCost)
+}
+
+// Gümüş kar hesaplama
+export function calculateSilverProfit(
+  productInfo: SilverProductInfo,
+  silverInfo: SilverInfo,
+  expenses: SilverExpenses,
+  platform: SilverPlatform
+): SilverResult {
+  // Has Gümüş Gram hesapla
+  const pureSilverGram = calculatePureSilverGram(productInfo)
+  
+  // Ürün Tutarı hesapla
+  const productAmount = calculateSilverProductAmount(pureSilverGram, silverInfo.silverPrice)
+  
+  // İşçilik Maliyeti hesapla
+  const laborCost = calculateSilverLaborCost(productInfo, silverInfo.usdTryRate)
+  
+  // Alış Fiyatı hesapla
+  const purchasePrice = calculateSilverPurchasePrice(productAmount, laborCost)
+  
+  // Komisyon Tutarı: Satış Tutarı × Komisyon Oranı / 100
+  const commissionAmount = roundToTwoDecimals((platform.salePrice * platform.commissionRate) / 100)
+  
+  // E-ticaret Stopajı: Satış Tutarı × (eCommerceTaxRate / 100)
+  const eCommerceTaxRate = expenses.eCommerceTaxRate || 1.00
+  const eCommerceTaxAmount = roundToTwoDecimals(platform.salePrice * (eCommerceTaxRate / 100))
+  
+  // Masraf Toplamı: Kargo + Ambalaj + Stopaj + Hizmet + Ekstra Zincir + Işıklı Kutu
+  const totalExpenses = roundToTwoDecimals(
+    expenses.shipping +
+    expenses.packaging +
+    eCommerceTaxAmount +
+    expenses.serviceFee +
+    expenses.extraChain +
+    expenses.specialPackaging
+  )
+  
+  // Toplam Maliyet: Alış Fiyatı + Masraf Toplamı + Komisyon Tutarı
+  const totalCost = roundToTwoDecimals(purchasePrice + totalExpenses + commissionAmount)
+  
+  // Kazanç: Satış Tutarı - Toplam Maliyet
+  const netProfit = roundToTwoDecimals(platform.salePrice - totalCost)
+  
+  // Kâr %: (Kazanç ÷ Satış Tutarı) × 100
+  const profitRate = roundToFourDecimals((netProfit / platform.salePrice) * 100)
+
+  // Bankaya yatan: Satış Tutarı - (Komisyon + Kargo + Stopaj)
+  const bankayaYatan = roundToTwoDecimals(platform.salePrice - (commissionAmount + expenses.shipping + eCommerceTaxAmount))
+
+  // Optimum Skor Hesaplama: (Kâr % / 15) × Satış Fiyatı Katsayısı × 100
+  const standardSalePrice = calculateSilverStandardSalePrice(
+    productInfo,
+    silverInfo,
+    expenses,
+    platform.commissionRate,
+    15 // %15 kâr referans olarak
+  )
+  const salePriceCoefficient = standardSalePrice > 0 ? roundToFourDecimals(platform.salePrice / standardSalePrice) : 1
+  const optimumScore = roundToTwoDecimals((profitRate / 15) * salePriceCoefficient * 100)
+
+  return {
+    platform: platform.name,
+    commissionRate: platform.commissionRate,
+    salePrice: platform.salePrice,
+    commissionAmount,
+    totalExpenses,
+    netProfit,
+    profitRate,
+    bankayaYatan,
+    optimumScore
+  }
+}
+
+// Tüm platformlar için gümüş hesaplama
+export function calculateAllSilverPlatforms(
+  productInfo: SilverProductInfo,
+  silverInfo: SilverInfo,
+  expenses: SilverExpenses,
+  platforms: SilverPlatform[]
+): SilverResult[] {
+  // Özel sıralama: Standart ilk, sonra Senaryo 1, Senaryo 2, vb.
+  const sortedPlatforms = [...platforms].sort((a, b) => {
+    // Standart her zaman ilk
+    if (a.name === 'Standart') return -1
+    if (b.name === 'Standart') return 1
+    
+    // Senaryo numaralarına göre sırala
+    const getScenarioNumber = (name: string): number => {
+      const match = name.match(/Senaryo (\d+)/)
+      return match ? parseInt(match[1]) : Infinity
+    }
+    
+    const numA = getScenarioNumber(a.name)
+    const numB = getScenarioNumber(b.name)
+    
+    if (numA !== Infinity && numB !== Infinity) {
+      return numA - numB
+    }
+    
+    // Senaryo olmayan diğer isimler alfabetik sırada
+    return a.name.localeCompare(b.name)
+  })
+  
+  return sortedPlatforms.map(platform => 
+    calculateSilverProfit(productInfo, silverInfo, expenses, platform)
+  )
+}
+
+// Gümüş için standart satış fiyatını hesapla
+export function calculateSilverStandardSalePrice(
+  productInfo: SilverProductInfo,
+  silverInfo: SilverInfo,
+  expenses: SilverExpenses,
+  commissionRate: number = 22,
+  targetProfitRate: number = 15 // Hedef kâr oranı (%)
+): number {
+  // Has Gümüş Gram hesapla
+  const pureSilverGram = calculatePureSilverGram(productInfo)
+  
+  // Ürün Tutarı hesapla
+  const productAmount = calculateSilverProductAmount(pureSilverGram, silverInfo.silverPrice)
+  
+  // İşçilik Maliyeti hesapla
+  const laborCost = calculateSilverLaborCost(productInfo, silverInfo.usdTryRate)
+  
+  // Alış Fiyatı hesapla
+  const purchasePrice = calculateSilverPurchasePrice(productAmount, laborCost)
+  
+  // Sabit masraflar (stopaj hariç)
+  const fixedExpenses = 
+    expenses.shipping +
+    expenses.packaging +
+    expenses.serviceFee +
+    expenses.extraChain +
+    expenses.specialPackaging
+  
+  // Stopaj oranı
+  const eCommerceTaxRate = expenses.eCommerceTaxRate || 1.00
+  
+  // Formül: Satış Fiyatı = (Alış Fiyatı + Sabit Masraflar) / (1 - Stopaj Oranı/100 - Komisyon Oranı/100 - Kâr Oranı/100)
+  const denominator = roundToFourDecimals(1 - (eCommerceTaxRate / 100) - (commissionRate / 100) - (targetProfitRate / 100))
+  
+  // Payda sıfır veya negatif olmamalı
+  if (denominator <= 0) {
+    // Fallback: Eski yöntem
+    const fallback = roundToTwoDecimals(productInfo.productGram * silverInfo.silverPrice * 1.2)
+    return Math.ceil(fallback)
+  }
+  
+  const calculatedSalePrice = roundToTwoDecimals((purchasePrice + fixedExpenses) / denominator)
+  
+  // Alt sınır yok; doğrudan yukarı yuvarla
   return Math.ceil(calculatedSalePrice)
 }
