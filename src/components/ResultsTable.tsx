@@ -196,7 +196,7 @@ function ResultsTableImpl({ results, onSaveScenario, showCommission = false, sho
 
       {/* Desktop Tablo Görünümü */}
       <div className="hidden md:block overflow-x-auto -mx-2 sm:mx-0">
-        <table className="w-full min-w-[900px] sm:min-w-0">
+        <table className="w-full min-w-[1010px] sm:min-w-0">
         <thead>
           <tr className="border-b-2 border-slate-200/80 bg-gradient-to-r from-slate-50 via-amber-50/60 to-yellow-50/70">
             <th className="px-3 py-2.5 text-left text-xs font-bold text-slate-700 uppercase tracking-wider w-[120px]">
@@ -206,6 +206,9 @@ function ResultsTableImpl({ results, onSaveScenario, showCommission = false, sho
               <>
                 <th className="px-3 py-2.5 text-center text-xs font-bold text-slate-700 uppercase tracking-wider w-[110px]">
                   Alış Fiyatı
+                </th>
+                <th className="px-3 py-2.5 text-center text-xs font-bold text-slate-700 uppercase tracking-wider w-[110px]">
+                  Masraf Toplamı
                 </th>
                 <th className="px-3 py-2.5 text-center text-xs font-bold text-slate-700 uppercase tracking-wider w-[110px]">
                   Komisyon
@@ -272,6 +275,11 @@ function ResultsTableImpl({ results, onSaveScenario, showCommission = false, sho
                     <td className="px-3 py-2.5 whitespace-nowrap text-center">
                       <span className="text-xs sm:text-sm font-semibold text-slate-900">
                         {formatNumber(result.purchasePrice)} <span className="text-slate-500 font-medium">TL</span>
+                      </span>
+                    </td>
+                    <td className="px-3 py-2.5 whitespace-nowrap text-center">
+                      <span className="text-xs sm:text-sm font-semibold text-slate-900">
+                        {formatNumber(result.totalExpenses)} <span className="text-slate-500 font-medium">TL</span>
                       </span>
                     </td>
                     <td className="px-3 py-2.5 whitespace-nowrap text-center">
