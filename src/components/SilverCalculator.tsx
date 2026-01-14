@@ -374,15 +374,6 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
 
       {/* Floating Buttons */}
       <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40 flex flex-col gap-2">
-        {onNavigateToGold && (
-          <button
-            onClick={onNavigateToGold}
-            className="inline-flex items-center gap-2 px-3 sm:px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-2xl shadow-amber-500/40 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:via-yellow-600 hover:to-amber-700 ring-4 ring-amber-400/30 hover:scale-105 transition-all"
-            title="Altın Hesap"
-          >
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> <span className="hidden sm:inline">Altın Hesap</span>
-          </button>
-        )}
         <button
           onClick={()=>setShowSettings(true)}
           className="inline-flex items-center gap-2 px-3 sm:px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-2xl shadow-slate-500/40 bg-gradient-to-r from-slate-500 via-slate-600 to-slate-700 hover:from-slate-600 hover:via-slate-700 hover:to-slate-800 ring-4 ring-slate-400/30 hover:scale-105 transition-all"
