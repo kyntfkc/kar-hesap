@@ -293,7 +293,7 @@ function WholesaleCalculator({ onNavigateToRetail }: WholesaleCalculatorProps = 
   })
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-4 sm:gap-5 px-3 sm:px-0 pb-24">
+    <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-4 sm:gap-5 px-3 sm:px-0 pb-24">
       {/* Gold card on mobile at very top */}
       <div className="order-1 md:hidden">
         <div className="card p-3 sm:p-4">
@@ -370,7 +370,7 @@ function WholesaleCalculator({ onNavigateToRetail }: WholesaleCalculatorProps = 
                 Senaryo Ekle
               </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3">
               {platforms.map((platform, index) => (
                 <div key={index} className="p-3 bg-white rounded-lg border border-slate-300/70 shadow-sm hover:shadow-md hover:border-slate-400/60 transition-all duration-200 relative ring-1 ring-slate-200/20">
                   <div className="space-y-1.5">
