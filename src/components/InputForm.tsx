@@ -320,32 +320,33 @@ function InputForm({
               {/* Dış Atölye */}
               <div className="flex items-center gap-2 bg-slate-50/80 px-2.5 py-1.5 rounded-lg border border-slate-200">
                 <span className="text-xs font-medium text-slate-700">Dış Atölye</span>
-                {productInfo.laserCuttingEnabled && (
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    value={productInfo.laserCuttingMillem === 0 ? '' : productInfo.laserCuttingMillem.toString().replace('.', ',')}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(',', '.')
-                      if (raw === '' || raw === '.') {
-                        updateProductInfo('laserCuttingMillem', 0)
-                      } else if (/^(\d+)?([.,]\d*)?$/.test(raw)) {
-                        const num = parseFloat(raw)
-                        if (!isNaN(num)) {
-                          updateProductInfo('laserCuttingMillem', num)
-                        }
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={productInfo.laserCuttingMillem === 0 ? '' : productInfo.laserCuttingMillem.toString().replace('.', ',')}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(',', '.')
+                    if (raw === '' || raw === '.') {
+                      updateProductInfo('laserCuttingMillem', 0)
+                    } else if (/^(\d+)?([.,]\d*)?$/.test(raw)) {
+                      const num = parseFloat(raw)
+                      if (!isNaN(num)) {
+                        updateProductInfo('laserCuttingMillem', num)
                       }
-                    }}
-                    onBlur={(e) => {
-                      const raw = e.target.value.replace(',', '.')
-                      if (raw === '' || raw === '.') {
-                        updateProductInfo('laserCuttingMillem', 0)
-                      }
-                    }}
-                    className="w-16 px-2 py-1 text-xs border border-slate-300/70 rounded-md focus:ring-1 focus:ring-amber-500 focus:border-amber-500 bg-white shadow-sm"
-                    placeholder="0.100"
-                  />
-                )}
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const raw = e.target.value.replace(',', '.')
+                    if (raw === '' || raw === '.') {
+                      updateProductInfo('laserCuttingMillem', 0)
+                    }
+                  }}
+                  className={`w-16 px-2 py-1 text-xs border border-slate-300/70 rounded-md focus:ring-1 focus:ring-amber-500 focus:border-amber-500 bg-white shadow-sm transition-all ${
+                    productInfo.laserCuttingEnabled ? 'opacity-100' : 'opacity-0 w-0 px-0 pointer-events-none'
+                  }`}
+                  placeholder="0.100"
+                  disabled={!productInfo.laserCuttingEnabled}
+                />
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
