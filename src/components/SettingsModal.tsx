@@ -19,7 +19,7 @@ export interface AppSettings {
 interface SettingsModalProps {
   open: boolean
   initial: AppSettings
-  mode: 'gold' | 'silver'
+  mode: 'gold' | 'silver' | 'wholesale'
   onClose: () => void
   onSave: (settings: AppSettings, applyNow: boolean) => void
 }
@@ -87,11 +87,11 @@ export default function SettingsModal({ open, initial, mode, onClose, onSave }: 
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
       <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl border border-slate-200 p-5">
         <h3 className="text-lg font-bold text-slate-900 mb-3">
-          {mode === 'gold' ? 'Altın Ayarları' : 'Gümüş Ayarları'}
+          {mode === 'gold' ? 'Altın Ayarları' : mode === 'silver' ? 'Gümüş Ayarları' : 'Toptan Ayarları'}
         </h3>
 
         <div className="grid grid-cols-2 gap-3">
-          {mode === 'gold' ? (
+          {mode === 'gold' || mode === 'wholesale' ? (
             <div>
               <label className="block text-xs text-slate-600 mb-1 font-medium">İşçilik (milyem)</label>
               <input type="text" inputMode="decimal" value={draft.defaultLaborMillem}
@@ -112,7 +112,7 @@ export default function SettingsModal({ open, initial, mode, onClose, onSave }: 
               onChange={e=>setDraftValue('defaultProductGram', e.target.value)} onBlur={()=>commitNumber('defaultProductGram')}
               className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
           </div>
-          {mode === 'gold' ? (
+          {mode === 'gold' || mode === 'wholesale' ? (
             <div>
               <label className="block text-xs text-slate-600 mb-1 font-medium">Varsayılan Altın Kuru</label>
               <input type="text" inputMode="numeric" value={draft.defaultGoldPrice}

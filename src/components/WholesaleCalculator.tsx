@@ -44,7 +44,7 @@ function WholesaleCalculator({ onNavigateToRetail }: WholesaleCalculatorProps = 
 
   const [showSettings, setShowSettings] = useState(false)
   const [appSettings, setAppSettings] = useState<AppSettings>(() => {
-    const saved = localStorage.getItem('goldAppSettings')
+    const saved = localStorage.getItem('wholesaleAppSettings')
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
@@ -210,7 +210,7 @@ function WholesaleCalculator({ onNavigateToRetail }: WholesaleCalculatorProps = 
 
   const handleSaveSettings = (s: AppSettings, applyNow: boolean) => {
     setAppSettings(s)
-    localStorage.setItem('goldAppSettings', JSON.stringify(s))
+    localStorage.setItem('wholesaleAppSettings', JSON.stringify(s))
     if (applyNow) {
       setWholesaleInfo(prev => ({ ...prev, goldPrice: s.defaultGoldPrice }))
       setExpenses(prev => ({ ...prev, commission: 0, otherExpenses: 0 }))
@@ -521,7 +521,7 @@ function WholesaleCalculator({ onNavigateToRetail }: WholesaleCalculatorProps = 
       </div>
       </div>
       
-      <SettingsModal open={showSettings} initial={appSettings} mode="gold" onClose={()=>setShowSettings(false)} onSave={handleSaveSettings} />
+      <SettingsModal open={showSettings} initial={appSettings} mode="wholesale" onClose={()=>setShowSettings(false)} onSave={handleSaveSettings} />
 
       {/* Floating Buttons */}
       <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40 flex flex-col gap-2">
