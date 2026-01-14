@@ -36,7 +36,7 @@ const defaultSilverExpenses: SilverExpenses = {
 }
 
 const getDefaultSilverPlatforms = (productGram: number = 0.80, silverPrice: number = 100): SilverPlatform[] => [
-  { name: 'Standart', commissionRate: 22, salePrice: Math.round(productGram * silverPrice * 1.2), targetProfitRate: 15 },
+  { name: 'Standart', commissionRate: 22, salePrice: Math.round(productGram * silverPrice * 1.2), targetProfitRate: 30 },
 ]
 
 interface SilverCalculatorProps {

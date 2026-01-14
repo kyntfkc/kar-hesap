@@ -181,7 +181,7 @@ function SilverInputForm({
     const next = platforms.filter((_, i) => i !== index)
     if (next.length === 0) {
       onPlatformsChange([
-        { name: 'Standart', commissionRate: 22, salePrice: calculateDefaultSalePrice(silverInfo.productAmount), targetProfitRate: 15 },
+        { name: 'Standart', commissionRate: 22, salePrice: calculateDefaultSalePrice(silverInfo.productAmount), targetProfitRate: 30 },
       ])
     } else {
       onPlatformsChange(next)
@@ -513,13 +513,13 @@ function SilverInputForm({
                   <input
                     type="number"
                     step="0.1"
-                    value={(platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 20 : 15)) === 0 ? '' : (platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 20 : 15))}
+                    value={(platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 20 : 30)) === 0 ? '' : (platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 20 : 30))}
                     onChange={(e) => {
                       const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
                       updatePlatform(index, 'targetProfitRate', value)
                     }}
                     className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white text-center font-semibold shadow-sm"
-                    placeholder={platform.name === 'Astarlı Ürün' ? '20' : '15'}
+                    placeholder={platform.name === 'Astarlı Ürün' ? '20' : '30'}
                   />
                 </div>
               )}

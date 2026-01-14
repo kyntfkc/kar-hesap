@@ -385,16 +385,16 @@ export function calculateSilverProfit(
   // Bankaya yatan: Satış Tutarı - (Komisyon + Kargo + Stopaj)
   const bankayaYatan = roundToTwoDecimals(platform.salePrice - (commissionAmount + expenses.shipping + eCommerceTaxAmount))
 
-  // Optimum Skor Hesaplama: (Kâr % / 15) × Satış Fiyatı Katsayısı × 100
+  // Optimum Skor Hesaplama: (Kâr % / 30) × Satış Fiyatı Katsayısı × 100
   const standardSalePrice = calculateSilverStandardSalePrice(
     productInfo,
     silverInfo,
     expenses,
     platform.commissionRate,
-    15 // %15 kâr referans olarak
+    30 // %30 kâr referans olarak
   )
   const salePriceCoefficient = standardSalePrice > 0 ? roundToFourDecimals(platform.salePrice / standardSalePrice) : 1
-  const optimumScore = roundToTwoDecimals((profitRate / 15) * salePriceCoefficient * 100)
+  const optimumScore = roundToTwoDecimals((profitRate / 30) * salePriceCoefficient * 100)
 
   return {
     platform: platform.name,
@@ -451,7 +451,7 @@ export function calculateSilverStandardSalePrice(
   silverInfo: SilverInfo,
   expenses: SilverExpenses,
   commissionRate: number = 22,
-  targetProfitRate: number = 15 // Hedef kâr oranı (%)
+  targetProfitRate: number = 30 // Hedef kâr oranı (%)
 ): number {
   // Has Gümüş Gram hesapla
   const pureSilverGram = calculatePureSilverGram(productInfo)
