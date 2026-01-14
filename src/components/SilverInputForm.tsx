@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { SilverProductInfo, SilverInfo, SilverExpenses, SilverPlatform } from '../types'
 import { 
   calculatePureSilverGram, 
@@ -42,7 +42,6 @@ function SilverInputForm({
   
   const [productGramInput, setProductGramInput] = useState<string>('')
   const [lengthOption, setLengthOption] = useState<'none' | '50' | '60'>('none')
-  const previousLaborUsdRef = useRef<number>(productInfo.laborUsd)
 
   const pureSilverGram = calculatePureSilverGram(productInfo)
   
@@ -63,11 +62,6 @@ function SilverInputForm({
     }
   }, [productInfo.productGram, productInfo.pureSilverGram, pureSilverGram])
 
-  useEffect(() => {
-    if (!productInfo.laserCuttingEnabled) {
-      previousLaborUsdRef.current = productInfo.laborUsd
-    }
-  }, [productInfo.laborUsd, productInfo.laserCuttingEnabled])
 
   useEffect(() => {
     const updatedSilverInfo = {
@@ -291,63 +285,6 @@ function SilverInputForm({
                     type="checkbox"
                     checked={expenses.specialPackaging > 0}
                     onChange={handleSpecialPackagingToggle}
-                    className="sr-only peer"
-                  />
-                  <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-slate-500 peer-checked:to-slate-600"></div>
-                </label>
-              </div>
-
-              <div className="flex items-center gap-2 bg-slate-50/80 px-2.5 py-1.5 rounded-lg border border-slate-200">
-                <span className="text-xs font-medium text-slate-700">Dış Atölye</span>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={productInfo.laserCuttingUsd === 0 ? '' : productInfo.laserCuttingUsd.toString().replace('.', ',')}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(',', '.')
-                    if (raw === '' || raw === '.') {
-                      updateProductInfo('laserCuttingUsd', 0)
-                    } else if (/^(\d+)?([.,]\d*)?$/.test(raw)) {
-                      const num = parseFloat(raw)
-                      if (!isNaN(num)) {
-                        updateProductInfo('laserCuttingUsd', num)
-                      }
-                    }
-                  }}
-                  onBlur={(e) => {
-                    const raw = e.target.value.replace(',', '.')
-                    if (raw === '' || raw === '.') {
-                      updateProductInfo('laserCuttingUsd', 0)
-                    }
-                  }}
-                  className={`w-16 px-2 py-1 text-xs border border-slate-300/70 rounded-md focus:ring-1 focus:ring-slate-500 focus:border-slate-500 bg-white shadow-sm transition-all ${
-                    productInfo.laserCuttingEnabled ? 'opacity-100' : 'opacity-0 w-0 px-0 pointer-events-none'
-                  }`}
-                  placeholder="0.50"
-                  disabled={!productInfo.laserCuttingEnabled}
-                />
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={productInfo.laserCuttingEnabled}
-                    onChange={(e) => {
-                      const enabled = e.target.checked
-                      if (enabled) {
-                        previousLaborUsdRef.current = productInfo.laborUsd
-                        onProductInfoChange({
-                          ...productInfo,
-                          laborUsd: 0,
-                          laserCuttingUsd: 0.50,
-                          laserCuttingEnabled: true
-                        })
-                      } else {
-                        onProductInfoChange({
-                          ...productInfo,
-                          laborUsd: previousLaborUsdRef.current,
-                          laserCuttingEnabled: false
-                        })
-                      }
-                    }}
                     className="sr-only peer"
                   />
                   <div className="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-slate-500 peer-checked:to-slate-600"></div>

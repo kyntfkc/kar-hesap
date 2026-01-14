@@ -322,10 +322,9 @@ export function calculateSilverProductAmount(pureSilverGram: number, silverPrice
   return roundToTwoDecimals(result)
 }
 
-// İşçilik Maliyeti hesaplama: Ürün Gramı × (İşçilik USD + Lazer Kesim USD) × USD/TRY Kuru
+// İşçilik Maliyeti hesaplama: Ürün Gramı × İşçilik USD × USD/TRY Kuru
 export function calculateSilverLaborCost(productInfo: SilverProductInfo, usdTryRate: number): number {
-  const totalLaborUsdPerGram = productInfo.laborUsd + (productInfo.laserCuttingEnabled ? productInfo.laserCuttingUsd : 0)
-  const result = productInfo.productGram * totalLaborUsdPerGram * usdTryRate
+  const result = productInfo.productGram * productInfo.laborUsd * usdTryRate
   return roundToTwoDecimals(result)
 }
 
