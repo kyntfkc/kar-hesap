@@ -58,7 +58,7 @@ function ProfitCalculator({ onNavigateToWholesale }: ProfitCalculatorProps = {})
 
   const [showSettings, setShowSettings] = useState(false)
   const [appSettings, setAppSettings] = useState<AppSettings>(() => {
-    const saved = localStorage.getItem('appSettings')
+    const saved = localStorage.getItem('goldAppSettings')
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
@@ -151,7 +151,7 @@ function ProfitCalculator({ onNavigateToWholesale }: ProfitCalculatorProps = {})
 
   const handleSaveSettings = (s: AppSettings, applyNow: boolean) => {
     setAppSettings(s)
-    localStorage.setItem('appSettings', JSON.stringify(s))
+    localStorage.setItem('goldAppSettings', JSON.stringify(s))
     if (applyNow) applySettingsToState(s)
     setShowSettings(false)
   }
@@ -162,7 +162,7 @@ function ProfitCalculator({ onNavigateToWholesale }: ProfitCalculatorProps = {})
     if (didApplySettingsOnMountRef.current) return
     didApplySettingsOnMountRef.current = true
     try {
-      const saved = localStorage.getItem('appSettings')
+      const saved = localStorage.getItem('goldAppSettings')
       const s = saved ? { ...defaultAppSettings, ...JSON.parse(saved) } : appSettings
       applySettingsToState(s)
     } catch {
@@ -347,7 +347,7 @@ function ProfitCalculator({ onNavigateToWholesale }: ProfitCalculatorProps = {})
         )}
       </div>
       </div>
-      <SettingsModal open={showSettings} initial={appSettings} onClose={()=>setShowSettings(false)} onSave={handleSaveSettings} />
+      <SettingsModal open={showSettings} initial={appSettings} mode="gold" onClose={()=>setShowSettings(false)} onSave={handleSaveSettings} />
 
       {/* Floating Buttons */}
       <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40 flex flex-col gap-2">

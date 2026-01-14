@@ -106,7 +106,7 @@ function SilverInputForm({
   const handleSpecialPackagingToggle = () => {
     if (expenses.specialPackaging === 0) {
       try {
-        const saved = localStorage.getItem('appSettings')
+        const saved = localStorage.getItem('silverAppSettings')
         const val = saved ? JSON.parse(saved).defaultExtraCost : 150
         updateExpenses('specialPackaging', typeof val === 'number' ? val : 150)
       } catch {

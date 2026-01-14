@@ -115,7 +115,7 @@ function InputForm({
     if (expenses.specialPackaging === 0) {
       // Ayarlardan oku; yoksa 150
       try {
-        const saved = localStorage.getItem('appSettings')
+        const saved = localStorage.getItem('goldAppSettings')
         const val = saved ? JSON.parse(saved).defaultExtraCost : 150
         updateExpenses('specialPackaging', typeof val === 'number' ? val : 150)
       } catch {

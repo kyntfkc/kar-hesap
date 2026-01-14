@@ -47,6 +47,7 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
   const defaultAppSettings: AppSettings = {
     defaultProductGram: 0.80,
     defaultGoldPrice: 5900,
+    defaultSilverPrice: 100,
     defaultShipping: 120,
     defaultPackaging: 120,
     defaultServiceFee: 20,
@@ -55,12 +56,13 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
     defaultStandardProfit: 15,
     defaultLinedProfit: 20,
     defaultLaborMillem: 0.050,
+    defaultLaborUsd: 0.50,
     defaultExtraCost: 150,
   }
 
   const [showSettings, setShowSettings] = useState(false)
   const [appSettings, setAppSettings] = useState<AppSettings>(() => {
-    const saved = localStorage.getItem('appSettings')
+    const saved = localStorage.getItem('silverAppSettings')
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
@@ -158,7 +160,8 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
   }, [appSettings, productInfo, silverInfo, expenses, platforms])
 
   const applySettingsToState = (s: AppSettings) => {
-    setProductInfo(prev => ({ ...prev, productGram: s.defaultProductGram }))
+    setProductInfo(prev => ({ ...prev, productGram: s.defaultProductGram, laborUsd: s.defaultLaborUsd || 0.50 }))
+    setSilverInfo(prev => ({ ...prev, silverPrice: s.defaultSilverPrice || 100 }))
     setExpenses(prev => ({ ...prev, shipping: s.defaultShipping, packaging: s.defaultPackaging, serviceFee: s.defaultServiceFee, eCommerceTaxRate: s.defaultETaxRate, specialPackaging: prev.specialPackaging > 0 ? s.defaultExtraCost : 0 }))
     setPlatforms(prev => prev.map(p => {
       if (p.name === 'Standart') return { ...p, commissionRate: s.defaultCommission, targetProfitRate: s.defaultStandardProfit }
@@ -169,7 +172,7 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
 
   const handleSaveSettings = (s: AppSettings, applyNow: boolean) => {
     setAppSettings(s)
-    localStorage.setItem('appSettings', JSON.stringify(s))
+    localStorage.setItem('silverAppSettings', JSON.stringify(s))
     if (applyNow) applySettingsToState(s)
     setShowSettings(false)
   }
@@ -180,7 +183,7 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
     if (didApplySettingsOnMountRef.current) return
     didApplySettingsOnMountRef.current = true
     try {
-      const saved = localStorage.getItem('appSettings')
+      const saved = localStorage.getItem('silverAppSettings')
       const s = saved ? { ...defaultAppSettings, ...JSON.parse(saved) } : appSettings
       applySettingsToState(s)
     } catch {
@@ -367,7 +370,7 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
         )}
       </div>
       </div>
-      <SettingsModal open={showSettings} initial={appSettings} onClose={()=>setShowSettings(false)} onSave={handleSaveSettings} />
+      <SettingsModal open={showSettings} initial={appSettings} mode="silver" onClose={()=>setShowSettings(false)} onSave={handleSaveSettings} />
 
       {/* Floating Buttons */}
       <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40 flex flex-col gap-2">
