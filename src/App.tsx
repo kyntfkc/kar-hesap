@@ -1,21 +1,17 @@
 import { useState } from 'react'
 import ProfitCalculator from './components/ProfitCalculator'
-import WholesaleCalculator from './components/WholesaleCalculator'
 import SilverCalculator from './components/SilverCalculator'
-import { Store, Package } from 'lucide-react'
 
 type Material = 'gold' | 'silver'
-type Page = 'retail' | 'wholesale'
 
 function App() {
   const [material, setMaterial] = useState<Material>('gold')
-  const [currentPage, setCurrentPage] = useState<Page>('retail')
 
   const getTitle = () => {
     if (material === 'silver') {
       return 'Gümüş Takı Kar Hesap'
     }
-    return currentPage === 'retail' ? 'Altın Takı Kar Hesap' : 'Toptan Altın Satış'
+    return 'Altın Takı Kar Hesap'
   }
 
   const getIcon = () => {
@@ -65,7 +61,6 @@ function App() {
             <button
               onClick={() => {
                 setMaterial('gold')
-                setCurrentPage('retail')
               }}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all ${
                 material === 'gold'
@@ -79,7 +74,6 @@ function App() {
             <button
               onClick={() => {
                 setMaterial('silver')
-                setCurrentPage('retail')
               }}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all ${
                 material === 'silver'
@@ -92,41 +86,12 @@ function App() {
             </button>
           </div>
 
-          {/* Sayfa Geçiş Butonları (Sadece Altın için) */}
-          {material === 'gold' && (
-            <div className="flex items-center justify-center gap-3 mt-3">
-              <button
-                onClick={() => setCurrentPage('retail')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all ${
-                  currentPage === 'retail'
-                    ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-lg shadow-amber-500/30'
-                    : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
-                }`}
-              >
-                <Store className="w-4 h-4" />
-                Takı Satışı
-              </button>
-              <button
-                onClick={() => setCurrentPage('wholesale')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all ${
-                  currentPage === 'wholesale'
-                    ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-lg shadow-amber-500/30'
-                    : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
-                }`}
-              >
-                <Package className="w-4 h-4" />
-                Toptan Satış
-              </button>
-            </div>
-          )}
         </div>
         
         {material === 'silver' ? (
           <SilverCalculator onNavigateToGold={() => setMaterial('gold')} />
-        ) : currentPage === 'retail' ? (
-          <ProfitCalculator onNavigateToWholesale={() => setCurrentPage('wholesale')} />
         ) : (
-          <WholesaleCalculator onNavigateToRetail={() => setCurrentPage('retail')} />
+          <ProfitCalculator />
         )}
       </div>
     </div>

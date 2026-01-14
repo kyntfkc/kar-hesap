@@ -37,11 +37,7 @@ const getDefaultPlatforms = (productGram: number = 0.80, goldPrice: number = 590
   { name: 'Standart', commissionRate: 22, salePrice: productGram * goldPrice * 1.2, targetProfitRate: 15 },
 ]
 
-interface ProfitCalculatorProps {
-  onNavigateToWholesale?: () => void
-}
-
-function ProfitCalculator({ onNavigateToWholesale }: ProfitCalculatorProps = {}) {
+function ProfitCalculator() {
   const defaultAppSettings: AppSettings = {
     defaultProductGram: 0.80,
     defaultGoldPrice: 5900,
@@ -351,15 +347,6 @@ function ProfitCalculator({ onNavigateToWholesale }: ProfitCalculatorProps = {})
 
       {/* Floating Buttons */}
       <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40 flex flex-col gap-2">
-        {onNavigateToWholesale && (
-          <button
-            onClick={onNavigateToWholesale}
-            className="inline-flex items-center gap-2 px-3 sm:px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-2xl shadow-blue-500/40 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 ring-4 ring-blue-400/30 hover:scale-105 transition-all"
-            title="Toptan Satış"
-          >
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg> <span className="hidden sm:inline">Toptan Satış</span>
-          </button>
-        )}
         <button
           onClick={()=>setShowSettings(true)}
           className="inline-flex items-center gap-2 px-3 sm:px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-2xl shadow-amber-500/40 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:via-yellow-600 hover:to-amber-700 ring-4 ring-amber-400/30 hover:scale-105 transition-all"
