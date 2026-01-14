@@ -290,7 +290,7 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
   })
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-4 sm:gap-5 px-3 sm:px-0 pb-24">
+    <div className="grid grid-cols-1 md:grid-cols-[2fr_3fr] gap-4 sm:gap-5 px-3 sm:px-0 pb-24">
       {/* Silver card on mobile at very top */}
       <div className="order-1 md:hidden">
         <div className="card p-3 sm:p-4">
