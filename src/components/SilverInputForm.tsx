@@ -257,7 +257,7 @@ function SilverInputForm({
             </button>
             </div>
 
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 bg-slate-50/80 px-2.5 py-1.5 rounded-lg border border-slate-200">
                 <span className="text-xs font-medium text-slate-700">Ekstra Maliyet</span>
                 <input
