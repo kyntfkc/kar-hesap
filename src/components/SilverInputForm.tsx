@@ -469,10 +469,10 @@ function SilverInputForm({
             </button>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 gap-3">
           {platforms.map((platform, index) => (
-            <div key={index} className="p-3 bg-white rounded-lg border border-slate-300/70 shadow-sm hover:shadow-md hover:border-slate-400/60 transition-all duration-200 relative ring-1 ring-slate-200/20">
-            <div className="space-y-1.5">
+            <div key={index} className="p-4 bg-white rounded-lg border border-slate-300/70 shadow-sm hover:shadow-md hover:border-slate-400/60 transition-all duration-200 relative ring-1 ring-slate-200/20">
+            <div className="space-y-3">
               <div className="relative">
                 <input
                   type="text"
@@ -482,7 +482,7 @@ function SilverInputForm({
                     updatePlatform(index, 'name', e.target.value)
                   }}
                   disabled={platform.name === 'Standart' || platform.name === 'Astarlı Ürün'}
-                  className="w-full px-2 py-1.5 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white font-medium text-slate-900 text-center shadow-sm disabled:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-500"
+                  className="w-full px-3 py-2 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white font-medium text-slate-900 text-center shadow-sm disabled:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-500"
                   placeholder="Senaryo adı"
                 />
                 <button
@@ -494,9 +494,9 @@ function SilverInputForm({
                 </button>
               </div>
               {platform.name === 'Standart' || platform.name === 'Astarlı Ürün' ? (
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-slate-600 mb-1 font-medium">Komisyon</label>
+                    <label className="block text-xs text-slate-600 mb-1.5 font-medium">Komisyon</label>
                     <input
                       type="number"
                       step="0.1"
@@ -504,12 +504,12 @@ function SilverInputForm({
                       onChange={(e) =>
                         updatePlatform(index, 'commissionRate', parseFloat(e.target.value) || 0)
                       }
-                      className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white text-center font-semibold shadow-sm"
+                      className="w-full px-3 py-2 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white text-center font-semibold shadow-sm"
                       placeholder="0"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-slate-600 mb-1 font-medium">Kâr Oranı (%)</label>
+                    <label className="block text-xs text-slate-600 mb-1.5 font-medium">Kâr Oranı (%)</label>
                     <input
                       type="number"
                       step="0.1"
@@ -518,14 +518,14 @@ function SilverInputForm({
                         const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
                         updatePlatform(index, 'targetProfitRate', value)
                       }}
-                      className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white text-center font-semibold shadow-sm"
+                      className="w-full px-3 py-2 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white text-center font-semibold shadow-sm"
                       placeholder={platform.name === 'Astarlı Ürün' ? '20' : '15'}
                     />
                   </div>
                 </div>
               ) : (
                 <div>
-                  <label className="block text-xs text-slate-600 mb-1 font-medium">Komisyon</label>
+                  <label className="block text-xs text-slate-600 mb-1.5 font-medium">Komisyon</label>
                   <input
                     type="number"
                     step="0.1"
@@ -533,13 +533,13 @@ function SilverInputForm({
                     onChange={(e) =>
                       updatePlatform(index, 'commissionRate', parseFloat(e.target.value) || 0)
                     }
-                    className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center font-semibold shadow-sm"
+                    className="w-full px-3 py-2 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-center font-semibold shadow-sm"
                     placeholder="0"
                   />
                 </div>
               )}
                 <div>
-                <label className="block text-xs text-slate-600 mb-1 font-medium">
+                <label className="block text-xs text-slate-600 mb-1.5 font-medium">
                   Satış Fiyatı
                   {(platform.name === 'Standart' || platform.name === 'Astarlı Ürün') && (
                     <span className="ml-1 text-xs text-gray-500 font-normal">(Otomatik)</span>
@@ -555,7 +555,7 @@ function SilverInputForm({
                         updatePlatform(index, 'salePrice', parseInt(e.target.value) || 0)
                       }}
                       disabled={platform.name === 'Standart' || platform.name === 'Astarlı Ürün'}
-                      className="w-full pr-8 px-2 py-1.5 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white text-center font-semibold disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500"
+                      className="w-full pr-8 px-3 py-2 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white text-center font-semibold disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500"
                       placeholder="0"
                     />
                     <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 font-medium">TL</span>
