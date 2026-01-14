@@ -171,12 +171,14 @@ export default function SettingsModal({ open, initial, mode, onClose, onSave }: 
               onChange={e=>setDraftValue('defaultStandardProfit', e.target.value)} onBlur={()=>commitNumber('defaultStandardProfit')}
               className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
           </div>
-          <div>
-            <label className="block text-xs text-slate-600 mb-1 font-medium">Astarlı Ürün Kâr Oranı (%)</label>
-            <input type="text" inputMode="decimal" value={draft.defaultLinedProfit}
-              onChange={e=>setDraftValue('defaultLinedProfit', e.target.value)} onBlur={()=>commitNumber('defaultLinedProfit')}
-              className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
-          </div>
+          {mode !== 'wholesale' && (
+            <div>
+              <label className="block text-xs text-slate-600 mb-1 font-medium">Astarlı Ürün Kâr Oranı (%)</label>
+              <input type="text" inputMode="decimal" value={draft.defaultLinedProfit}
+                onChange={e=>setDraftValue('defaultLinedProfit', e.target.value)} onBlur={()=>commitNumber('defaultLinedProfit')}
+                className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-between mt-4">
@@ -188,6 +190,8 @@ export default function SettingsModal({ open, initial, mode, onClose, onSave }: 
             <button onClick={onClose} className="px-3 py-1.5 text-sm rounded-lg border border-slate-300">İptal</button>
             <button onClick={()=>onSave(form, applyNow)} className={`px-3 py-1.5 text-sm rounded-lg text-white shadow-lg hover:shadow-xl transition-all ${
               mode === 'gold' 
+                ? 'bg-gradient-to-r from-amber-500 to-yellow-500 shadow-amber-500/30 hover:shadow-amber-500/40'
+                : mode === 'wholesale'
                 ? 'bg-gradient-to-r from-amber-500 to-yellow-500 shadow-amber-500/30 hover:shadow-amber-500/40'
                 : 'bg-gradient-to-r from-slate-500 to-slate-600 shadow-slate-500/30 hover:shadow-slate-500/40'
             }`}>Kaydet</button>

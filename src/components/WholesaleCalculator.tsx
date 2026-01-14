@@ -20,7 +20,7 @@ const defaultWholesaleExpenses: WholesaleExpenses = {
 }
 
 const getDefaultPlatforms = (gram: number = 100, goldPrice: number = 5900): WholesalePlatform[] => [
-  { name: 'Standart', commissionRate: 2, salePrice: Math.round(gram * goldPrice * 1.07), targetProfitRate: 5 },
+  { name: 'Standart', commissionRate: 2, salePrice: Math.round(gram * goldPrice * 1.07), targetProfitRate: 5 }, // defaultStandardProfit kullanılacak
 ]
 
 interface WholesaleCalculatorProps {
@@ -215,7 +215,7 @@ function WholesaleCalculator({ onNavigateToRetail }: WholesaleCalculatorProps = 
       setWholesaleInfo(prev => ({ ...prev, goldPrice: s.defaultGoldPrice }))
       setExpenses(prev => ({ ...prev, commission: 0, otherExpenses: 0 }))
       setPlatforms(prev => prev.map(p => {
-        if (p.name === 'Standart') return { ...p, commissionRate: 2, targetProfitRate: 5 }
+        if (p.name === 'Standart') return { ...p, commissionRate: 2, targetProfitRate: s.defaultStandardProfit }
         return p
       }))
     }
