@@ -135,7 +135,7 @@ function ResultsTableImpl({ results, onSaveScenario, showCommission = false, sho
               {/* Genişletilebilir Detaylar */}
               {isExpanded && (
                 <div className="border-t border-slate-200 bg-slate-50/50 p-4 space-y-3 transition-all duration-300 ease-in-out">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     <div className="bg-white rounded-lg p-3 border border-slate-200">
                       <div className="text-xs text-slate-600 font-medium mb-1">Satış Tutarı</div>
                       <div className="text-base font-semibold text-slate-900">
