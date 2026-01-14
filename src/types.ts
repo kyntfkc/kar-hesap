@@ -38,6 +38,7 @@ export interface ProfitResult {
   netProfit: number
   profitRate: number
   bankayaYatan: number
+  purchasePrice: number
   optimumScore?: number
 }
 
@@ -74,6 +75,7 @@ export interface WholesaleResult {
   totalExpenses: number
   netProfit: number
   profitRate: number
+  purchasePrice: number
   optimumScore?: number
 }
 export interface SilverProductInfo {
@@ -117,5 +119,6 @@ export interface SilverResult {
   netProfit: number
   profitRate: number
   bankayaYatan: number
+  purchasePrice: number
   optimumScore?: number
 }

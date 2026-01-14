@@ -288,7 +288,8 @@ function WholesaleCalculator({ onNavigateToRetail }: WholesaleCalculatorProps = 
   // ResultsTable için ProfitResult formatına dönüştür
   const convertToProfitResult = (result: WholesaleResult): any => ({
     ...result,
-    bankayaYatan: result.salePrice - result.commissionAmount
+    bankayaYatan: result.salePrice - result.commissionAmount,
+    purchasePrice: result.purchasePrice
   })
 
   return (

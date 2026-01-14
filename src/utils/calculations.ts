@@ -108,6 +108,7 @@ export function calculateProfit(
     netProfit,
     profitRate,
     bankayaYatan,
+    purchasePrice,
     optimumScore
   }
 }
@@ -242,6 +243,7 @@ export function calculateWholesaleProfit(
     totalExpenses,
     netProfit,
     profitRate,
+    purchasePrice,
     optimumScore
   }
 }
@@ -403,6 +405,7 @@ export function calculateSilverProfit(
     netProfit,
     profitRate,
     bankayaYatan,
+    purchasePrice,
     optimumScore
   }
 }
