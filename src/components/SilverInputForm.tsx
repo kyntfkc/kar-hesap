@@ -373,7 +373,7 @@ function SilverInputForm({
             <div className="mb-3">
               <div className="grid grid-cols-4 gap-2">
                 <div className="col-span-2">
-                  <label className="block text-xs text-gray-700 mb-1 font-medium">İşçilik (USD)</label>
+                  <label className="block text-xs text-gray-700 mb-1 font-medium">İşçilik (USD/gr)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -384,7 +384,7 @@ function SilverInputForm({
                   />
                 </div>
                 <div className="col-span-2 flex items-end text-[11px] text-slate-500">
-                  Dolar cinsinden işçilik maliyeti
+                  Gram başına dolar cinsinden işçilik maliyeti
                 </div>
               </div>
             </div>

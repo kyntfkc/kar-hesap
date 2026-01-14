@@ -100,7 +100,7 @@ export default function SettingsModal({ open, initial, mode, onClose, onSave }: 
             </div>
           ) : (
             <div>
-              <label className="block text-xs text-slate-600 mb-1 font-medium">İşçilik (USD)</label>
+              <label className="block text-xs text-slate-600 mb-1 font-medium">İşçilik (USD/gr)</label>
               <input type="text" inputMode="decimal" value={draft.defaultLaborUsd || ''}
                 onChange={e=>setDraftValue('defaultLaborUsd' as keyof AppSettings, e.target.value)} onBlur={()=>commitNumber('defaultLaborUsd' as keyof AppSettings)}
                 className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
