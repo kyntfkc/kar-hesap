@@ -189,41 +189,41 @@ function ResultsTableImpl({ results, onSaveScenario, showCommission = false, sho
 
       {/* Desktop Tablo Görünümü */}
       <div className="hidden md:block overflow-x-auto -mx-2 sm:mx-0">
-        <table className="w-full min-w-[720px] sm:min-w-0 table-fixed">
+        <table className="w-full min-w-[900px] sm:min-w-0">
         <thead>
           <tr className="border-b-2 border-slate-200/80 bg-gradient-to-r from-slate-50 via-amber-50/60 to-yellow-50/70">
-            <th className="px-2 py-2 text-left text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <th className="px-3 py-2.5 text-left text-xs font-bold text-slate-700 uppercase tracking-wider w-[120px]">
               Senaryo
             </th>
             {showCommission && (
               <>
-                <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
+                <th className="px-3 py-2.5 text-center text-xs font-bold text-slate-700 uppercase tracking-wider w-[110px]">
                   Alış Fiyatı
                 </th>
-                <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
+                <th className="px-3 py-2.5 text-center text-xs font-bold text-slate-700 uppercase tracking-wider w-[110px]">
                   Komisyon
                 </th>
               </>
             )}
-            <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <th className="px-3 py-2.5 text-center text-xs font-bold text-slate-700 uppercase tracking-wider w-[80px]">
               Kâr %
             </th>
-            <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <th className="px-3 py-2.5 text-center text-xs font-bold text-slate-700 uppercase tracking-wider w-[120px]">
               Optimum Skor
             </th>
-            <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <th className="px-3 py-2.5 text-center text-xs font-bold text-slate-700 uppercase tracking-wider w-[130px]">
               Net Kazanç
             </th>
-            <th className="px-2 py-2 text-left text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <th className="px-3 py-2.5 text-left text-xs font-bold text-slate-700 uppercase tracking-wider w-[110px]">
               Satış Tutarı
             </th>
             {showBank && (
-              <th className="px-2 py-2 text-center text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <th className="px-3 py-2.5 text-center text-xs font-bold text-slate-700 uppercase tracking-wider w-[130px]">
                 Bankaya Yatan
               </th>
             )}
             {onSaveScenario && (
-              <th className="px-2 py-2 text-right text-[11px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">Kaydet</th>
+              <th className="px-3 py-2.5 text-right text-xs font-bold text-slate-700 uppercase tracking-wider w-[100px]">Kaydet</th>
             )}
           </tr>
         </thead>
@@ -255,31 +255,31 @@ function ResultsTableImpl({ results, onSaveScenario, showCommission = false, sho
 
             return (
               <tr key={index} className="hover:bg-amber-50/50 transition-all duration-200 border-b border-slate-100/80 group">
-                <td className="px-2 py-2 whitespace-nowrap">
+                <td className="px-3 py-2.5 whitespace-nowrap">
                   <span className="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-amber-700 transition-colors">
                     {result.platform}
                   </span>
                 </td>
                 {showCommission && (
                   <>
-                    <td className="px-2 py-2 whitespace-nowrap text-center">
+                    <td className="px-3 py-2.5 whitespace-nowrap text-center">
                       <span className="text-xs sm:text-sm font-semibold text-slate-900">
                         {formatNumber(result.purchasePrice)} <span className="text-slate-500 font-medium">TL</span>
                       </span>
                     </td>
-                    <td className="px-2 py-2 whitespace-nowrap text-center">
+                    <td className="px-3 py-2.5 whitespace-nowrap text-center">
                       <span className="text-xs sm:text-sm font-medium text-slate-700">
                         {commissionDisplay}
                       </span>
                     </td>
                   </>
                 )}
-                <td className="px-2 py-2 whitespace-nowrap text-center">
+                <td className="px-3 py-2.5 whitespace-nowrap text-center">
                   <span className="text-sm sm:text-base font-bold text-slate-900">
                     {Math.round(result.profitRate)}%
                   </span>
                 </td>
-                <td className="px-2 py-2 whitespace-nowrap text-center">
+                <td className="px-3 py-2.5 whitespace-nowrap text-center">
                   {result.optimumScore !== undefined ? (
                     <div className="flex flex-col items-center gap-0.5">
                       <span className={`text-sm sm:text-base font-bold ${
@@ -305,28 +305,28 @@ function ResultsTableImpl({ results, onSaveScenario, showCommission = false, sho
                     <span className="text-xs text-slate-400">-</span>
                   )}
                 </td>
-                <td className="px-2 py-2 whitespace-nowrap text-center">
-                  <span className={`inline-block px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg ${profitBgColor} text-slate-800 font-bold text-xs sm:text-sm hover:scale-105 transition-transform`}>
+                <td className="px-3 py-2.5 whitespace-nowrap text-center">
+                  <span className={`inline-block px-2 py-1.5 rounded-lg ${profitBgColor} text-slate-800 font-bold text-xs sm:text-sm hover:scale-105 transition-transform whitespace-nowrap`}>
                     {formatNumber(result.netProfit)} TL
                   </span>
                 </td>
-                <td className="px-2 py-2 whitespace-nowrap">
+                <td className="px-3 py-2.5 whitespace-nowrap">
                   <span className="text-xs sm:text-sm font-semibold text-slate-900">
                     {formatNumber(result.salePrice)} <span className="text-slate-500 font-medium">TL</span>
                   </span>
                 </td>
                 {showBank && (
-                  <td className="px-2 py-2 whitespace-nowrap text-center">
+                  <td className="px-3 py-2.5 whitespace-nowrap text-center">
                     <span className="text-xs sm:text-sm font-semibold text-amber-800">
                       {formatNumber(result.bankayaYatan)} TL
                     </span>
                   </td>
                 )}
                 {onSaveScenario && (
-                  <td className="px-2 py-2 whitespace-nowrap text-right">
+                  <td className="px-3 py-2.5 whitespace-nowrap text-right">
                     <button
                       onClick={() => onSaveScenario(result)}
-                      className="btn-outline h-8 text-xs sm:text-sm"
+                      className="btn-outline h-8 text-xs sm:text-sm whitespace-nowrap"
                       title="Bu senaryoyu kaydet"
                     >
                       Kaydet

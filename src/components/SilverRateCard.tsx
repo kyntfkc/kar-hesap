@@ -9,6 +9,7 @@ interface Props {
 
 export default function SilverRateCard({ silverInfo, onSilverInfoChange }: Props) {
   const [priceInput, setPriceInput] = useState('')
+  const [rateInput, setRateInput] = useState('')
   const [loadingRate, setLoadingRate] = useState(false)
 
   const update = (field: keyof SilverInfo, value: number) => onSilverInfoChange({ ...silverInfo, [field]: value })
@@ -62,15 +63,19 @@ export default function SilverRateCard({ silverInfo, onSilverInfoChange }: Props
             <input
               type="text"
               inputMode="numeric"
-              value={loadingRate ? 'Yükleniyor...' : (silverInfo.usdTryRate === 0 ? '' : silverInfo.usdTryRate.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }))}
+              value={loadingRate ? 'Yükleniyor...' : (rateInput !== '' ? rateInput : (silverInfo.usdTryRate === 0 ? '' : silverInfo.usdTryRate.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })))}
               onChange={(e) => {
                 const raw = e.target.value
                 const cleaned = raw.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
+                setRateInput(raw)
                 const num = parseFloat(cleaned)
-                if (!isNaN(num) && num > 0) {
+                if (cleaned === '' || cleaned === '.') {
+                  update('usdTryRate', 0)
+                } else if (!isNaN(num) && num > 0) {
                   update('usdTryRate', num)
                 }
               }}
+              onBlur={() => setRateInput('')}
               disabled={loadingRate}
               className="w-full px-3 py-2 text-sm border border-slate-300/70 rounded-xl focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white transition-all font-medium text-slate-900 hover:border-slate-400 shadow-sm disabled:bg-slate-100 disabled:cursor-not-allowed"
               placeholder="0"
