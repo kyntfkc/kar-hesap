@@ -129,6 +129,9 @@ function InputForm({
   const isAutoPlatform = (name: string) =>
     name === 'Standart' || name === 'Astarlı Ürün' || name === 'İndigo'
 
+  // Standart satış tutarı kilitli; Astarlı/İndigo otomatik gelir ama düzenlenebilir
+  const isSalePriceLocked = (name: string) => name === 'Standart'
+
   const getDefaultTargetProfit = (name: string) => {
     if (name === 'İndigo') return 20
     if (name === 'Astarlı Ürün') return 20
@@ -588,8 +591,11 @@ function InputForm({
                 <div>
                 <label className="block text-xs text-slate-600 mb-1 font-medium">
                   Satış Fiyatı
-                  {isAutoPlatform(platform.name) && (
+                  {isSalePriceLocked(platform.name) && (
                     <span className="ml-1 text-xs text-gray-500 font-normal">(Otomatik)</span>
+                  )}
+                  {(platform.name === 'Astarlı Ürün' || platform.name === 'İndigo') && (
+                    <span className="ml-1 text-xs text-gray-500 font-normal">(Otomatik, düzenlenebilir)</span>
                   )}
                 </label>
                   <div className="relative">
@@ -598,10 +604,10 @@ function InputForm({
                       step="1"
                       value={platform.salePrice}
                       onChange={(e) => {
-                        if (isAutoPlatform(platform.name)) return
+                        if (isSalePriceLocked(platform.name)) return
                         updatePlatform(index, 'salePrice', parseInt(e.target.value) || 0)
                       }}
-                      disabled={isAutoPlatform(platform.name)}
+                      disabled={isSalePriceLocked(platform.name)}
                       className="w-full pr-8 px-2 py-1.5 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 bg-white text-center font-semibold disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500"
                       placeholder="0"
                     />
