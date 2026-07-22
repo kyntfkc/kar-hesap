@@ -106,6 +106,7 @@ function ProfitCalculator() {
 
   useEffect(() => {
     localStorage.setItem('goldInfo', JSON.stringify(goldInfo))
+    window.dispatchEvent(new CustomEvent('goldInfoChanged', { detail: { goldPrice: goldInfo.goldPrice } }))
   }, [goldInfo])
 
   useEffect(() => {
@@ -153,10 +154,12 @@ function ProfitCalculator() {
   }
 
   // İlk yüklemede kaydedilmiş ayarları otomatik uygula
+  // Kullanıcının kaydettiği productInfo varsa ezme — sadece ilk açılışta uygula
   const didApplySettingsOnMountRef = useRef(false)
   useEffect(() => {
     if (didApplySettingsOnMountRef.current) return
     didApplySettingsOnMountRef.current = true
+    if (localStorage.getItem('productInfo')) return
     try {
       const saved = localStorage.getItem('goldAppSettings')
       const s = saved ? { ...defaultAppSettings, ...JSON.parse(saved) } : appSettings
@@ -166,17 +169,17 @@ function ProfitCalculator() {
     }
   }, [])
 
-  // Otomatik senaryoların (Standart ve Astarlı Ürün) satış fiyatını güncelle
+  // Otomatik senaryoların (Standart, Astarlı Ürün, İndigo) satış fiyatını güncelle
   useEffect(() => {
     setPlatforms(prevPlatforms => {
       let updated: Platform[] | null = null
 
-      const autoNames = ['Standart', 'Astarlı Ürün']
+      const autoNames = ['Standart', 'Astarlı Ürün', 'İndigo']
       autoNames.forEach(name => {
         const idx = prevPlatforms.findIndex(p => p.name === name)
         if (idx !== -1) {
-          const commissionRate = prevPlatforms[idx].commissionRate || 22
-          const defaultTarget = name === 'Astarlı Ürün' ? appSettings.defaultLinedProfit : appSettings.defaultStandardProfit
+          const commissionRate = prevPlatforms[idx].commissionRate || (name === 'İndigo' ? 15 : 22)
+          const defaultTarget = name === 'İndigo' ? 20 : name === 'Astarlı Ürün' ? appSettings.defaultLinedProfit : appSettings.defaultStandardProfit
           const targetProfitRate = prevPlatforms[idx].targetProfitRate ?? defaultTarget
           const newSalePrice = calculateStandardSalePrice(
             productInfo,

@@ -182,6 +182,7 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
   useEffect(() => {
     if (didApplySettingsOnMountRef.current) return
     didApplySettingsOnMountRef.current = true
+    if (localStorage.getItem('silverProductInfo')) return
     try {
       const saved = localStorage.getItem('silverAppSettings')
       const s = saved ? { ...defaultAppSettings, ...JSON.parse(saved) } : appSettings
@@ -191,17 +192,17 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
     }
   }, [])
 
-  // Otomatik senaryoların (Standart ve Astarlı Ürün) satış fiyatını güncelle
+  // Otomatik senaryoların (Standart, Astarlı Ürün, İndigo) satış fiyatını güncelle
   useEffect(() => {
     setPlatforms(prevPlatforms => {
       let updated: SilverPlatform[] | null = null
 
-      const autoNames = ['Standart', 'Astarlı Ürün']
+      const autoNames = ['Standart', 'Astarlı Ürün', 'İndigo']
       autoNames.forEach(name => {
         const idx = prevPlatforms.findIndex(p => p.name === name)
         if (idx !== -1) {
-          const commissionRate = prevPlatforms[idx].commissionRate || 22
-          const defaultTarget = name === 'Astarlı Ürün' ? appSettings.defaultLinedProfit : appSettings.defaultStandardProfit
+          const commissionRate = prevPlatforms[idx].commissionRate || (name === 'İndigo' ? 15 : 22)
+          const defaultTarget = name === 'İndigo' ? 30 : name === 'Astarlı Ürün' ? appSettings.defaultLinedProfit : appSettings.defaultStandardProfit
           const targetProfitRate = prevPlatforms[idx].targetProfitRate ?? defaultTarget
           const newSalePrice = calculateSilverStandardSalePrice(
             productInfo,
@@ -298,7 +299,7 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
         </div>
       </div>
 
-      <div className="order-2 md:order-1 card p-4 sm:p-6 hover:shadow-2xl hover:shadow-slate-500/20 transition-all duration-300">
+      <div className="order-2 md:order-1 card p-4 sm:p-6 hover:shadow-2xl hover:shadow-sky-400/20 transition-all duration-300">
         <SilverInputForm
           productInfo={productInfo}
           silverInfo={silverInfo}
@@ -312,7 +313,7 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
         <button
           onClick={handleCalculate}
           disabled={isCalculating}
-          className="w-full mt-6 btn-primary !h-11 text-white !text-sm bg-gradient-to-r from-slate-500 via-slate-600 to-slate-700 hover:from-slate-600 hover:via-slate-700 hover:to-slate-800"
+          className="w-full mt-6 !h-11 text-white !text-sm bg-gradient-to-r from-sky-400 via-blue-500 to-cyan-500 hover:from-sky-500 hover:via-blue-600 hover:to-cyan-600 shadow-lg shadow-sky-400/30 hover:shadow-xl hover:shadow-sky-400/40 disabled:opacity-60 flex items-center justify-center transition-all rounded-xl font-semibold"
         >
           {isCalculating ? (
             <>
@@ -334,11 +335,11 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
           <SilverRateCard silverInfo={silverInfo} onSilverInfoChange={setSilverInfo} />
         </div>
 
-        <div className="card p-4 sm:p-6 overflow-y-auto overflow-x-hidden hover:shadow-2xl hover:shadow-slate-500/20 transition-all duration-300">
+        <div className="card p-4 sm:p-6 overflow-y-auto overflow-x-hidden hover:shadow-2xl hover:shadow-sky-400/20 transition-all duration-300">
         {isCalculating ? (
           <div className="flex flex-col items-center justify-center h-full">
-            <Loader2 className="w-12 h-12 text-slate-500 animate-spin mb-4" />
-            <p className="text-sm text-slate-600 font-medium">Hesaplanıyor...</p>
+            <Loader2 className="w-12 h-12 text-sky-500 animate-spin mb-4" />
+            <p className="text-sm text-blue-600 font-medium">Hesaplanıyor...</p>
           </div>
         ) : results.length > 0 ? (
           <div>
@@ -358,14 +359,14 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
           <ResultsTable results={results.map(convertToProfitResult)} showCommission={showExtraCols} showBank={showExtraCols} />
         </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-slate-400">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center mb-4 shadow-lg shadow-slate-200/30">
-              <svg className="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex flex-col items-center justify-center h-full text-sky-400">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-sky-100 to-blue-200 flex items-center justify-center mb-4 shadow-lg shadow-sky-200/30">
+              <svg className="w-10 h-10 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
             <p className="text-sm font-medium">Sonuçları görmek için hesapla butonuna tıklayın</p>
-            <p className="text-xs text-slate-400 mt-1">Girdiğiniz bilgilere göre karşılaştırma yapılacak</p>
+            <p className="text-xs text-blue-400 mt-1">Girdiğiniz bilgilere göre karşılaştırma yapılacak</p>
           </div>
         )}
       </div>
@@ -376,7 +377,7 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
       <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40 flex flex-col gap-2">
         <button
           onClick={()=>setShowSettings(true)}
-          className="inline-flex items-center gap-2 px-3 sm:px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-2xl shadow-slate-500/40 bg-gradient-to-r from-slate-500 via-slate-600 to-slate-700 hover:from-slate-600 hover:via-slate-700 hover:to-slate-800 ring-4 ring-slate-400/30 hover:scale-105 transition-all"
+          className="inline-flex items-center gap-2 px-3 sm:px-4 py-3 rounded-xl text-sm font-semibold text-white shadow-2xl shadow-sky-400/40 bg-gradient-to-r from-sky-400 via-blue-500 to-cyan-500 hover:from-sky-500 hover:via-blue-600 hover:to-cyan-600 ring-4 ring-sky-300/30 hover:scale-105 transition-all"
           title="Ayarlar"
         >
           <Settings className="w-4 h-4 text-white" /> <span className="hidden sm:inline">Ayarlar</span>

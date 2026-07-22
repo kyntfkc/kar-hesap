@@ -111,22 +111,35 @@ function SilverInputForm({
     }
   }
 
+  const isAutoPlatform = (name: string) =>
+    name === 'Standart' || name === 'Astarlı Ürün' || name === 'İndigo'
+
+  const getDefaultTargetProfit = (name: string) => {
+    if (name === 'İndigo') return 30
+    if (name === 'Astarlı Ürün') return 20
+    return 30
+  }
+
   const updatePlatform = (index: number, field: keyof SilverPlatform, value: string | number) => {
     const updated = [...platforms]
     const platform = updated[index]
-    const isAutoPlatform = platform.name === 'Standart' || platform.name === 'Astarlı Ürün'
+    const auto = isAutoPlatform(platform.name)
     
-    if (isAutoPlatform && field === 'targetProfitRate') {
-      const newTargetProfitRate = typeof value === 'number' ? value : parseFloat(String(value))
-      if (!isNaN(newTargetProfitRate)) {
+    if (auto && (field === 'targetProfitRate' || field === 'commissionRate')) {
+      const numValue = typeof value === 'number' ? value : parseFloat(String(value))
+      if (!isNaN(numValue)) {
+        const commissionRate = field === 'commissionRate' ? numValue : (platform.commissionRate || 22)
+        const targetProfitRate = field === 'targetProfitRate'
+          ? numValue
+          : (platform.targetProfitRate ?? getDefaultTargetProfit(platform.name))
         const newSalePrice = calculateSilverStandardSalePrice(
           productInfo,
           silverInfo,
           expenses,
-          platform.commissionRate || 22,
-          newTargetProfitRate
+          commissionRate,
+          targetProfitRate
         )
-        updated[index] = { ...platform, [field]: newTargetProfitRate, salePrice: newSalePrice }
+        updated[index] = { ...platform, [field]: numValue, salePrice: newSalePrice }
       } else {
         updated[index] = { ...platform, [field]: value }
       }
@@ -168,6 +181,21 @@ function SilverInputForm({
     onPlatformsChange([
       ...platforms,
       { name: 'Astarlı Ürün', commissionRate: 22, salePrice: sale, targetProfitRate: 20 },
+    ])
+  }
+
+  const addIndigo = () => {
+    if (platforms.some(p => p.name === 'İndigo')) return
+    const sale = calculateSilverStandardSalePrice(
+      productInfo,
+      silverInfo,
+      expenses,
+      15,
+      30
+    )
+    onPlatformsChange([
+      ...platforms,
+      { name: 'İndigo', commissionRate: 15, salePrice: sale, targetProfitRate: 30 },
     ])
   }
 
@@ -405,6 +433,14 @@ function SilverInputForm({
               <Plus className="w-3 h-3" />
               Astarlı Ürün
             </button>
+            <button
+              onClick={addIndigo}
+              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-100/60 rounded-lg transition-all"
+              title="İndigo senaryosu ekle"
+            >
+              <Plus className="w-3 h-3" />
+              İndigo
+            </button>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -416,10 +452,10 @@ function SilverInputForm({
                   type="text"
                   value={platform.name}
                   onChange={(e) => {
-                    if (platform.name === 'Standart' || platform.name === 'Astarlı Ürün') return
+                    if (isAutoPlatform(platform.name)) return
                     updatePlatform(index, 'name', e.target.value)
                   }}
-                  disabled={platform.name === 'Standart' || platform.name === 'Astarlı Ürün'}
+                  disabled={isAutoPlatform(platform.name)}
                   className="w-full px-2 py-1.5 pr-8 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white font-medium text-slate-900 text-center shadow-sm disabled:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-500"
                   placeholder="Senaryo adı"
                 />
@@ -444,26 +480,26 @@ function SilverInputForm({
                   placeholder="0"
                 />
               </div>
-              {(platform.name === 'Standart' || platform.name === 'Astarlı Ürün') && (
+              {isAutoPlatform(platform.name) && (
                 <div>
                   <label className="block text-xs text-slate-600 mb-1 font-medium">Kâr Oranı (%)</label>
                   <input
                     type="number"
                     step="0.1"
-                    value={(platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 20 : 30)) === 0 ? '' : (platform.targetProfitRate ?? (platform.name === 'Astarlı Ürün' ? 20 : 30))}
+                    value={(platform.targetProfitRate ?? getDefaultTargetProfit(platform.name)) === 0 ? '' : (platform.targetProfitRate ?? getDefaultTargetProfit(platform.name))}
                     onChange={(e) => {
                       const value = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0
                       updatePlatform(index, 'targetProfitRate', value)
                     }}
                     className="w-full px-2 py-1.5 text-sm border border-slate-300/70 rounded-lg focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white text-center font-semibold shadow-sm"
-                    placeholder={platform.name === 'Astarlı Ürün' ? '20' : '30'}
+                    placeholder={String(getDefaultTargetProfit(platform.name))}
                   />
                 </div>
               )}
                 <div>
                 <label className="block text-xs text-slate-600 mb-1 font-medium">
                   Satış Fiyatı
-                  {(platform.name === 'Standart' || platform.name === 'Astarlı Ürün') && (
+                  {isAutoPlatform(platform.name) && (
                     <span className="ml-1 text-xs text-gray-500 font-normal">(Otomatik)</span>
                   )}
                 </label>
@@ -473,10 +509,10 @@ function SilverInputForm({
                       step="1"
                       value={platform.salePrice}
                       onChange={(e) => {
-                        if (platform.name === 'Standart' || platform.name === 'Astarlı Ürün') return
+                        if (isAutoPlatform(platform.name)) return
                         updatePlatform(index, 'salePrice', parseInt(e.target.value) || 0)
                       }}
-                      disabled={platform.name === 'Standart' || platform.name === 'Astarlı Ürün'}
+                      disabled={isAutoPlatform(platform.name)}
                       className="w-full pr-8 px-2 py-1.5 text-sm border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500/40 focus:border-slate-500 bg-white text-center font-semibold disabled:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-500"
                       placeholder="0"
                     />

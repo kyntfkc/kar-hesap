@@ -122,3 +122,21 @@ export interface SilverResult {
   purchasePrice: number
   optimumScore?: number
 }
+
+export interface VariantReference {
+  gram: number
+  price: number
+}
+
+export interface VariantGroup {
+  name: string
+  minSize: number
+  maxSize: number
+  discountPercent: number // Negatif değer indirim, pozitif değer ek ücret
+}
+
+export interface VariantPriceResult {
+  groupName: string
+  sizeRange: string
+  price: number
+}

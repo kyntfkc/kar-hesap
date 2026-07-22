@@ -1,4 +1,4 @@
-import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, WholesaleInfo, WholesaleExpenses, WholesalePlatform, WholesaleResult, SilverProductInfo, SilverInfo, SilverExpenses, SilverPlatform, SilverResult } from '../types'
+import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult, WholesaleInfo, WholesaleExpenses, WholesalePlatform, WholesaleResult, SilverProductInfo, SilverInfo, SilverExpenses, SilverPlatform, SilverResult, VariantReference, VariantGroup, VariantPriceResult } from '../types'
 
 // 14 ayar milyem sabit değeri
 const AYAR_14_MILLEM = 0.585
@@ -489,4 +489,41 @@ export function calculateSilverStandardSalePrice(
   
   // Alt sınır yok; doğrudan yukarı yuvarla
   return Math.ceil(calculatedSalePrice)
+}
+
+// Varyant Fiyat Hesaplama Fonksiyonları
+
+// Varyant fiyat hesaplama: Referans fiyata göre indirim/ek ücret uygula
+export function calculateVariantPrice(
+  reference: VariantReference,
+  group: VariantGroup
+): number {
+  // Referans fiyat
+  const basePrice = reference.price
+  
+  // İndirim/ek ücret yüzdesi (negatif değer indirim, pozitif değer ek ücret)
+  const adjustmentPercent = group.discountPercent
+  
+  // Yeni fiyat hesapla
+  const adjustedPrice = basePrice * (1 + adjustmentPercent / 100)
+  
+  // Yuvarla ve döndür
+  return Math.round(adjustedPrice)
+}
+
+// Tüm varyant grupları için fiyat hesapla
+export function calculateAllVariantPrices(
+  reference: VariantReference,
+  groups: VariantGroup[]
+): VariantPriceResult[] {
+  return groups.map(group => {
+    const price = calculateVariantPrice(reference, group)
+    const sizeRange = `${group.minSize}-${group.maxSize}`
+    
+    return {
+      groupName: group.name,
+      sizeRange,
+      price
+    }
+  })
 }
