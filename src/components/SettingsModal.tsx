@@ -106,27 +106,6 @@ export default function SettingsModal({ open, initial, mode, onClose, onSave }: 
                 className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
             </div>
           )}
-          <div>
-            <label className="block text-xs text-slate-600 mb-1 font-medium">Varsayılan Ürün Gram</label>
-            <input type="text" inputMode="decimal" value={draft.defaultProductGram}
-              onChange={e=>setDraftValue('defaultProductGram', e.target.value)} onBlur={()=>commitNumber('defaultProductGram')}
-              className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
-          </div>
-          {mode === 'gold' || mode === 'wholesale' ? (
-            <div>
-              <label className="block text-xs text-slate-600 mb-1 font-medium">Varsayılan Altın Kuru</label>
-              <input type="text" inputMode="numeric" value={draft.defaultGoldPrice}
-                onChange={e=>setDraftValue('defaultGoldPrice', e.target.value)} onBlur={()=>commitNumber('defaultGoldPrice')}
-                className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
-            </div>
-          ) : (
-            <div>
-              <label className="block text-xs text-slate-600 mb-1 font-medium">Varsayılan Gümüş Kuru</label>
-              <input type="text" inputMode="numeric" value={draft.defaultSilverPrice || ''}
-                onChange={e=>setDraftValue('defaultSilverPrice' as keyof AppSettings, e.target.value)} onBlur={()=>commitNumber('defaultSilverPrice' as keyof AppSettings)}
-                className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded-lg" />
-            </div>
-          )}
 
           <div>
             <label className="block text-xs text-slate-600 mb-1 font-medium">Kargo</label>

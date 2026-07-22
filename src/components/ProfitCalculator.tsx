@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult } from '../types'
 import { calculateAllPlatforms, calculateStandardSalePrice } from '../utils/calculations'
-import { apiEnabled, postCalculate, postSync } from '../utils/api'
+import { apiEnabled, postCalculate } from '../utils/api'
 import { TrendingUp, Loader2, Settings } from 'lucide-react'
 import GoldRateCard from './GoldRateCard'
 import Toast from './Toast'
 import InputForm from './InputForm'
 import ResultsTable from './ResultsTable'
 import SettingsModal, { AppSettings } from './SettingsModal'
+import { cacheSetJson } from '../utils/appSnapshot'
 
 const defaultProductInfo: ProductInfo = {
   productGram: 0.80,
@@ -99,56 +100,42 @@ function ProfitCalculator() {
   const [toast, setToast] = useState<{message: string; type?: 'success' | 'error' | 'info'} | null>(null)
   const [showExtraCols, setShowExtraCols] = useState(false)
 
-  // Auto-save to localStorage
+  // Auto-save to localStorage (+ online sync tetikle)
   useEffect(() => {
-    localStorage.setItem('productInfo', JSON.stringify(productInfo))
+    cacheSetJson('productInfo', productInfo)
   }, [productInfo])
 
   useEffect(() => {
-    localStorage.setItem('goldInfo', JSON.stringify(goldInfo))
+    cacheSetJson('goldInfo', goldInfo)
     window.dispatchEvent(new CustomEvent('goldInfoChanged', { detail: { goldPrice: goldInfo.goldPrice } }))
   }, [goldInfo])
 
   useEffect(() => {
-    localStorage.setItem('expenses', JSON.stringify(expenses))
+    cacheSetJson('expenses', expenses)
   }, [expenses])
 
   useEffect(() => {
-    localStorage.setItem('platforms', JSON.stringify(platforms))
+    cacheSetJson('platforms', platforms)
   }, [platforms])
 
-  // Backend sync (debounced) with localStorage snapshot
-  useEffect(() => {
-    if (!apiEnabled) return
-    const timer = setTimeout(() => {
-      const snapshot = {
-        appSettings,
-        productInfo,
-        goldInfo,
-        expenses,
-        platforms,
-      }
-      postSync(snapshot).catch((err) => {
-        console.error('Sync error:', err)
-      })
-    }, 2000)
-    return () => clearTimeout(timer)
-  }, [appSettings, productInfo, goldInfo, expenses, platforms])
-
   const applySettingsToState = (s: AppSettings) => {
-    setProductInfo(prev => ({ ...prev, productGram: s.defaultProductGram, laborMillem: s.defaultLaborMillem }))
-    setGoldInfo(prev => ({ ...prev, goldPrice: s.defaultGoldPrice }))
+    setProductInfo(prev => ({ ...prev, laborMillem: s.defaultLaborMillem }))
     setExpenses(prev => ({ ...prev, shipping: s.defaultShipping, packaging: s.defaultPackaging, serviceFee: s.defaultServiceFee, eCommerceTaxRate: s.defaultETaxRate, specialPackaging: prev.specialPackaging > 0 ? s.defaultExtraCost : 0 }))
     setPlatforms(prev => prev.map(p => {
-      if (p.name === 'Standart') return { ...p, commissionRate: s.defaultCommission, targetProfitRate: s.defaultStandardProfit }
-      if (p.name === 'Astarlı Ürün') return { ...p, commissionRate: s.defaultCommission, targetProfitRate: s.defaultLinedProfit }
+      if (p.name === 'Standart') {
+        return { ...p, commissionRate: s.defaultCommission, targetProfitRate: s.defaultStandardProfit }
+      }
+      // Astarlı: sadece kâr oranı; komisyon/satış korunur. İndigo: dokunma.
+      if (p.name === 'Astarlı Ürün') {
+        return { ...p, targetProfitRate: s.defaultLinedProfit }
+      }
       return p
     }))
   }
 
   const handleSaveSettings = (s: AppSettings, applyNow: boolean) => {
     setAppSettings(s)
-    localStorage.setItem('goldAppSettings', JSON.stringify(s))
+    cacheSetJson('goldAppSettings', s)
     if (applyNow) applySettingsToState(s)
     setShowSettings(false)
   }
@@ -169,17 +156,18 @@ function ProfitCalculator() {
     }
   }, [])
 
-  // Otomatik senaryoların (Standart, Astarlı Ürün, İndigo) satış fiyatını güncelle
+  // Otomatik senaryoların satış fiyatını güncelle (yalnızca Standart)
+  // Astarlı/İndigo: ilk eklemede hesaplanır; sonrasında kâr oranı veya ürün değişince satış ezilmez
   useEffect(() => {
     setPlatforms(prevPlatforms => {
       let updated: Platform[] | null = null
 
-      const autoNames = ['Standart', 'Astarlı Ürün', 'İndigo']
+      const autoNames = ['Standart']
       autoNames.forEach(name => {
         const idx = prevPlatforms.findIndex(p => p.name === name)
         if (idx !== -1) {
-          const commissionRate = prevPlatforms[idx].commissionRate || (name === 'İndigo' ? 15 : 22)
-          const defaultTarget = name === 'İndigo' ? 20 : name === 'Astarlı Ürün' ? appSettings.defaultLinedProfit : appSettings.defaultStandardProfit
+          const commissionRate = prevPlatforms[idx].commissionRate || 22
+          const defaultTarget = appSettings.defaultStandardProfit
           const targetProfitRate = prevPlatforms[idx].targetProfitRate ?? defaultTarget
           const newSalePrice = calculateStandardSalePrice(
             productInfo,

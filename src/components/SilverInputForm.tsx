@@ -8,6 +8,11 @@ import {
 } from '../utils/calculations'
 import { calculateSilverStandardSalePrice } from '../utils/calculations'
 import { Plus, X } from 'lucide-react'
+import {
+  INDIGO_COMMISSION,
+  INDIGO_PROFIT_SILVER,
+  readSilverAppSettings,
+} from '../utils/scenarioDefaults'
 
 interface SilverInputFormProps {
   productInfo: SilverProductInfo
@@ -126,9 +131,13 @@ function SilverInputForm({
   const updatePlatform = (index: number, field: keyof SilverPlatform, value: string | number) => {
     const updated = [...platforms]
     const platform = updated[index]
-    const auto = isAutoPlatform(platform.name)
-    
-    if (auto && (field === 'targetProfitRate' || field === 'commissionRate')) {
+
+    // Standart: kâr/komisyon değişince satış otomatik güncellenir
+    // Astarlı/İndigo: sadece ilk eklemede otomatik; kâr oranı değişince satış değişmez
+    const shouldRecalcSale =
+      platform.name === 'Standart' && (field === 'targetProfitRate' || field === 'commissionRate')
+
+    if (shouldRecalcSale) {
       const numValue = typeof value === 'number' ? value : parseFloat(String(value))
       if (!isNaN(numValue)) {
         const commissionRate = field === 'commissionRate' ? numValue : (platform.commissionRate || 22)
@@ -174,16 +183,19 @@ function SilverInputForm({
 
   const addLinedProduct = () => {
     if (platforms.some(p => p.name === 'Astarlı Ürün')) return
+    const settings = readSilverAppSettings()
+    const commission = settings.defaultCommission
+    const targetProfit = settings.defaultLinedProfit
     const sale = calculateSilverStandardSalePrice(
       productInfo,
       silverInfo,
       expenses,
-      22,
-      20
+      commission,
+      targetProfit
     )
     onPlatformsChange([
       ...platforms,
-      { name: 'Astarlı Ürün', commissionRate: 22, salePrice: sale, targetProfitRate: 20 },
+      { name: 'Astarlı Ürün', commissionRate: commission, salePrice: sale, targetProfitRate: targetProfit },
     ])
   }
 
@@ -193,12 +205,12 @@ function SilverInputForm({
       productInfo,
       silverInfo,
       expenses,
-      15,
-      30
+      INDIGO_COMMISSION,
+      INDIGO_PROFIT_SILVER
     )
     onPlatformsChange([
       ...platforms,
-      { name: 'İndigo', commissionRate: 15, salePrice: sale, targetProfitRate: 30 },
+      { name: 'İndigo', commissionRate: INDIGO_COMMISSION, salePrice: sale, targetProfitRate: INDIGO_PROFIT_SILVER },
     ])
   }
 

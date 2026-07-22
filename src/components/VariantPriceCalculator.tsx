@@ -4,6 +4,7 @@ import { calculateAllVariantPrices } from '../utils/calculations'
 import { formatNumber } from '../utils/format'
 import { TrendingUp, Loader2 } from 'lucide-react'
 import VariantPriceTable from './VariantPriceTable'
+import { cacheSetJson } from '../utils/appSnapshot'
 
 const defaultVariantReference: VariantReference = {
   gram: 1.0,
@@ -50,13 +51,13 @@ function VariantPriceCalculator() {
     setGramInput(variantReference.gram === 0 ? '' : variantReference.gram.toFixed(2).replace('.', ','))
   }, [])
 
-  // Auto-save to localStorage
+  // Auto-save to localStorage (+ online sync)
   useEffect(() => {
-    localStorage.setItem('variantReference', JSON.stringify(variantReference))
+    cacheSetJson('variantReference', variantReference)
   }, [variantReference])
 
   useEffect(() => {
-    localStorage.setItem('variantGroups', JSON.stringify(variantGroups))
+    cacheSetJson('variantGroups', variantGroups)
   }, [variantGroups])
 
   const updateGroupDiscount = (index: number, discountPercent: number) => {

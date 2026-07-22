@@ -3,10 +3,10 @@ const DEFAULT_BASE = '/api'
 // Env varsa onu, yoksa proxy'yi kullan
 const BASE = (import.meta?.env?.VITE_API_BASE_URL as string) || DEFAULT_BASE
 
-export const apiEnabled = false;
+/** Online sync açık (Vercel /api proxy veya VITE_API_BASE_URL) */
+export const apiEnabled = true
 
 async function request(path: string, options: RequestInit = {}, timeoutMs = 8000, retries = 1) {
-  // BASE her zaman tanımlı; yine de koruma
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -40,6 +40,10 @@ export function postCalculate(payload: unknown) {
 
 export function postStandardSalePrice(payload: unknown) {
   return request('/standard-sale-price', { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export function getSync() {
+  return request('/sync') as Promise<Record<string, unknown>>
 }
 
 export function postSync(payload: unknown) {
@@ -80,7 +84,6 @@ export async function getXauUsd(): Promise<number> {
 
 export async function getRates(): Promise<{ usdtry: number; xauusd: number; ts: number; cached: boolean }> {
   if (!apiEnabled) {
-    // Backend kapalıysa sadece USD/TRY kurunu al, XAU/USD için null döndür
     const usdtry = await getUsdTryRate().catch(() => null)
     return {
       usdtry: usdtry || 0,
@@ -91,6 +94,3 @@ export async function getRates(): Promise<{ usdtry: number; xauusd: number; ts: 
   }
   return request('/rates') as any
 }
-
-
-// Force rebuild Sun Dec 28 18:54:57 +03 2025

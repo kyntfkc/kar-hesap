@@ -7,6 +7,11 @@ import {
 } from '../utils/calculations'
 import { calculateStandardSalePrice } from '../utils/calculations'
 import { Plus, X } from 'lucide-react'
+import {
+  INDIGO_COMMISSION,
+  INDIGO_PROFIT_GOLD,
+  readGoldAppSettings,
+} from '../utils/scenarioDefaults'
 
 interface InputFormProps {
   productInfo: ProductInfo
@@ -141,10 +146,13 @@ function InputForm({
   const updatePlatform = (index: number, field: keyof Platform, value: string | number) => {
     const updated = [...platforms]
     const platform = updated[index]
-    const auto = isAutoPlatform(platform.name)
-    
-    // Otomatik senaryolarda kâr oranı veya komisyon değişince satış fiyatını güncelle
-    if (auto && (field === 'targetProfitRate' || field === 'commissionRate')) {
+
+    // Standart: kâr/komisyon değişince satış otomatik güncellenir
+    // Astarlı/İndigo: sadece ilk eklemede otomatik; kâr oranı değişince satış değişmez
+    const shouldRecalcSale =
+      platform.name === 'Standart' && (field === 'targetProfitRate' || field === 'commissionRate')
+
+    if (shouldRecalcSale) {
       const numValue = typeof value === 'number' ? value : parseFloat(String(value))
       if (!isNaN(numValue)) {
         const commissionRate = field === 'commissionRate' ? numValue : (platform.commissionRate || 22)
@@ -193,16 +201,19 @@ function InputForm({
   const addLinedProduct = () => {
     // Eğer zaten mevcutsa ekleme
     if (platforms.some(p => p.name === 'Astarlı Ürün')) return
+    const settings = readGoldAppSettings()
+    const commission = settings.defaultCommission
+    const targetProfit = settings.defaultLinedProfit
     const sale = calculateStandardSalePrice(
       productInfo,
       goldInfo,
       expenses,
-      22,
-      20
+      commission,
+      targetProfit
     )
     onPlatformsChange([
       ...platforms,
-      { name: 'Astarlı Ürün', commissionRate: 22, salePrice: sale, targetProfitRate: 20 },
+      { name: 'Astarlı Ürün', commissionRate: commission, salePrice: sale, targetProfitRate: targetProfit },
     ])
   }
 
@@ -212,12 +223,12 @@ function InputForm({
       productInfo,
       goldInfo,
       expenses,
-      15,
-      20
+      INDIGO_COMMISSION,
+      INDIGO_PROFIT_GOLD
     )
     onPlatformsChange([
       ...platforms,
-      { name: 'İndigo', commissionRate: 15, salePrice: sale, targetProfitRate: 20 },
+      { name: 'İndigo', commissionRate: INDIGO_COMMISSION, salePrice: sale, targetProfitRate: INDIGO_PROFIT_GOLD },
     ])
   }
 

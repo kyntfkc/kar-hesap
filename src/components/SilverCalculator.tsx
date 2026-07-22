@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { SilverProductInfo, SilverInfo, SilverExpenses, SilverPlatform, SilverResult } from '../types'
 import { calculateAllSilverPlatforms, calculateSilverStandardSalePrice } from '../utils/calculations'
-import { apiEnabled, postCalculate, postSync } from '../utils/api'
+import { apiEnabled, postCalculate } from '../utils/api'
 import { TrendingUp, Loader2, Settings } from 'lucide-react'
 import SilverRateCard from './SilverRateCard'
 import Toast from './Toast'
@@ -9,6 +9,7 @@ import SilverInputForm from './SilverInputForm'
 import ResultsTable from './ResultsTable'
 import SettingsModal, { AppSettings } from './SettingsModal'
 import { getUsdTryRate } from '../utils/api'
+import { cacheSetJson } from '../utils/appSnapshot'
 
 const defaultSilverProductInfo: SilverProductInfo = {
   productGram: 0.80,
@@ -53,7 +54,7 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
     defaultServiceFee: 20,
     defaultETaxRate: 1.0,
     defaultCommission: 22,
-    defaultStandardProfit: 15,
+    defaultStandardProfit: 30,
     defaultLinedProfit: 20,
     defaultLaborMillem: 0.050,
     defaultLaborUsd: 0.50,
@@ -124,55 +125,41 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
     }
   }, [])
 
-  // Auto-save to localStorage
+  // Auto-save to localStorage (+ online sync tetikle)
   useEffect(() => {
-    localStorage.setItem('silverProductInfo', JSON.stringify(productInfo))
+    cacheSetJson('silverProductInfo', productInfo)
   }, [productInfo])
 
   useEffect(() => {
-    localStorage.setItem('silverInfo', JSON.stringify(silverInfo))
+    cacheSetJson('silverInfo', silverInfo)
   }, [silverInfo])
 
   useEffect(() => {
-    localStorage.setItem('silverExpenses', JSON.stringify(expenses))
+    cacheSetJson('silverExpenses', expenses)
   }, [expenses])
 
   useEffect(() => {
-    localStorage.setItem('silverPlatforms', JSON.stringify(platforms))
+    cacheSetJson('silverPlatforms', platforms)
   }, [platforms])
 
-  // Backend sync (debounced) with localStorage snapshot
-  useEffect(() => {
-    if (!apiEnabled) return
-    const timer = setTimeout(() => {
-      const snapshot = {
-        appSettings,
-        silverProductInfo: productInfo,
-        silverInfo,
-        silverExpenses: expenses,
-        silverPlatforms: platforms,
-      }
-      postSync(snapshot).catch((err) => {
-        console.error('Sync error:', err)
-      })
-    }, 2000)
-    return () => clearTimeout(timer)
-  }, [appSettings, productInfo, silverInfo, expenses, platforms])
-
   const applySettingsToState = (s: AppSettings) => {
-    setProductInfo(prev => ({ ...prev, productGram: s.defaultProductGram, laborUsd: s.defaultLaborUsd || 0.50 }))
-    setSilverInfo(prev => ({ ...prev, silverPrice: s.defaultSilverPrice || 100 }))
+    setProductInfo(prev => ({ ...prev, laborUsd: s.defaultLaborUsd || 0.50 }))
     setExpenses(prev => ({ ...prev, shipping: s.defaultShipping, packaging: s.defaultPackaging, serviceFee: s.defaultServiceFee, eCommerceTaxRate: s.defaultETaxRate, specialPackaging: prev.specialPackaging > 0 ? s.defaultExtraCost : 0 }))
     setPlatforms(prev => prev.map(p => {
-      if (p.name === 'Standart') return { ...p, commissionRate: s.defaultCommission, targetProfitRate: s.defaultStandardProfit }
-      if (p.name === 'Astarlı Ürün') return { ...p, commissionRate: s.defaultCommission, targetProfitRate: s.defaultLinedProfit }
+      if (p.name === 'Standart') {
+        return { ...p, commissionRate: s.defaultCommission, targetProfitRate: s.defaultStandardProfit }
+      }
+      // Astarlı: sadece kâr oranı; komisyon/satış korunur. İndigo: dokunma.
+      if (p.name === 'Astarlı Ürün') {
+        return { ...p, targetProfitRate: s.defaultLinedProfit }
+      }
       return p
     }))
   }
 
   const handleSaveSettings = (s: AppSettings, applyNow: boolean) => {
     setAppSettings(s)
-    localStorage.setItem('silverAppSettings', JSON.stringify(s))
+    cacheSetJson('silverAppSettings', s)
     if (applyNow) applySettingsToState(s)
     setShowSettings(false)
   }
@@ -192,17 +179,18 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
     }
   }, [])
 
-  // Otomatik senaryoların (Standart, Astarlı Ürün, İndigo) satış fiyatını güncelle
+  // Otomatik senaryoların satış fiyatını güncelle (yalnızca Standart)
+  // Astarlı/İndigo: ilk eklemede hesaplanır; sonrasında kâr oranı veya ürün değişince satış ezilmez
   useEffect(() => {
     setPlatforms(prevPlatforms => {
       let updated: SilverPlatform[] | null = null
 
-      const autoNames = ['Standart', 'Astarlı Ürün', 'İndigo']
+      const autoNames = ['Standart']
       autoNames.forEach(name => {
         const idx = prevPlatforms.findIndex(p => p.name === name)
         if (idx !== -1) {
-          const commissionRate = prevPlatforms[idx].commissionRate || (name === 'İndigo' ? 15 : 22)
-          const defaultTarget = name === 'İndigo' ? 30 : name === 'Astarlı Ürün' ? appSettings.defaultLinedProfit : appSettings.defaultStandardProfit
+          const commissionRate = prevPlatforms[idx].commissionRate || 22
+          const defaultTarget = appSettings.defaultStandardProfit
           const targetProfitRate = prevPlatforms[idx].targetProfitRate ?? defaultTarget
           const newSalePrice = calculateSilverStandardSalePrice(
             productInfo,

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { formatNumber } from '../utils/format'
+import { cacheSet } from '../utils/appSnapshot'
 
 function readInitialGoldPrice(): number {
   try {
@@ -25,7 +26,7 @@ export default function EcommerceMilyemCalculator() {
   const [profitInput, setProfitInput] = useState<string>('')
 
   useEffect(() => {
-    localStorage.setItem('ecommerceGoldPrice', String(goldPrice || 0))
+    cacheSet('ecommerceGoldPrice', String(goldPrice || 0))
   }, [goldPrice])
 
   const milem = useMemo(() => {

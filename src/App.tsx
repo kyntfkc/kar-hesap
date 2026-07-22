@@ -1,13 +1,71 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ProfitCalculator from './components/ProfitCalculator'
 import SilverCalculator from './components/SilverCalculator'
 import VariantPriceCalculator from './components/VariantPriceCalculator'
 import EcommerceMilyemCalculator from './components/EcommerceMilyemCalculator'
+import { apiEnabled, getSync, postSync } from './utils/api'
+import {
+  APP_DATA_CHANGED,
+  AppSnapshot,
+  applySnapshotToLocal,
+  buildLocalSnapshot,
+  hasRemoteSnapshotData,
+} from './utils/appSnapshot'
 
 type Tab = 'gold' | 'silver' | 'variant' | 'ecommerceMilyem'
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('gold')
+  const [ready, setReady] = useState(false)
+
+  // Açılışta online hydrate; başarısızsa localStorage ile devam
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        if (apiEnabled) {
+          const remote = (await getSync()) as AppSnapshot
+          if (hasRemoteSnapshotData(remote)) {
+            applySnapshotToLocal(remote)
+          } else {
+            // Uzakta veri yoksa mevcut local'i bir kez yükle
+            const local = buildLocalSnapshot()
+            if (hasRemoteSnapshotData(local)) {
+              await postSync(local).catch(() => {})
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Online hydrate failed, using local cache', err)
+      } finally {
+        if (!cancelled) setReady(true)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // Değişikliklerde debounce ile tam snapshot kaydet
+  useEffect(() => {
+    if (!ready || !apiEnabled) return
+
+    let timer: ReturnType<typeof setTimeout> | null = null
+    const onChange = () => {
+      if (timer) clearTimeout(timer)
+      timer = setTimeout(() => {
+        const snapshot = buildLocalSnapshot()
+        localStorage.setItem('appSnapshot', JSON.stringify(snapshot))
+        postSync(snapshot).catch((err) => console.error('Sync error:', err))
+      }, 1500)
+    }
+
+    window.addEventListener(APP_DATA_CHANGED, onChange)
+    return () => {
+      window.removeEventListener(APP_DATA_CHANGED, onChange)
+      if (timer) clearTimeout(timer)
+    }
+  }, [ready])
 
   const getTitle = () => {
     if (activeTab === 'silver') {
@@ -93,6 +151,14 @@ function App() {
     return 'bg-gradient-to-r from-slate-900 via-amber-600 to-yellow-700'
   }
 
+  if (!ready) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-amber-50/50 to-yellow-50/70">
+        <div className="text-sm font-semibold text-slate-600">Veriler yükleniyor…</div>
+      </div>
+    )
+  }
+
   return (
     <div className={`min-h-screen py-5 px-5 ${getBackgroundClass()}`}>
       <div className="max-w-[1280px] mx-auto">
@@ -104,7 +170,6 @@ function App() {
             </h1>
           </div>
           
-          {/* Sekme Seçimi (Altın/Gümüş/Varyant Fiyat) */}
           <div className="flex items-center justify-center gap-3 mt-4 flex-wrap">
             <button
               onClick={() => setActiveTab('gold')}

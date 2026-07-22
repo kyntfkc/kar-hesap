@@ -212,7 +212,6 @@ function WholesaleCalculator({ onNavigateToRetail }: WholesaleCalculatorProps = 
     setAppSettings(s)
     localStorage.setItem('wholesaleAppSettings', JSON.stringify(s))
     if (applyNow) {
-      setWholesaleInfo(prev => ({ ...prev, goldPrice: s.defaultGoldPrice }))
       setExpenses(prev => ({ ...prev, commission: 0, otherExpenses: 0 }))
       setPlatforms(prev => prev.map(p => {
         if (p.name === 'Standart') return { ...p, commissionRate: 2, targetProfitRate: s.defaultStandardProfit }
