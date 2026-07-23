@@ -166,34 +166,12 @@ function WholesaleCalculator({ onNavigateToRetail }: WholesaleCalculatorProps = 
 
   const handleCalculate = useCallback(() => {
     setIsCalculating(true)
-    if (apiEnabled) {
-      // API'ye gönder (backend'de toptan satış desteği varsa)
-      postCalculate({ wholesaleInfo, expenses, platforms })
-        .then((resp: any) => {
-          const apiResults = resp.results || []
-          const localResults = calculateAllWholesalePlatforms(wholesaleInfo, expenses, platforms)
-          const mergedResults = apiResults.map((apiResult: any) => {
-            const localResult = localResults.find(lr => lr.platform === apiResult.platform)
-            return {
-              ...apiResult,
-              optimumScore: localResult?.optimumScore ?? apiResult.optimumScore
-            }
-          })
-          setResults(mergedResults.length > 0 ? mergedResults : localResults)
-        })
-        .catch(() => {
-          const calculatedResults = calculateAllWholesalePlatforms(wholesaleInfo, expenses, platforms)
-          setResults(calculatedResults)
-        })
-        .finally(() => { setIsCalculating(false); setHasCalculated(true) })
-    } else {
-      setTimeout(() => {
-        const calculatedResults = calculateAllWholesalePlatforms(wholesaleInfo, expenses, platforms)
-        setResults(calculatedResults)
-        setIsCalculating(false)
-        setHasCalculated(true)
-      }, 100)
-    }
+    setTimeout(() => {
+      const calculatedResults = calculateAllWholesalePlatforms(wholesaleInfo, expenses, platforms)
+      setResults(calculatedResults)
+      setIsCalculating(false)
+      setHasCalculated(true)
+    }, 100)
   }, [wholesaleInfo, expenses, platforms])
 
   // Keyboard shortcut (Ctrl/Cmd + Enter)

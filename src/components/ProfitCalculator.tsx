@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { ProductInfo, GoldInfo, Expenses, Platform, ProfitResult } from '../types'
 import { calculateAllPlatforms, calculateStandardSalePrice } from '../utils/calculations'
-import { apiEnabled, postCalculate } from '../utils/api'
 import { TrendingUp, Loader2, Settings } from 'lucide-react'
 import GoldRateCard from './GoldRateCard'
 import Toast from './Toast'
@@ -207,37 +206,12 @@ function ProfitCalculator() {
 
   const handleCalculate = useCallback(() => {
     setIsCalculating(true)
-    if (apiEnabled) {
-      postCalculate({ productInfo, goldInfo, expenses, platforms })
-        .then((resp: any) => {
-          // API sonuçlarında optimum skor eksikse local hesaplama yap
-          const apiResults = resp.results || []
-          const localResults = calculateAllPlatforms(productInfo, goldInfo, expenses, platforms)
-          
-          // API sonuçlarını optimum skorlarla birleştir (platform adına göre eşleştir)
-          const mergedResults = apiResults.map((apiResult: ProfitResult) => {
-            const localResult = localResults.find(lr => lr.platform === apiResult.platform)
-            return {
-              ...apiResult,
-              optimumScore: localResult?.optimumScore ?? apiResult.optimumScore
-            }
-          })
-          
-          setResults(mergedResults.length > 0 ? mergedResults : localResults)
-        })
-        .catch(() => {
-          const calculatedResults = calculateAllPlatforms(productInfo, goldInfo, expenses, platforms)
-          setResults(calculatedResults)
-        })
-        .finally(() => { setIsCalculating(false); setHasCalculated(true) })
-    } else {
-      setTimeout(() => {
-        const calculatedResults = calculateAllPlatforms(productInfo, goldInfo, expenses, platforms)
-        setResults(calculatedResults)
-        setIsCalculating(false)
-        setHasCalculated(true)
-      }, 100)
-    }
+    setTimeout(() => {
+      const calculatedResults = calculateAllPlatforms(productInfo, goldInfo, expenses, platforms)
+      setResults(calculatedResults)
+      setIsCalculating(false)
+      setHasCalculated(true)
+    }, 100)
   }, [productInfo, goldInfo, expenses, platforms])
 
   // Keyboard shortcut (Ctrl/Cmd + Enter)

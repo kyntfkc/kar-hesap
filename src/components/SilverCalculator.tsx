@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { SilverProductInfo, SilverInfo, SilverExpenses, SilverPlatform, SilverResult } from '../types'
 import { calculateAllSilverPlatforms, calculateSilverStandardSalePrice } from '../utils/calculations'
-import { apiEnabled, postCalculate } from '../utils/api'
 import { TrendingUp, Loader2, Settings } from 'lucide-react'
 import SilverRateCard from './SilverRateCard'
 import Toast from './Toast'
@@ -230,35 +229,12 @@ function SilverCalculator({ onNavigateToGold }: SilverCalculatorProps = {}) {
 
   const handleCalculate = useCallback(() => {
     setIsCalculating(true)
-    if (apiEnabled) {
-      postCalculate({ silverProductInfo: productInfo, silverInfo, silverExpenses: expenses, silverPlatforms: platforms })
-        .then((resp: any) => {
-          const apiResults = resp.results || []
-          const localResults = calculateAllSilverPlatforms(productInfo, silverInfo, expenses, platforms)
-          
-          const mergedResults = apiResults.map((apiResult: SilverResult) => {
-            const localResult = localResults.find(lr => lr.platform === apiResult.platform)
-            return {
-              ...apiResult,
-              optimumScore: localResult?.optimumScore ?? apiResult.optimumScore
-            }
-          })
-          
-          setResults(mergedResults.length > 0 ? mergedResults : localResults)
-        })
-        .catch(() => {
-          const calculatedResults = calculateAllSilverPlatforms(productInfo, silverInfo, expenses, platforms)
-          setResults(calculatedResults)
-        })
-        .finally(() => { setIsCalculating(false); setHasCalculated(true) })
-    } else {
-      setTimeout(() => {
-        const calculatedResults = calculateAllSilverPlatforms(productInfo, silverInfo, expenses, platforms)
-        setResults(calculatedResults)
-        setIsCalculating(false)
-        setHasCalculated(true)
-      }, 100)
-    }
+    setTimeout(() => {
+      const calculatedResults = calculateAllSilverPlatforms(productInfo, silverInfo, expenses, platforms)
+      setResults(calculatedResults)
+      setIsCalculating(false)
+      setHasCalculated(true)
+    }, 100)
   }, [productInfo, silverInfo, expenses, platforms])
 
   // Keyboard shortcut (Ctrl/Cmd + Enter)
