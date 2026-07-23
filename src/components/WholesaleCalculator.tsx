@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { WholesaleInfo, WholesaleExpenses, WholesalePlatform, WholesaleResult, GoldInfo } from '../types'
 import { calculateAllWholesalePlatforms, calculateWholesaleStandardSalePrice, calculateWholesalePurchasePrice } from '../utils/calculations'
-import { apiEnabled, postCalculate } from '../utils/api'
 import { TrendingUp, Loader2, Settings, Store } from 'lucide-react'
 import GoldRateCard from './GoldRateCard'
 import Toast from './Toast'
