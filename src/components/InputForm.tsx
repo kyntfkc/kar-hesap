@@ -134,8 +134,10 @@ function InputForm({
   const isAutoPlatform = (name: string) =>
     name === 'Standart' || name === 'Astarlı Ürün' || name === 'İndigo'
 
-  // Standart satış tutarı kilitli; Astarlı/İndigo otomatik gelir ama düzenlenebilir
-  const isSalePriceLocked = (name: string) => name === 'Standart'
+  // Standart ve Astarlı satış tutarı kilitli (otomatik); İndigo otomatik gelir ama düzenlenebilir
+  const isSalePriceLocked = (name: string) => name === 'Standart' || name === 'Astarlı Ürün'
+
+  const isAutoRecalcPlatform = (name: string) => name === 'Standart' || name === 'Astarlı Ürün'
 
   const getDefaultTargetProfit = (name: string) => {
     if (name === 'İndigo') return 20
@@ -147,10 +149,9 @@ function InputForm({
     const updated = [...platforms]
     const platform = updated[index]
 
-    // Standart: kâr/komisyon değişince satış otomatik güncellenir
-    // Astarlı/İndigo: sadece ilk eklemede otomatik; kâr oranı değişince satış değişmez
+    // Standart/Astarlı: kâr veya komisyon değişince satış otomatik güncellenir
     const shouldRecalcSale =
-      platform.name === 'Standart' && (field === 'targetProfitRate' || field === 'commissionRate')
+      isAutoRecalcPlatform(platform.name) && (field === 'targetProfitRate' || field === 'commissionRate')
 
     if (shouldRecalcSale) {
       const numValue = typeof value === 'number' ? value : parseFloat(String(value))
@@ -605,7 +606,7 @@ function InputForm({
                   {isSalePriceLocked(platform.name) && (
                     <span className="ml-1 text-xs text-gray-500 font-normal">(Otomatik)</span>
                   )}
-                  {(platform.name === 'Astarlı Ürün' || platform.name === 'İndigo') && (
+                  {platform.name === 'İndigo' && (
                     <span className="ml-1 text-xs text-gray-500 font-normal">(Otomatik, düzenlenebilir)</span>
                   )}
                 </label>

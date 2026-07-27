@@ -155,18 +155,19 @@ function ProfitCalculator() {
     }
   }, [])
 
-  // Otomatik senaryoların satış fiyatını güncelle (yalnızca Standart)
-  // Astarlı/İndigo: ilk eklemede hesaplanır; sonrasında kâr oranı veya ürün değişince satış ezilmez
+  // Otomatik senaryoların (Standart, Astarlı Ürün) satış fiyatını güncelle
   useEffect(() => {
     setPlatforms(prevPlatforms => {
       let updated: Platform[] | null = null
 
-      const autoNames = ['Standart']
+      const autoNames = ['Standart', 'Astarlı Ürün']
       autoNames.forEach(name => {
         const idx = prevPlatforms.findIndex(p => p.name === name)
         if (idx !== -1) {
           const commissionRate = prevPlatforms[idx].commissionRate || 22
-          const defaultTarget = appSettings.defaultStandardProfit
+          const defaultTarget = name === 'Astarlı Ürün'
+            ? appSettings.defaultLinedProfit
+            : appSettings.defaultStandardProfit
           const targetProfitRate = prevPlatforms[idx].targetProfitRate ?? defaultTarget
           const newSalePrice = calculateStandardSalePrice(
             productInfo,
